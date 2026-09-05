@@ -1,7 +1,6 @@
 package com.team.corporate.interactions;
 
 import com.team.corporate.interactions.commands.CommandInterface;
-import com.team.corporate.interactions.commands.CreateOrderCommand;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -16,6 +15,37 @@ public class ConsoleInteraction implements InteractionInterface {
 
     public ConsoleInteraction() {
         this.scanner = new Scanner(System.in);
+    }
+
+    public void run() {
+        printHelpMenu();
+
+        while (true) {
+            System.out.print("Выберите действие: ");
+            System.out.flush();
+
+            String input = scanner.nextLine();
+            try {
+                int code = Integer.parseInt(input);
+                if (code == 0) {
+                    break;
+                }
+
+                var action = actionFromCode(code);
+                if (action != null) {
+                    var command = menuCommands.get(action);
+                    if (command != null) {
+                        command.execute();
+                    }
+                }
+                else {
+                    System.out.printf("Некорректный выбор: %s%n", input);
+                }
+            } catch (NumberFormatException _) {
+                System.out.printf("Некорректный ввод: '%s'. Ожидалось число.%n", input);
+            }
+
+        }
     }
 
     private void printHeader() {
@@ -47,34 +77,6 @@ public class ConsoleInteraction implements InteractionInterface {
             return InteractionAction.values()[code - 1];
         } catch (IndexOutOfBoundsException _) {
             return null;
-        }
-    }
-
-    @Override
-    public @Nullable InteractionAction getNextAction() {
-        while (true) {
-            System.out.print("Выберите действие: ");
-            System.out.flush();
-
-            String input = scanner.nextLine();
-            try {
-                int code = Integer.parseInt(input);
-                if (code == 0) {
-                    return null;
-                }
-
-                var action = actionFromCode(code);
-                if (action != null) {
-                    var command = menuCommands.get(action);
-                    if (command != null) {
-                        command.execute();
-                        return action;
-                    }
-                }
-            } catch (NumberFormatException _) {
-            }
-
-            System.out.printf("Некорректный выбор: %s%n", input);
         }
     }
 }
