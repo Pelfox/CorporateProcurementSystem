@@ -1,11 +1,16 @@
 package com.team.corporate.interactions;
 
+import com.team.corporate.interactions.commands.CommandInterface;
+import com.team.corporate.interactions.commands.CreateOrderCommand;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleInteraction implements InteractionInterface {
     public static final int HEADER_WIDTH = 10;
+    private Map<InteractionAction, CommandInterface> menuCommands = new HashMap<>();
 
     private final Scanner scanner;
 
@@ -32,6 +37,10 @@ public class ConsoleInteraction implements InteractionInterface {
         this.printHeader();
     }
 
+    public void registerCommand(InteractionAction action, CommandInterface command) {
+        menuCommands.put(action, command);
+    }
+
     @Nullable
     private InteractionAction actionFromCode(int code) {
         try {
@@ -56,7 +65,11 @@ public class ConsoleInteraction implements InteractionInterface {
 
                 var action = actionFromCode(code);
                 if (action != null) {
-                    return action;
+                    var command = menuCommands.get(action);
+                    if (command != null) {
+                        command.execute();
+                        return action;
+                    }
                 }
             } catch (NumberFormatException _) {
             }
