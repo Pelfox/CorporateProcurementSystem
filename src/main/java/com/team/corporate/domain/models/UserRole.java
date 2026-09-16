@@ -1,4 +1,4 @@
-package com.team.corporate.models;
+package com.team.corporate.domain.models;
 
 public enum UserRole {
     USER,
