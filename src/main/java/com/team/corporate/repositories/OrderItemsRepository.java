@@ -1,6 +1,6 @@
 package com.team.corporate.repositories;
 
-import com.team.corporate.models.OrderItem;
+import com.team.corporate.entities.OrderItem;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -14,7 +14,7 @@ public interface OrderItemsRepository {
 
     @NotNull List<OrderItem> getAll();
 
-    Optional<OrderItem> getById(@NotNull UUID id);
+    @NotNull Optional<OrderItem> getById(@NotNull UUID id);
 
     @NotNull List<OrderItem> getByOrderId(@NotNull UUID id);
 

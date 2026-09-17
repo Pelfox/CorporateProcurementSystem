@@ -1,10 +1,11 @@
-package com.team.corporate.models;
+package com.team.corporate.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -12,7 +13,7 @@ import java.util.UUID;
 public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,8 +33,8 @@ public class AuditLog {
     private OrderStatus newStatus;
 
     @CreationTimestamp
-    @Column(name = "changed_at", updatable = false)
-    private LocalDateTime changedAt;
+    @Column(name = "changed_at", nullable = false, updatable = false)
+    private Instant changedAt;
 
     public AuditLog() {
     }
@@ -89,8 +90,8 @@ public class AuditLog {
         this.newStatus = newStatus;
     }
 
-    @NotNull
-    public LocalDateTime getChangedAt() {
+    @Nullable
+    public Instant getChangedAt() {
         return changedAt;
     }
 }

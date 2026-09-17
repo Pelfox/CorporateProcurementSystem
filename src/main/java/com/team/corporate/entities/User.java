@@ -1,10 +1,11 @@
-package com.team.corporate.models;
+package com.team.corporate.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -12,7 +13,7 @@ import java.util.UUID;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "username", nullable = false, unique = true)
@@ -24,7 +25,7 @@ public class User {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public User() {
     }
@@ -57,8 +58,8 @@ public class User {
         this.userRole = userRole;
     }
 
-    @NotNull
-    public LocalDateTime getCreatedAt() {
+    @Nullable
+    public Instant getCreatedAt() {
         return createdAt;
     }
 }

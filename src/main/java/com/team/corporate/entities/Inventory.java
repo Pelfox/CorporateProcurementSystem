@@ -1,16 +1,18 @@
-package com.team.corporate.models;
+package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 @Entity
-@Table(name = "inventory")
+@Table(name = "inventory", uniqueConstraints = @UniqueConstraint(
+        name = "uk_inventory_product_warehouse", columnNames = {"product_id", "warehouse_id"}))
 public class Inventory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,7 +34,12 @@ public class Inventory {
                      int quantity) {
         this.product = product;
         this.warehouse = warehouse;
-        this.quantity = quantity;
+        this.quantity = EntityValidation.requireAtLeast(quantity, 0, "quantity");
+    }
+
+    @NotNull
+    public UUID getId() {
+        return id;
     }
 
     @NotNull
@@ -58,6 +65,6 @@ public class Inventory {
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        this.quantity = EntityValidation.requireAtLeast(quantity, 0, "quantity");
     }
 }

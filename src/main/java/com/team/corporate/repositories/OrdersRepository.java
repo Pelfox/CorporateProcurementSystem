@@ -1,6 +1,6 @@
 package com.team.corporate.repositories;
 
-import com.team.corporate.models.Order;
+import com.team.corporate.entities.Order;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public interface OrdersRepository {
 
     @NotNull List<Order> getAll();
 
-    Optional<Order> getById(@NotNull UUID id);
+    @NotNull Optional<Order> getById(@NotNull UUID id);
 
     @NotNull Order update(@NotNull Order order);
 

@@ -1,15 +1,17 @@
-package com.team.corporate.models;
+package com.team.corporate.entities;
 
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "categories")
 public class Category {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", nullable = false, updatable = false)
+    private UUID id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -21,7 +23,8 @@ public class Category {
         this.name = name;
     }
 
-    public int getId() {
+    @NotNull
+    public UUID getId() {
         return id;
     }
 

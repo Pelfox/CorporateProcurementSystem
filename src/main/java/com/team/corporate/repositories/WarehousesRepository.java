@@ -1,19 +1,20 @@
 package com.team.corporate.repositories;
 
-import com.team.corporate.models.Warehouse;
+import com.team.corporate.entities.Warehouse;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface WarehousesRepository {
     @NotNull Warehouse add(@NotNull Warehouse warehouse);
 
     @NotNull List<Warehouse> getAll();
 
-    Optional<Warehouse> getById(int id);
+    @NotNull Optional<Warehouse> getById(@NotNull UUID id);
 
     @NotNull Warehouse update(@NotNull Warehouse warehouse);
 
-    void delete(int id);
+    void delete(@NotNull UUID id);
 }

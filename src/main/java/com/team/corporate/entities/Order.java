@@ -1,11 +1,12 @@
-package com.team.corporate.models;
+package com.team.corporate.entities;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -13,7 +14,7 @@ import java.util.UUID;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,17 +29,17 @@ public class Order {
     private String notes;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     public Order() {
     }
 
-    public Order(@NotNull User user, @NotNull OrderStatus status, @NotNull String notes) {
+    public Order(@NotNull User user, @NotNull OrderStatus status, @Nullable String notes) {
         this.user = user;
         this.status = status;
         this.notes = notes;
@@ -72,22 +73,22 @@ public class Order {
         this.status = status;
     }
 
-    @NotNull
+    @Nullable
     public String getNotes() {
         return notes;
     }
 
-    public void setNotes(@NotNull String notes) {
+    public void setNotes(@Nullable String notes) {
         this.notes = notes;
     }
 
-    @NotNull
-    public LocalDateTime getCreatedAt() {
+    @Nullable
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    @NotNull
-    public LocalDateTime getUpdatedAt() {
+    @Nullable
+    public Instant getUpdatedAt() {
         return updatedAt;
     }
 }

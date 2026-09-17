@@ -1,7 +1,9 @@
-package com.team.corporate.models;
+package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -11,7 +13,7 @@ import java.util.UUID;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "sku", nullable = false, unique = true)
@@ -32,17 +34,12 @@ public class Product {
 
     public Product(@NotNull String sku,
                    @NotNull String name,
-                   @NotNull Category category,
+                   @Nullable Category category,
                    @NotNull BigDecimal price) {
         this.sku = sku;
         this.name = name;
         this.category = category;
-        this.price = price;
-    }
-
-    public Product(@NotNull String sku, @NotNull String name) {
-        this.sku = sku;
-        this.name = name;
+        this.price = EntityValidation.requireMoney(price, "price");
     }
 
     @NotNull
@@ -68,12 +65,12 @@ public class Product {
         this.name = name;
     }
 
-    @NotNull
+    @Nullable
     public Category getCategory() {
         return category;
     }
 
-    public void setCategory(@NotNull Category category) {
+    public void setCategory(@Nullable Category category) {
         this.category = category;
     }
 
@@ -83,6 +80,6 @@ public class Product {
     }
 
     public void setPrice(@NotNull BigDecimal price) {
-        this.price = price;
+        this.price = EntityValidation.requireMoney(price, "price");
     }
 }

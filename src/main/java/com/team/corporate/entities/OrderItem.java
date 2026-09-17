@@ -1,5 +1,6 @@
-package com.team.corporate.models;
+package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,7 +26,7 @@ public class OrderItem {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
-    @Column(name = "purchase_price", nullable = false)
+    @Column(name = "purchase_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal purchasePrice;
 
     public OrderItem() {
@@ -37,8 +38,8 @@ public class OrderItem {
                      @NotNull BigDecimal purchasePrice) {
         this.order = order;
         this.product = product;
-        this.quantity = quantity;
-        this.purchasePrice = purchasePrice;
+        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "quantity");
+        this.purchasePrice = EntityValidation.requireMoney(purchasePrice, "purchasePrice");
     }
 
     @NotNull
@@ -69,7 +70,7 @@ public class OrderItem {
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = quantity;
+        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "quantity");
     }
 
     @NotNull
@@ -78,6 +79,6 @@ public class OrderItem {
     }
 
     public void setPurchasePrice(@NotNull BigDecimal purchasePrice) {
-        this.purchasePrice = purchasePrice;
+        this.purchasePrice = EntityValidation.requireMoney(purchasePrice, "purchasePrice");
     }
 }

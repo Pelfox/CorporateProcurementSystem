@@ -1,6 +1,6 @@
 package com.team.corporate.repositories;
 
-import com.team.corporate.models.Inventory;
+import com.team.corporate.entities.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -12,11 +12,11 @@ public interface InventoriesRepository {
 
     @NotNull List<Inventory> getAll();
 
-    Optional<Inventory> getByProductAndWarehouseIds(@NotNull UUID productId, int warehouseId);
+    @NotNull Optional<Inventory> getByProductAndWarehouseIds(@NotNull UUID productId, @NotNull UUID warehouseId);
 
     @NotNull List<Inventory> getByProductId(@NotNull UUID id);
 
-    @NotNull List<Inventory> getByWarehouseId(int id);
+    @NotNull List<Inventory> getByWarehouseId(@NotNull UUID id);
 
     @NotNull Inventory update(@NotNull Inventory inventory);
 
