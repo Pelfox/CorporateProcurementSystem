@@ -43,14 +43,6 @@ public class AuditLog {
         this.oldStatus = oldStatus;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public Order getOrder() {
         return order;
     }

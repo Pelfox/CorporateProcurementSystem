@@ -32,14 +32,6 @@ public class Inventory {
         this.quantity = quantity;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public Product getProduct() {
         return product;
     }

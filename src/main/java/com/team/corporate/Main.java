@@ -1,5 +1,7 @@
 package com.team.corporate;
 
+import com.team.corporate.adapters.outbound.persistence.hibernate.HibernateUserRepository;
+import com.team.corporate.util.HibernateConfiguration;
 import com.team.corporate.interactions.ConsoleInteraction;
 import com.team.corporate.interactions.InteractionAction;
 import com.team.corporate.interactions.InteractionInterface;
@@ -21,5 +23,12 @@ public class Main {
             System.out.println(nextAction);
             nextAction = interaction.getNextAction();
         }
+
+        HibernateUserRepository hur = new HibernateUserRepository(HibernateConfiguration.getSessionFactory());
+//        User u = new User();
+//        u.setUsername("test");
+//        u.setUserRole(UserRole.USER);
+//        hur.add(u);
+        hur.getAll();
     }
 }

@@ -41,14 +41,6 @@ public class Product {
         this.name = name;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public String getSku() {
         return sku;
     }

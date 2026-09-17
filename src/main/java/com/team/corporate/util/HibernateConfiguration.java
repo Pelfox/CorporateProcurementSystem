@@ -1,5 +1,6 @@
 package com.team.corporate.util;
 
+import com.team.corporate.domain.models.*;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
@@ -18,6 +19,14 @@ public class HibernateConfiguration {
         settings.put(Environment.SHOW_SQL, "true");
         settings.put(Environment.HBM2DDL_AUTO, "update");
 
+        configuration.addAnnotatedClass(User.class);
+        configuration.addAnnotatedClass(Category.class);
+        configuration.addAnnotatedClass(Product.class);
+        configuration.addAnnotatedClass(Warehouse.class);
+        configuration.addAnnotatedClass(Inventory.class);
+        configuration.addAnnotatedClass(Order.class);
+        configuration.addAnnotatedClass(OrderItem.class);
+        configuration.addAnnotatedClass(AuditLog.class);
         configuration.setProperties(settings);
 
         return configuration.buildSessionFactory();

@@ -28,17 +28,9 @@ public class User {
 
     public User() { }
 
-    public User(String username, UserRole userRole, LocalDateTime createdAt) {
+    public User(String username, UserRole userRole) {
         this.username = username;
         this.userRole = userRole;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getUsername() {

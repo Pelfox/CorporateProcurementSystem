@@ -48,14 +48,6 @@ public class Order {
         this.status = status;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
     public User getUser() {
         return user;
     }
