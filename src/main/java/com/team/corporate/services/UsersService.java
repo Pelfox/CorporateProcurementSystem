@@ -22,7 +22,5 @@ public interface UsersService {
 
     @NotNull List<User> getAll();
 
-    boolean checkIfExists(@NotNull UUID id);
-
-
+    @NotNull Optional<User> login(@NotNull String username);
 }

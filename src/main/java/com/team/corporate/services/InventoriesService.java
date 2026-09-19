@@ -4,24 +4,25 @@ import com.team.corporate.entities.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface InventoriesService {
 
-    @NotNull Inventory placeProductInWarehouse(@NotNull UUID product_id, @NotNull UUID warehouse_id, int quantity);
+    @NotNull Inventory placeProductInWarehouse(@NotNull UUID productId, @NotNull UUID warehouseId, int quantity);
 
-    @NotNull List<Inventory> getAllByWarehouse(@NotNull UUID warehouse_id);
+    @NotNull List<Inventory> getAllByWarehouse(@NotNull UUID warehouseId);
 
-    @NotNull List<Inventory> getAllByProduct(@NotNull UUID product_id);
+    @NotNull List<Inventory> getAllByProduct(@NotNull UUID productId);
 
-    @NotNull List<Inventory> getAllByProductAndWarehouse(@NotNull UUID product_id, @NotNull UUID warehouse_id);
+    @NotNull List<Inventory> getAllByProductAndWarehouse(@NotNull UUID productId, @NotNull UUID warehouseId);
 
-    @NotNull Inventory getInventory(@NotNull UUID id);
+    @NotNull Optional<Inventory> getInventory(@NotNull UUID id);
 
     void deleteInventory(@NotNull UUID id);
 
-    @NotNull Inventory getAll();
+    @NotNull List<Inventory> getAll();
 
-    boolean checkIfExists(@NotNull UUID id);
+    @NotNull Inventory updateInventory(@NotNull UUID inventoryId, int quantity);
 
 }

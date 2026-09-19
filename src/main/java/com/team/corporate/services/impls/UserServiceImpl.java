@@ -50,7 +50,8 @@ public class UserServiceImpl implements UsersService {
     }
 
     @Override
-    public boolean checkIfExists(@NotNull UUID id) {
-        return false;
+    public @NotNull Optional<User> login(@NotNull String username) {
+        return Optional.empty();
     }
+
 }
