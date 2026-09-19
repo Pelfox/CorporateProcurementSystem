@@ -14,7 +14,7 @@ public interface AuditLogsService {
 
     @NotNull Optional<AuditLog> getAuditLog(@NotNull UUID id);
 
-    @NotNull List<AuditLog> getAllByOrder(@NotNull UUID id);
+    @NotNull List<AuditLog> getAllByOrder(@NotNull UUID orderId);
 
     @NotNull List<AuditLog> getAllByChangedBy(@NotNull UUID changedByUserId);
 

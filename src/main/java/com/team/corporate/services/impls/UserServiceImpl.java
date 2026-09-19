@@ -16,7 +16,7 @@ public class UserServiceImpl implements UsersService {
     public UsersRepository usersRepository;
 
     public UserServiceImpl(@NotNull UsersRepository usersRepository) {
-        this.usersRepository = Objects.requireNonNull(usersRepository, "userRepository must not be none.");
+        this.usersRepository = Objects.requireNonNull(usersRepository, "userRepository must not be null.");
     }
 
     @Override
