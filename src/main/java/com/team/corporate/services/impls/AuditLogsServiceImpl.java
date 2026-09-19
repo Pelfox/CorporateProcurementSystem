@@ -19,9 +19,9 @@ import java.util.UUID;
 
 public class AuditLogsServiceImpl implements AuditLogsService {
 
-    public UsersRepository userRepository;
-    public OrdersRepository ordersRepository;
-    public AuditLogsRepository auditLogsRepository;
+    private final UsersRepository userRepository;
+    private final OrdersRepository ordersRepository;
+    private final AuditLogsRepository auditLogsRepository;
 
     public AuditLogsServiceImpl(@NotNull UsersRepository usersRepository, @NotNull OrdersRepository ordersRepository, @NotNull AuditLogsRepository auditLogsRepository) {
         this.ordersRepository = Objects.requireNonNull(ordersRepository, "ordersRepository must not be null.");
@@ -31,21 +31,12 @@ public class AuditLogsServiceImpl implements AuditLogsService {
 
     @Override
     public @NotNull AuditLog createAuditLog(@NotNull UUID orderId, @NotNull UUID changedByUserId, @NotNull OrderStatus oldStatus, @NotNull OrderStatus newStatus) {
-        /* Handling possible null value */
-        Optional<Order> orderSearchResult = ordersRepository.getById(orderId);
-        if (orderSearchResult.isEmpty()){
-            throw new OrderNotFoundException();
-        }
-        Order order = orderSearchResult.get();
+        Order order = ordersRepository.getById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным Id не найден."));
 
+        User changedByUser = userRepository.getById(changedByUserId)
+                .orElseThrow(() -> new UserNotFoundException("Пользоватеть с указанным Id не найден."));
 
-        /* Handling possible null value */
-        Optional<User> userSearchResult = userRepository.getById(changedByUserId);
-        if (userSearchResult.isEmpty()){
-            throw new UserNotFoundException();
-        }
-        /* Creating new auditLog object and adding by repo */
-        User changedByUser = userSearchResult.get();
         AuditLog auditLog = new AuditLog(order, changedByUser, oldStatus, newStatus);
         return auditLogsRepository.add(auditLog);
     }
@@ -67,15 +58,13 @@ public class AuditLogsServiceImpl implements AuditLogsService {
 
     @Override
     public @NotNull List<AuditLog> getAllByOldStatus(@NotNull OrderStatus status) {
-        /* Need repository method */
-        List<AuditLog> allAuditLogs = auditLogsRepository.getAll();
-        return allAuditLogs;
+
+        return auditLogsRepository.getAll();
     }
 
     @Override
     public @NotNull List<AuditLog> getAllByNewStatus(@NotNull OrderStatus status) {
-        /* Need repository method */
-        List<AuditLog> allAuditLogs = auditLogsRepository.getAll();
-        return allAuditLogs;
+
+        return auditLogsRepository.getAll();
     }
 }

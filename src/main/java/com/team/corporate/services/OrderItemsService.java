@@ -6,17 +6,18 @@ import com.team.corporate.entities.Product;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderItemsService {
 
-    @NotNull OrderItem createOrderItemForOrder(@NotNull UUID orderId, @NotNull UUID productId, int quantity, int purchasePrice);
+    @NotNull OrderItem createOrderItemForOrder(@NotNull UUID orderId, @NotNull UUID productId, int quantity, BigDecimal purchasePrice);
 
     void deleteOrderItem(@NotNull UUID id);
 
-    @NotNull OrderItem updateOrderItem(@NotNull UUID id, int quantity, int purchasePrice);
+    @NotNull OrderItem updateOrderItem(@NotNull UUID id, @Nullable Integer quantity, @Nullable BigDecimal purchasePrice);
 
     @NotNull List<OrderItem> getAllByOrder(@NotNull UUID orderId);
 

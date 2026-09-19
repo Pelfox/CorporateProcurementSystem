@@ -3,6 +3,7 @@ package com.team.corporate.services;
 import com.team.corporate.entities.Category;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -10,9 +11,9 @@ public interface CategoriesService {
 
     @NotNull Category createCategory(@NotNull String categoryName);
 
-    @NotNull Category getAll();
+    @NotNull List<Category> getAll();
 
-    void deleteCategory();
+    void deleteCategory(@NotNull UUID id);
 
     @NotNull Optional<Category> getCategory(@NotNull UUID id);
 
