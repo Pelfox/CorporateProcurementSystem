@@ -3,6 +3,7 @@ package com.team.corporate.services;
 import com.team.corporate.entities.User;
 import com.team.corporate.entities.UserRole;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,7 @@ public interface UsersService {
 
     void deleteUser(@NotNull UUID id);
 
-    @NotNull User updateUser(@NotNull UUID id, String username, UserRole role);
+    @NotNull User updateUser(@NotNull UUID id, @Nullable String username, @Nullable UserRole role);
 
     @NotNull List<User> getAllByRole(@NotNull UserRole role);
 

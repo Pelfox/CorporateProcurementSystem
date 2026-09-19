@@ -13,7 +13,7 @@ public interface WarehousesService {
 
     @NotNull Warehouse createWarehouse(@NotNull String name, @Nullable String location);
 
-    @NotNull Warehouse updateWarehouse(@Nullable String name, @Nullable String location);
+    @NotNull Warehouse updateWarehouse(@NotNull UUID id, @Nullable String name, @Nullable String location);
 
     void deleteWarehouse(@NotNull UUID id);
 
