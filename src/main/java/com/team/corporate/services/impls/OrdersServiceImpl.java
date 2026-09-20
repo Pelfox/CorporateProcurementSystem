@@ -3,6 +3,8 @@ package com.team.corporate.services.impls;
 import com.team.corporate.entities.Order;
 import com.team.corporate.entities.OrderStatus;
 import com.team.corporate.entities.User;
+import com.team.corporate.exceptions.OrderNotFoundException;
+import com.team.corporate.exceptions.UserNotFoundException;
 import com.team.corporate.repositories.OrdersRepository;
 import com.team.corporate.repositories.UsersRepository;
 import com.team.corporate.services.OrdersService;
@@ -26,7 +28,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public @NotNull Order createOrder(@NotNull UUID userId, @NotNull OrderStatus status, @Nullable String notes) {
         User user = usersRepository.getById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id не найден"));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным id не найден"));
 
         Order order = new Order(user, status, notes);
         return ordersRepository.add(order);
@@ -40,7 +42,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public @NotNull Order updateOrder(@NotNull UUID id, @Nullable OrderStatus status, @Nullable String notes) {
         Order order = ordersRepository.getById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Заказ с указанным id не найден"));
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным id не найден"));
 
         if (status != null) {
             order.setStatus(status);
@@ -54,7 +56,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public @NotNull List<Order> getAllByUser(@NotNull UUID userId) {
         usersRepository.getById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id не найден"));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным id не найден"));
 
         return ordersRepository.getAll() // Требуется реализовать отдельный метод в OrdersRepository.
                 .stream().filter(order -> order.getUser().getId().equals(userId))

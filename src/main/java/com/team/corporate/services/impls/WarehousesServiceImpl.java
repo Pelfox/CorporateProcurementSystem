@@ -1,6 +1,7 @@
 package com.team.corporate.services.impls;
 
 import com.team.corporate.entities.Warehouse;
+import com.team.corporate.exceptions.WarehouseNotFoundException;
 import com.team.corporate.repositories.WarehousesRepository;
 import com.team.corporate.services.WarehousesService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,7 +29,7 @@ public class WarehousesServiceImpl implements WarehousesService
     @Override
     public @NotNull Warehouse updateWarehouse(@NotNull UUID id, @Nullable String name, @Nullable String location) {
         Warehouse warehouse = warehousesRepository.getById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Склад с указанным id не найден"));
+                .orElseThrow(() -> new WarehouseNotFoundException("Склад с указанным id не найден"));
 
         if (name != null) {
             warehouse.setName(name);

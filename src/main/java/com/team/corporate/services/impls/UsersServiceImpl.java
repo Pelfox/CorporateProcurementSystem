@@ -2,6 +2,7 @@ package com.team.corporate.services.impls;
 
 import com.team.corporate.entities.User;
 import com.team.corporate.entities.UserRole;
+import com.team.corporate.exceptions.UserNotFoundException;
 import com.team.corporate.repositories.UsersRepository;
 import com.team.corporate.services.UsersService;
 import jakarta.persistence.EntityNotFoundException;
@@ -40,7 +41,7 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public @NotNull User updateUser(@NotNull UUID id, @Nullable String username, @Nullable UserRole role) {
         User user = usersRepository.getById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с указанным id не найден"));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным id не найден"));
 
         if (username != null && !username.equals(user.getUsername())) {
             // TODO: Требуется реализовать отдельный метод в UsersRepository для получения пользователя по никнейму
