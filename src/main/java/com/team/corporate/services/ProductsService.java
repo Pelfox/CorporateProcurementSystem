@@ -10,18 +10,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductsService {
-
-    @NotNull Product createProduct(@NotNull String name, @NotNull String sku, @NotNull UUID categoryId, @NotNull BigDecimal price);
+    @NotNull
+    Product createProduct(@NotNull String name, @NotNull String sku, @NotNull UUID categoryId, @NotNull BigDecimal price);
 
     void deleteProduct(@NotNull UUID id);
 
-    @NotNull Product updateProduct(@NotNull UUID id, @Nullable String name, @Nullable String sku, @Nullable UUID categoryId, @Nullable BigDecimal price);
+    @NotNull
+    Product updateProduct(@NotNull UUID id, @Nullable String name, @Nullable String sku, @Nullable UUID categoryId, @Nullable BigDecimal price);
 
-    @NotNull Optional<Product> getProduct(@NotNull UUID id);
+    @NotNull
+    Optional<Product> getProduct(@NotNull UUID id);
 
-    @NotNull List<Product> getAllByCategory(@NotNull UUID categoryId);
+    @NotNull
+    List<Product> getAllByCategory(@NotNull UUID categoryId);
 
-    @NotNull List<Product> getAll();
-
-
+    @NotNull
+    List<Product> getAll();
 }

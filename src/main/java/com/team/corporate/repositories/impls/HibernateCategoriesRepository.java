@@ -21,7 +21,7 @@ public class HibernateCategoriesRepository implements CategoriesRepository {
     @NotNull
     public Category add(@NotNull Category category) {
         Objects.requireNonNull(category, "category must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(category);
             return category;
         });
@@ -30,7 +30,7 @@ public class HibernateCategoriesRepository implements CategoriesRepository {
     @Override
     @NotNull
     public List<Category> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery("FROM Category", Category.class).getResultList());
     }
 
@@ -38,7 +38,7 @@ public class HibernateCategoriesRepository implements CategoriesRepository {
     @NotNull
     public Optional<Category> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session -> Optional.ofNullable(session.find(Category.class, id)));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> Optional.ofNullable(session.find(Category.class, id)));
     }
 
     @Override
@@ -48,13 +48,13 @@ public class HibernateCategoriesRepository implements CategoriesRepository {
         if (category.getId() == null) {
             throw new IllegalArgumentException("Cannot update a category without an ID; use add() first");
         }
-        return sessionFactory.fromTransaction(session -> session.merge(category));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(category));
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        sessionFactory.inTransaction(session -> {
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
             Category category = session.find(Category.class, id);
             if (category != null) {
                 session.remove(category);
@@ -62,4 +62,3 @@ public class HibernateCategoriesRepository implements CategoriesRepository {
         });
     }
 }
-

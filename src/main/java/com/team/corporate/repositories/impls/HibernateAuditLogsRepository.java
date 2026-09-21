@@ -23,7 +23,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @NotNull
     public AuditLog add(@NotNull AuditLog auditLog) {
         Objects.requireNonNull(auditLog, "auditLog must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(auditLog);
             return auditLog;
         });
@@ -32,7 +32,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @Override
     @NotNull
     public List<AuditLog> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT, AuditLog.class).getResultList());
     }
 
@@ -40,7 +40,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @NotNull
     public Optional<AuditLog> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE a.id = :id", AuditLog.class)
                         .setParameter("id", id)
                         .uniqueResultOptional());
@@ -50,7 +50,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @NotNull
     public List<AuditLog> getByOrderId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE a.order.id = :id", AuditLog.class)
                         .setParameter("id", id)
                         .getResultList());
@@ -60,10 +60,9 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @NotNull
     public List<AuditLog> getByUserId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE a.changedBy.id = :id", AuditLog.class)
                         .setParameter("id", id)
                         .getResultList());
     }
 }
-

@@ -10,18 +10,23 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderItemsService {
-
-    @NotNull OrderItem createOrderItemForOrder(@NotNull UUID orderId, @NotNull UUID productId, int quantity, @NotNull BigDecimal purchasePrice);
+    @NotNull
+    OrderItem createOrderItemForOrder(@NotNull UUID orderId, @NotNull UUID productId, int quantity, @NotNull BigDecimal purchasePrice);
 
     void deleteOrderItem(@NotNull UUID id);
 
-    @NotNull OrderItem updateOrderItem(@NotNull UUID id, @Nullable Integer quantity, @Nullable BigDecimal purchasePrice);
+    @NotNull
+    OrderItem updateOrderItem(@NotNull UUID id, @Nullable Integer quantity, @Nullable BigDecimal purchasePrice);
 
-    @NotNull List<OrderItem> getAllByOrder(@NotNull UUID orderId);
+    @NotNull
+    List<OrderItem> getAllByOrder(@NotNull UUID orderId);
 
-    @NotNull Optional<OrderItem> getOrderItem(@NotNull UUID id);
+    @NotNull
+    Optional<OrderItem> getOrderItem(@NotNull UUID id);
 
-    @NotNull List<OrderItem> getAllByProduct(@NotNull UUID productId);
+    @NotNull
+    List<OrderItem> getAllByProduct(@NotNull UUID productId);
 
-    @NotNull List<OrderItem> getAll();
+    @NotNull
+    List<OrderItem> getAll();
 }

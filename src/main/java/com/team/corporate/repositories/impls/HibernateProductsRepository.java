@@ -23,7 +23,7 @@ public class HibernateProductsRepository implements ProductsRepository {
     @NotNull
     public Product add(@NotNull Product product) {
         Objects.requireNonNull(product, "product must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(product);
             return product;
         });
@@ -32,7 +32,7 @@ public class HibernateProductsRepository implements ProductsRepository {
     @Override
     @NotNull
     public List<Product> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT, Product.class).getResultList());
     }
 
@@ -40,7 +40,7 @@ public class HibernateProductsRepository implements ProductsRepository {
     @NotNull
     public Optional<Product> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE p.id = :id", Product.class)
                         .setParameter("id", id)
                         .uniqueResultOptional());
@@ -50,7 +50,7 @@ public class HibernateProductsRepository implements ProductsRepository {
     @NotNull
     public Optional<Product> getBySKU(@NotNull String sku) {
         Objects.requireNonNull(sku, "sku must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE p.sku = :sku", Product.class)
                         .setParameter("sku", sku)
                         .uniqueResultOptional());
@@ -63,13 +63,13 @@ public class HibernateProductsRepository implements ProductsRepository {
         if (product.getId() == null) {
             throw new IllegalArgumentException("Cannot update a product without an ID; use add() first");
         }
-        return sessionFactory.fromTransaction(session -> session.merge(product));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(product));
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        sessionFactory.inTransaction(session -> {
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
             Product product = session.find(Product.class, id);
             if (product != null) {
                 session.remove(product);
@@ -77,4 +77,3 @@ public class HibernateProductsRepository implements ProductsRepository {
         });
     }
 }
-

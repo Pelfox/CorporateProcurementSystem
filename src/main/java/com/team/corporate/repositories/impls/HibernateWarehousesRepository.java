@@ -21,7 +21,7 @@ public class HibernateWarehousesRepository implements WarehousesRepository {
     @NotNull
     public Warehouse add(@NotNull Warehouse warehouse) {
         Objects.requireNonNull(warehouse, "warehouse must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(warehouse);
             return warehouse;
         });
@@ -30,7 +30,7 @@ public class HibernateWarehousesRepository implements WarehousesRepository {
     @Override
     @NotNull
     public List<Warehouse> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery("FROM Warehouse", Warehouse.class).getResultList());
     }
 
@@ -38,7 +38,7 @@ public class HibernateWarehousesRepository implements WarehousesRepository {
     @NotNull
     public Optional<Warehouse> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session -> Optional.ofNullable(session.find(Warehouse.class, id)));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> Optional.ofNullable(session.find(Warehouse.class, id)));
     }
 
     @Override
@@ -48,13 +48,13 @@ public class HibernateWarehousesRepository implements WarehousesRepository {
         if (warehouse.getId() == null) {
             throw new IllegalArgumentException("Cannot update a warehouse without an ID; use add() first");
         }
-        return sessionFactory.fromTransaction(session -> session.merge(warehouse));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(warehouse));
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        sessionFactory.inTransaction(session -> {
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
             Warehouse warehouse = session.find(Warehouse.class, id);
             if (warehouse != null) {
                 session.remove(warehouse);
@@ -62,4 +62,3 @@ public class HibernateWarehousesRepository implements WarehousesRepository {
         });
     }
 }
-

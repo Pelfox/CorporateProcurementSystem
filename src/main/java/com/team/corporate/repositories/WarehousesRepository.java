@@ -8,13 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WarehousesRepository {
-    @NotNull Warehouse add(@NotNull Warehouse warehouse);
+    @NotNull
+    Warehouse add(@NotNull Warehouse warehouse);
 
-    @NotNull List<Warehouse> getAll();
+    @NotNull
+    List<Warehouse> getAll();
 
-    @NotNull Optional<Warehouse> getById(@NotNull UUID id);
+    @NotNull
+    Optional<Warehouse> getById(@NotNull UUID id);
 
-    @NotNull Warehouse update(@NotNull Warehouse warehouse);
+    @NotNull
+    Warehouse update(@NotNull Warehouse warehouse);
 
     void delete(@NotNull UUID id);
 }

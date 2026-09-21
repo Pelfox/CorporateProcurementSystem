@@ -9,16 +9,21 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AuditLogsService {
+    @NotNull
+    AuditLog createAuditLog(@NotNull UUID orderId, @NotNull UUID changedByUserId, @NotNull OrderStatus oldStatus, @NotNull OrderStatus newStatus);
 
-    @NotNull AuditLog createAuditLog(@NotNull UUID orderId, @NotNull UUID changedByUserId, @NotNull OrderStatus oldStatus, @NotNull OrderStatus newStatus);
+    @NotNull
+    Optional<AuditLog> getAuditLog(@NotNull UUID id);
 
-    @NotNull Optional<AuditLog> getAuditLog(@NotNull UUID id);
+    @NotNull
+    List<AuditLog> getAllByOrder(@NotNull UUID orderId);
 
-    @NotNull List<AuditLog> getAllByOrder(@NotNull UUID orderId);
+    @NotNull
+    List<AuditLog> getAllByChangedBy(@NotNull UUID changedByUserId);
 
-    @NotNull List<AuditLog> getAllByChangedBy(@NotNull UUID changedByUserId);
+    @NotNull
+    List<AuditLog> getAllByOldStatus(@NotNull OrderStatus status);
 
-    @NotNull List<AuditLog> getAllByOldStatus(@NotNull OrderStatus status);
-
-    @NotNull List<AuditLog> getAllByNewStatus(@NotNull OrderStatus status);
+    @NotNull
+    List<AuditLog> getAllByNewStatus(@NotNull OrderStatus status);
 }

@@ -8,13 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UsersRepository {
-    @NotNull User add(@NotNull User user);
+    @NotNull
+    User add(@NotNull User user);
 
-    @NotNull List<User> getAll();
+    @NotNull
+    List<User> getAll();
 
-    @NotNull Optional<User> getById(@NotNull UUID id);
+    @NotNull
+    Optional<User> getById(@NotNull UUID id);
 
-    @NotNull User update(@NotNull User user);
+    @NotNull
+    User update(@NotNull User user);
 
     void delete(@NotNull UUID id);
 }

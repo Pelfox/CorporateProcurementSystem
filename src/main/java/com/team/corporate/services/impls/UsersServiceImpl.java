@@ -20,13 +20,15 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public @NotNull User createUser(@NotNull String username, @NotNull UserRole role) {
+    @NotNull
+    public User createUser(@NotNull String username, @NotNull UserRole role) {
         User newUser = new User(username, role);
         return usersRepository.add(newUser);
     }
 
     @Override
-    public @NotNull Optional<User> getUser(@NotNull UUID id) {
+    @NotNull
+    public Optional<User> getUser(@NotNull UUID id) {
         return usersRepository.getById(id);
     }
 
@@ -36,7 +38,8 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public @NotNull User updateUser(@NotNull UUID id, @Nullable String username, @Nullable UserRole role) {
+    @NotNull
+    public User updateUser(@NotNull UUID id, @Nullable String username, @Nullable UserRole role) {
         User user = usersRepository.getById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным ID не найден"));
         if (username != null && !username.equals(user.getUsername())) {
@@ -49,7 +52,8 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public @NotNull List<User> getAllByRole(@NotNull UserRole role) {
+    @NotNull
+    public List<User> getAllByRole(@NotNull UserRole role) {
         return usersRepository.getAll()
                 .stream()
                 .filter(user -> user.getUserRole().equals(role))
@@ -57,12 +61,16 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public @NotNull List<User> getAll() {
+    @NotNull
+    public List<User> getAll() {
         return usersRepository.getAll();
     }
 
     @Override
-    public @NotNull Optional<User> login(@NotNull String username) {
-        return Optional.empty();
+    @NotNull
+    public Optional<User> login(@NotNull String username) {
+        return usersRepository.getAll().stream()
+                .filter(user -> user.getUsername().equals(username.trim()))
+                .findFirst();
     }
 }

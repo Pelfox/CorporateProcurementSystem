@@ -8,13 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CategoriesRepository {
-    @NotNull Category add(@NotNull Category category);
+    @NotNull
+    Category add(@NotNull Category category);
 
-    @NotNull List<Category> getAll();
+    @NotNull
+    List<Category> getAll();
 
-    @NotNull Optional<Category> getById(@NotNull UUID id);
+    @NotNull
+    Optional<Category> getById(@NotNull UUID id);
 
-    @NotNull Category update(@NotNull Category category);
+    @NotNull
+    Category update(@NotNull Category category);
 
     void delete(@NotNull UUID id);
 }

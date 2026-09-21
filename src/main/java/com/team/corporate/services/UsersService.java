@@ -10,18 +10,23 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UsersService {
+    @NotNull
+    User createUser(@NotNull String username, @NotNull UserRole role);
 
-    @NotNull User createUser(@NotNull String username, @NotNull UserRole role);
-
-    @NotNull Optional<User> getUser(@NotNull UUID id);
+    @NotNull
+    Optional<User> getUser(@NotNull UUID id);
 
     void deleteUser(@NotNull UUID id);
 
-    @NotNull User updateUser(@NotNull UUID id, @Nullable String username, @Nullable UserRole role);
+    @NotNull
+    User updateUser(@NotNull UUID id, @Nullable String username, @Nullable UserRole role);
 
-    @NotNull List<User> getAllByRole(@NotNull UserRole role);
+    @NotNull
+    List<User> getAllByRole(@NotNull UserRole role);
 
-    @NotNull List<User> getAll();
+    @NotNull
+    List<User> getAll();
 
-    @NotNull Optional<User> login(@NotNull String username);
+    @NotNull
+    Optional<User> login(@NotNull String username);
 }

@@ -8,13 +8,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface OrdersRepository {
-    @NotNull Order add(@NotNull Order order);
+    @NotNull
+    Order add(@NotNull Order order);
 
-    @NotNull List<Order> getAll();
+    @NotNull
+    List<Order> getAll();
 
-    @NotNull Optional<Order> getById(@NotNull UUID id);
+    @NotNull
+    Optional<Order> getById(@NotNull UUID id);
 
-    @NotNull Order update(@NotNull Order order);
+    @NotNull
+    Order update(@NotNull Order order);
+
+    @NotNull
+    Optional<Order> getByIdForUpdate(@NotNull UUID id);
 
     void delete(@NotNull UUID id);
 }

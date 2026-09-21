@@ -8,13 +8,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AuditLogsRepository {
-    @NotNull AuditLog add(@NotNull AuditLog auditLog);
+    @NotNull
+    AuditLog add(@NotNull AuditLog auditLog);
 
-    @NotNull List<AuditLog> getAll();
+    @NotNull
+    List<AuditLog> getAll();
 
-    @NotNull Optional<AuditLog> getById(@NotNull UUID id);
+    @NotNull
+    Optional<AuditLog> getById(@NotNull UUID id);
 
-    @NotNull List<AuditLog> getByOrderId(@NotNull UUID id);
+    @NotNull
+    List<AuditLog> getByOrderId(@NotNull UUID id);
 
-    @NotNull List<AuditLog> getByUserId(@NotNull UUID id);
+    @NotNull
+    List<AuditLog> getByUserId(@NotNull UUID id);
 }

@@ -30,10 +30,11 @@ public class AuditLogsServiceImpl implements AuditLogsService {
     }
 
     @Override
-    public @NotNull AuditLog createAuditLog(@NotNull UUID orderId,
-                                            @NotNull UUID changedByUserId,
-                                            @NotNull OrderStatus oldStatus,
-                                            @NotNull OrderStatus newStatus) {
+    @NotNull
+    public AuditLog createAuditLog(@NotNull UUID orderId,
+                                   @NotNull UUID changedByUserId,
+                                   @NotNull OrderStatus oldStatus,
+                                   @NotNull OrderStatus newStatus) {
         Order order = ordersRepository.getById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
         User changedByUser = userRepository.getById(changedByUserId)
@@ -43,27 +44,32 @@ public class AuditLogsServiceImpl implements AuditLogsService {
     }
 
     @Override
-    public @NotNull Optional<AuditLog> getAuditLog(@NotNull UUID id) {
+    @NotNull
+    public Optional<AuditLog> getAuditLog(@NotNull UUID id) {
         return auditLogsRepository.getById(id);
     }
 
     @Override
-    public @NotNull List<AuditLog> getAllByOrder(@NotNull UUID id) {
+    @NotNull
+    public List<AuditLog> getAllByOrder(@NotNull UUID id) {
         return auditLogsRepository.getByOrderId(id);
     }
 
     @Override
-    public @NotNull List<AuditLog> getAllByChangedBy(@NotNull UUID changedByUserId) {
+    @NotNull
+    public List<AuditLog> getAllByChangedBy(@NotNull UUID changedByUserId) {
         return auditLogsRepository.getByUserId(changedByUserId);
     }
 
     @Override
-    public @NotNull List<AuditLog> getAllByOldStatus(@NotNull OrderStatus status) {
+    @NotNull
+    public List<AuditLog> getAllByOldStatus(@NotNull OrderStatus status) {
         return auditLogsRepository.getAll();
     }
 
     @Override
-    public @NotNull List<AuditLog> getAllByNewStatus(@NotNull OrderStatus status) {
+    @NotNull
+    public List<AuditLog> getAllByNewStatus(@NotNull OrderStatus status) {
         return auditLogsRepository.getAll();
     }
 }

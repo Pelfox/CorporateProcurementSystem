@@ -23,7 +23,7 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
     @NotNull
     public OrderItem add(@NotNull OrderItem orderItem) {
         Objects.requireNonNull(orderItem, "orderItem must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(orderItem);
             return orderItem;
         });
@@ -37,7 +37,7 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
         if (items.isEmpty()) {
             return items;
         }
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             items.forEach(session::persist);
             return items;
         });
@@ -46,7 +46,7 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
     @Override
     @NotNull
     public List<OrderItem> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT, OrderItem.class).getResultList());
     }
 
@@ -54,7 +54,7 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
     @NotNull
     public Optional<OrderItem> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE i.id = :id", OrderItem.class)
                         .setParameter("id", id)
                         .uniqueResultOptional());
@@ -64,7 +64,7 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
     @NotNull
     public List<OrderItem> getByOrderId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE i.order.id = :id", OrderItem.class)
                         .setParameter("id", id)
                         .getResultList());
@@ -74,7 +74,7 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
     @NotNull
     public List<OrderItem> getByProductId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE i.product.id = :id", OrderItem.class)
                         .setParameter("id", id)
                         .getResultList());
@@ -87,13 +87,13 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
         if (orderItem.getId() == null) {
             throw new IllegalArgumentException("Cannot update an order item without an ID; use add() first");
         }
-        return sessionFactory.fromTransaction(session -> session.merge(orderItem));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(orderItem));
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        sessionFactory.inTransaction(session -> {
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
             OrderItem orderItem = session.find(OrderItem.class, id);
             if (orderItem != null) {
                 session.remove(orderItem);
@@ -101,4 +101,3 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
         });
     }
 }
-

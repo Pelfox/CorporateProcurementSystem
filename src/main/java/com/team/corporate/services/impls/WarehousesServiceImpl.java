@@ -19,13 +19,15 @@ public class WarehousesServiceImpl implements WarehousesService {
     }
 
     @Override
-    public @NotNull Warehouse createWarehouse(@NotNull String name, @Nullable String location) {
+    @NotNull
+    public Warehouse createWarehouse(@NotNull String name, @Nullable String location) {
         Warehouse newWarehouse = new Warehouse(name, location);
         return warehousesRepository.add(newWarehouse);
     }
 
     @Override
-    public @NotNull Warehouse updateWarehouse(@NotNull UUID id, @Nullable String name, @Nullable String location) {
+    @NotNull
+    public Warehouse updateWarehouse(@NotNull UUID id, @Nullable String name, @Nullable String location) {
         Warehouse warehouse = warehousesRepository.getById(id)
                 .orElseThrow(() -> new WarehouseNotFoundException("Склад с указанным ID не найден"));
         if (name != null) {
@@ -43,12 +45,14 @@ public class WarehousesServiceImpl implements WarehousesService {
     }
 
     @Override
-    public @NotNull List<Warehouse> getAll() {
+    @NotNull
+    public List<Warehouse> getAll() {
         return warehousesRepository.getAll();
     }
 
     @Override
-    public @NotNull Optional<Warehouse> getWarehouse(@NotNull UUID id) {
+    @NotNull
+    public Optional<Warehouse> getWarehouse(@NotNull UUID id) {
         return warehousesRepository.getById(id);
     }
 }

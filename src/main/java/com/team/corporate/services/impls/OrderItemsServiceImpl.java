@@ -31,12 +31,12 @@ public class OrderItemsServiceImpl implements OrderItemsService {
         this.orderItemsRepository = orderItemsRepository;
     }
 
-
     @Override
-    public @NotNull OrderItem createOrderItemForOrder(@NotNull UUID orderId,
-                                                      @NotNull UUID productId,
-                                                      int quantity,
-                                                      @NotNull BigDecimal purchasePrice) {
+    @NotNull
+    public OrderItem createOrderItemForOrder(@NotNull UUID orderId,
+                                             @NotNull UUID productId,
+                                             int quantity,
+                                             @NotNull BigDecimal purchasePrice) {
         Order order = ordersRepository.getById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
         Product product = productsRepository.getById(productId)
@@ -53,7 +53,8 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     }
 
     @Override
-    public @NotNull OrderItem updateOrderItem(@NotNull UUID id, @Nullable Integer quantity, @Nullable BigDecimal purchasePrice) {
+    @NotNull
+    public OrderItem updateOrderItem(@NotNull UUID id, @Nullable Integer quantity, @Nullable BigDecimal purchasePrice) {
         OrderItem orderItem = orderItemsRepository.getById(id)
                 .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа с указанным ID не найдена."));
         if (purchasePrice == null && quantity == null) {
@@ -69,26 +70,30 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     }
 
     @Override
-    public @NotNull List<OrderItem> getAllByOrder(@NotNull UUID orderId) {
+    @NotNull
+    public List<OrderItem> getAllByOrder(@NotNull UUID orderId) {
         ordersRepository.getById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
         return orderItemsRepository.getByOrderId(orderId);
     }
 
     @Override
-    public @NotNull Optional<OrderItem> getOrderItem(@NotNull UUID id) {
+    @NotNull
+    public Optional<OrderItem> getOrderItem(@NotNull UUID id) {
         return orderItemsRepository.getById(id);
     }
 
     @Override
-    public @NotNull List<OrderItem> getAllByProduct(@NotNull UUID productId) {
+    @NotNull
+    public List<OrderItem> getAllByProduct(@NotNull UUID productId) {
         productsRepository.getById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
         return orderItemsRepository.getByProductId(productId);
     }
 
     @Override
-    public @NotNull List<OrderItem> getAll() {
+    @NotNull
+    public List<OrderItem> getAll() {
         return orderItemsRepository.getAll();
     }
 }

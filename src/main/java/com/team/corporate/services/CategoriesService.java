@@ -8,14 +8,17 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CategoriesService {
+    @NotNull
+    Category createCategory(@NotNull String categoryName);
 
-    @NotNull Category createCategory(@NotNull String categoryName);
-
-    @NotNull List<Category> getAll();
+    @NotNull
+    List<Category> getAll();
 
     void deleteCategory(@NotNull UUID id);
 
-    @NotNull Optional<Category> getCategory(@NotNull UUID id);
+    @NotNull
+    Optional<Category> getCategory(@NotNull UUID id);
 
-    @NotNull Category updateCategory(@NotNull UUID id, @NotNull String name);
+    @NotNull
+    Category updateCategory(@NotNull UUID id, @NotNull String name);
 }

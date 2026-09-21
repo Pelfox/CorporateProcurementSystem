@@ -2,6 +2,7 @@ package com.team.corporate.repositories.impls;
 
 import com.team.corporate.entities.Order;
 import com.team.corporate.repositories.OrdersRepository;
+import jakarta.persistence.LockModeType;
 import org.hibernate.SessionFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,7 @@ public class HibernateOrdersRepository implements OrdersRepository {
     @NotNull
     public Order add(@NotNull Order order) {
         Objects.requireNonNull(order, "order must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(order);
             return order;
         });
@@ -32,7 +33,7 @@ public class HibernateOrdersRepository implements OrdersRepository {
     @Override
     @NotNull
     public List<Order> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT, Order.class).getResultList());
     }
 
@@ -40,7 +41,7 @@ public class HibernateOrdersRepository implements OrdersRepository {
     @NotNull
     public Optional<Order> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE o.id = :id", Order.class)
                         .setParameter("id", id)
                         .uniqueResultOptional());
@@ -53,13 +54,23 @@ public class HibernateOrdersRepository implements OrdersRepository {
         if (order.getId() == null) {
             throw new IllegalArgumentException("Cannot update an order without an ID; use add() first");
         }
-        return sessionFactory.fromTransaction(session -> session.merge(order));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(order));
+    }
+
+    @Override
+    @NotNull
+    public Optional<Order> getByIdForUpdate(@NotNull UUID id) {
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+                session.createSelectionQuery(SELECT + " WHERE o.id = :id", Order.class)
+                        .setParameter("id", id)
+                        .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+                        .uniqueResultOptional());
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        sessionFactory.inTransaction(session -> {
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
             Order order = session.find(Order.class, id);
             if (order != null) {
                 session.remove(order);
@@ -67,4 +78,3 @@ public class HibernateOrdersRepository implements OrdersRepository {
         });
     }
 }
-

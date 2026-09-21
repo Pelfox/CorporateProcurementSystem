@@ -30,9 +30,10 @@ public class InventoriesServiceImpl implements InventoriesService {
     }
 
     @Override
-    public @NotNull Inventory placeProductInWarehouse(@NotNull UUID productId,
-                                                      @NotNull UUID warehouseId,
-                                                      int quantity) {
+    @NotNull
+    public Inventory placeProductInWarehouse(@NotNull UUID productId,
+                                             @NotNull UUID warehouseId,
+                                             int quantity) {
         Product product = productsRepository.getById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
         Warehouse warehouse = warehousesRepository.getById(warehouseId)
@@ -42,22 +43,24 @@ public class InventoriesServiceImpl implements InventoriesService {
     }
 
     @Override
-    public @NotNull List<Inventory> getAllByWarehouse(@NotNull UUID warehouseId) {
+    @NotNull
+    public List<Inventory> getAllByWarehouse(@NotNull UUID warehouseId) {
         warehousesRepository.getById(warehouseId)
                 .orElseThrow(() -> new WarehouseNotFoundException("Склад с указанным ID не найден."));
         return inventoriesRepository.getByWarehouseId(warehouseId);
     }
 
     @Override
-    public @NotNull List<Inventory> getAllByProduct(@NotNull UUID productId) {
+    @NotNull
+    public List<Inventory> getAllByProduct(@NotNull UUID productId) {
         productsRepository.getById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
         return inventoriesRepository.getByProductId(productId);
     }
 
-
     @Override
-    public @NotNull Optional<Inventory> getAllByProductAndWarehouse(@NotNull UUID productId, @NotNull UUID warehouseId) {
+    @NotNull
+    public Optional<Inventory> getAllByProductAndWarehouse(@NotNull UUID productId, @NotNull UUID warehouseId) {
         productsRepository.getById(productId)
                 .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
         warehousesRepository.getById(warehouseId)
@@ -66,7 +69,8 @@ public class InventoriesServiceImpl implements InventoriesService {
     }
 
     @Override
-    public @NotNull Optional<Inventory> getInventory(@NotNull UUID id) {
+    @NotNull
+    public Optional<Inventory> getInventory(@NotNull UUID id) {
         return inventoriesRepository.getById(id);
     }
 
@@ -81,12 +85,14 @@ public class InventoriesServiceImpl implements InventoriesService {
     }
 
     @Override
-    public @NotNull List<Inventory> getAll() {
+    @NotNull
+    public List<Inventory> getAll() {
         return inventoriesRepository.getAll();
     }
 
     @Override
-    public @NotNull Inventory updateInventory(@NotNull UUID inventoryId, int quantity) {
+    @NotNull
+    public Inventory updateInventory(@NotNull UUID inventoryId, int quantity) {
         Inventory inventory = inventoriesRepository.getById(inventoryId)
                 .orElseThrow(() -> new InventoryNotFoundException("Инвентарь с указанным ID не найден."));
         inventory.setQuantity(quantity);

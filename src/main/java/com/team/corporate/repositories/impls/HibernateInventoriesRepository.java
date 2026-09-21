@@ -23,7 +23,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @NotNull
     public Inventory add(@NotNull Inventory inventory) {
         Objects.requireNonNull(inventory, "inventory must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(inventory);
             return inventory;
         });
@@ -32,14 +32,15 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @Override
     @NotNull
     public List<Inventory> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT, Inventory.class).getResultList());
     }
 
     @Override
-    public @NotNull Optional<Inventory> getById(@NotNull UUID id) {
+    @NotNull
+    public Optional<Inventory> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null.");
-        return sessionFactory.fromTransaction(session -> Optional.ofNullable(session.find(Inventory.class, id)));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> Optional.ofNullable(session.find(Inventory.class, id)));
     }
 
     /*Not practical*/
@@ -48,7 +49,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     public Optional<Inventory> getByProductAndWarehouseIds(@NotNull UUID productId, @NotNull UUID warehouseId) {
         Objects.requireNonNull(productId, "productId must not be null");
         Objects.requireNonNull(warehouseId, "warehouseId must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE i.product.id = :productId AND i.warehouse.id = :warehouseId", Inventory.class)
                         .setParameter("productId", productId)
                         .setParameter("warehouseId", warehouseId)
@@ -59,7 +60,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @NotNull
     public List<Inventory> getByProductId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE i.product.id = :id", Inventory.class)
                         .setParameter("id", id)
                         .getResultList());
@@ -69,7 +70,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @NotNull
     public List<Inventory> getByWarehouseId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery(SELECT + " WHERE i.warehouse.id = :id", Inventory.class)
                         .setParameter("id", id)
                         .getResultList());
@@ -82,13 +83,13 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
         if (inventory.getId() == null) {
             throw new IllegalArgumentException("Cannot update an inventory without an ID; use add() first");
         }
-        return sessionFactory.fromTransaction(session -> session.merge(inventory));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(inventory));
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        sessionFactory.inTransaction(session -> {
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
             Inventory inventory = session.find(Inventory.class, id);
             if (inventory != null) {
                 session.remove(inventory);
@@ -96,4 +97,3 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
         });
     }
 }
-

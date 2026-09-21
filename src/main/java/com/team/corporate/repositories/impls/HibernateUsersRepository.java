@@ -21,7 +21,7 @@ public class HibernateUsersRepository implements UsersRepository {
     @NotNull
     public User add(@NotNull User user) {
         Objects.requireNonNull(user, "user must not be null");
-        return sessionFactory.fromTransaction(session -> {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
             session.persist(user);
             return user;
         });
@@ -30,7 +30,7 @@ public class HibernateUsersRepository implements UsersRepository {
     @Override
     @NotNull
     public List<User> getAll() {
-        return sessionFactory.fromTransaction(session ->
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
                 session.createSelectionQuery("FROM User", User.class).getResultList());
     }
 
@@ -38,7 +38,7 @@ public class HibernateUsersRepository implements UsersRepository {
     @NotNull
     public Optional<User> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return sessionFactory.fromTransaction(session -> Optional.ofNullable(session.find(User.class, id)));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> Optional.ofNullable(session.find(User.class, id)));
     }
 
     @Override
@@ -48,13 +48,13 @@ public class HibernateUsersRepository implements UsersRepository {
         if (user.getId() == null) {
             throw new IllegalArgumentException("Cannot update a user without an ID; use add() first");
         }
-        return sessionFactory.fromTransaction(session -> session.merge(user));
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(user));
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        sessionFactory.inTransaction(session -> {
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
             User user = session.find(User.class, id);
             if (user != null) {
                 session.remove(user);
