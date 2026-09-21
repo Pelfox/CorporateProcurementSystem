@@ -8,7 +8,6 @@ import com.team.corporate.exceptions.UserNotFoundException;
 import com.team.corporate.repositories.OrdersRepository;
 import com.team.corporate.repositories.UsersRepository;
 import com.team.corporate.services.OrdersService;
-import jakarta.persistence.EntityNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +19,7 @@ public class OrdersServiceImpl implements OrdersService {
     private final OrdersRepository ordersRepository;
     private final UsersRepository usersRepository;
 
-    public OrdersServiceImpl(OrdersRepository ordersRepository, UsersRepository usersRepository) {
+    public OrdersServiceImpl(@NotNull OrdersRepository ordersRepository, @NotNull UsersRepository usersRepository) {
         this.ordersRepository = ordersRepository;
         this.usersRepository = usersRepository;
     }
@@ -28,8 +27,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public @NotNull Order createOrder(@NotNull UUID userId, @NotNull OrderStatus status, @Nullable String notes) {
         User user = usersRepository.getById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным id не найден"));
-
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным ID не найден"));
         Order order = new Order(user, status, notes);
         return ordersRepository.add(order);
     }
@@ -42,8 +40,7 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public @NotNull Order updateOrder(@NotNull UUID id, @Nullable OrderStatus status, @Nullable String notes) {
         Order order = ordersRepository.getById(id)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным id не найден"));
-
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден"));
         if (status != null) {
             order.setStatus(status);
         }
@@ -56,10 +53,10 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public @NotNull List<Order> getAllByUser(@NotNull UUID userId) {
         usersRepository.getById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным id не найден"));
-
-        return ordersRepository.getAll() // Требуется реализовать отдельный метод в OrdersRepository.
-                .stream().filter(order -> order.getUser().getId().equals(userId))
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным ID не найден"));
+        return ordersRepository.getAll()
+                .stream()
+                .filter(order -> order.getUser().getId().equals(userId))
                 .toList();
     }
 
@@ -70,8 +67,9 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public @NotNull List<Order> getAllByStatus(@NotNull OrderStatus status) {
-        return ordersRepository.getAll() // Требуется реализовать отдельный метод в OrdersRepository.
-                .stream().filter(order -> order.getStatus().equals(status))
+        return ordersRepository.getAll()
+                .stream()
+                .filter(order -> order.getStatus().equals(status))
                 .toList();
     }
 

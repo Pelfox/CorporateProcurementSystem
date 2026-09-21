@@ -2,7 +2,6 @@ package com.team.corporate.services;
 
 import com.team.corporate.entities.Order;
 import com.team.corporate.entities.OrderStatus;
-import com.team.corporate.entities.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

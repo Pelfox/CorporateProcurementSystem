@@ -2,7 +2,7 @@ package com.team.corporate.exceptions;
 
 public class InventoryNotFoundException extends RuntimeException {
 
-    public InventoryNotFoundException(){
+    public InventoryNotFoundException() {
         super("Inventory not found.");
     }
 
@@ -10,7 +10,7 @@ public class InventoryNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public InventoryNotFoundException(String message, Throwable cause){
+    public InventoryNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

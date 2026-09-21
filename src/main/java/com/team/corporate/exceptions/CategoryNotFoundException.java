@@ -2,15 +2,15 @@ package com.team.corporate.exceptions;
 
 public class CategoryNotFoundException extends RuntimeException {
 
-    public CategoryNotFoundException(){
+    public CategoryNotFoundException() {
         super("Category not found.");
     }
 
-    public CategoryNotFoundException(String message){
+    public CategoryNotFoundException(String message) {
         super(message);
     }
 
-    public CategoryNotFoundException(String message, Throwable cause){
+    public CategoryNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

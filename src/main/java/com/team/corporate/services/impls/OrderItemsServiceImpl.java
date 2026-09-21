@@ -19,12 +19,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class OrderItemsServiceImpl implements OrderItemsService {
-
     private final OrdersRepository ordersRepository;
     private final ProductsRepository productsRepository;
     private final OrderItemsRepository orderItemsRepository;
 
-    public OrderItemsServiceImpl(OrdersRepository ordersRepository, ProductsRepository productsRepository, OrderItemsRepository orderItemsRepository){
+    public OrderItemsServiceImpl(@NotNull OrdersRepository ordersRepository,
+                                 @NotNull ProductsRepository productsRepository,
+                                 @NotNull OrderItemsRepository orderItemsRepository) {
         this.ordersRepository = ordersRepository;
         this.productsRepository = productsRepository;
         this.orderItemsRepository = orderItemsRepository;
@@ -32,50 +33,45 @@ public class OrderItemsServiceImpl implements OrderItemsService {
 
 
     @Override
-    public @NotNull OrderItem createOrderItemForOrder(@NotNull UUID orderId, @NotNull UUID productId, int quantity, BigDecimal purchasePrice) {
+    public @NotNull OrderItem createOrderItemForOrder(@NotNull UUID orderId,
+                                                      @NotNull UUID productId,
+                                                      int quantity,
+                                                      @NotNull BigDecimal purchasePrice) {
         Order order = ordersRepository.getById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным Id не найден."));
-
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
         Product product = productsRepository.getById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным Id не найден."));
-
+                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
         OrderItem orderItem = new OrderItem(order, product, quantity, purchasePrice);
-
         return orderItemsRepository.add(orderItem);
     }
 
     @Override
     public void deleteOrderItem(@NotNull UUID id) {
         orderItemsRepository.getById(id)
-                .orElseThrow(()-> new OrderItemNotFoundException("Позация заказа с указанным Id не найдена."));
+                .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа с указанным ID не найдена."));
         orderItemsRepository.delete(id);
-
     }
 
     @Override
     public @NotNull OrderItem updateOrderItem(@NotNull UUID id, @Nullable Integer quantity, @Nullable BigDecimal purchasePrice) {
         OrderItem orderItem = orderItemsRepository.getById(id)
-                .orElseThrow(()-> new OrderItemNotFoundException("Позация заказа с указанным Id не найдена."));
-
-        if (purchasePrice == null && quantity == null) return orderItem;
-
-        if(quantity != null){
+                .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа с указанным ID не найдена."));
+        if (purchasePrice == null && quantity == null) {
+            return orderItem;
+        }
+        if (quantity != null) {
             orderItem.setQuantity(quantity);
         }
-        if (purchasePrice != null){
+        if (purchasePrice != null) {
             orderItem.setPurchasePrice(purchasePrice);
         }
-
         return orderItemsRepository.update(orderItem);
-
     }
 
     @Override
     public @NotNull List<OrderItem> getAllByOrder(@NotNull UUID orderId) {
-
         ordersRepository.getById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным Id не найден."));
-
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
         return orderItemsRepository.getByOrderId(orderId);
     }
 
@@ -87,8 +83,7 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     @Override
     public @NotNull List<OrderItem> getAllByProduct(@NotNull UUID productId) {
         productsRepository.getById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным Id не найден."));
-
+                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
         return orderItemsRepository.getByProductId(productId);
     }
 

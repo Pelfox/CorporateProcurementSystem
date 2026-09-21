@@ -2,7 +2,7 @@ package com.team.corporate.exceptions;
 
 public class ProductNotFoundException extends RuntimeException {
 
-    public ProductNotFoundException(){
+    public ProductNotFoundException() {
         super("Product not found.");
     }
 
@@ -10,7 +10,7 @@ public class ProductNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public ProductNotFoundException(String message, Throwable cause){
+    public ProductNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 }

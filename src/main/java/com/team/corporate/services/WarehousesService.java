@@ -1,6 +1,5 @@
 package com.team.corporate.services;
 
-import com.team.corporate.entities.User;
 import com.team.corporate.entities.Warehouse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

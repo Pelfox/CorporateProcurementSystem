@@ -11,10 +11,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class CategoriesServiceImpl implements CategoriesService {
-
     private final CategoriesRepository categoriesRepository;
 
-    public CategoriesServiceImpl(CategoriesRepository categoriesRepository){
+    public CategoriesServiceImpl(@NotNull CategoriesRepository categoriesRepository) {
         this.categoriesRepository = categoriesRepository;
     }
 
@@ -31,10 +30,9 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Override
     public void deleteCategory(@NotNull UUID id) {
         Optional<Category> category = categoriesRepository.getById(id);
-        if (category.isPresent()){
+        if (category.isPresent()) {
             categoriesRepository.delete(id);
         }
-
     }
 
     @Override
@@ -45,8 +43,7 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Override
     public @NotNull Category updateCategory(@NotNull UUID id, @NotNull String name) {
         Category categoryToUpdate = categoriesRepository.getById(id)
-                .orElseThrow(() -> new CategoryNotFoundException("Категория с указанным id не найдена."));
-
+                .orElseThrow(() -> new CategoryNotFoundException("Категория с указанным ID не найдена."));
         categoryToUpdate.setName(name);
         return categoriesRepository.update(categoryToUpdate);
     }

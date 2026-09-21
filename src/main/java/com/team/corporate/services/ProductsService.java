@@ -1,6 +1,5 @@
 package com.team.corporate.services;
 
-import com.team.corporate.entities.Category;
 import com.team.corporate.entities.Product;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

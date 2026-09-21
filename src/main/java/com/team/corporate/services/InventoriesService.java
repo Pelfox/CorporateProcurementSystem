@@ -2,7 +2,6 @@ package com.team.corporate.services;
 
 import com.team.corporate.entities.Inventory;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +23,6 @@ public interface InventoriesService {
 
     @NotNull List<Inventory> getAll();
 
-    @NotNull Inventory updateInventory(@NotNull UUID inventoryId, @Nullable Integer quantity);
+    @NotNull Inventory updateInventory(@NotNull UUID inventoryId, int quantity);
 
 }
