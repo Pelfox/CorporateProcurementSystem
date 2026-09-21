@@ -1,5 +1,6 @@
 package com.team.corporate.repositories.impls;
 
+import com.team.corporate.entities.Category;
 import com.team.corporate.entities.Inventory;
 import com.team.corporate.repositories.InventoriesRepository;
 import org.hibernate.SessionFactory;
@@ -36,6 +37,12 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
                 session.createSelectionQuery(SELECT, Inventory.class).getResultList());
     }
 
+    @Override
+    public @NotNull Optional<Inventory> getById(@NotNull UUID id) {
+        Objects.requireNonNull(id, "id must not be null.");
+        return sessionFactory.fromTransaction(session -> Optional.ofNullable(session.find(Inventory.class, id)));
+    }
+    /*Not practical*/
     @Override
     @NotNull
     public Optional<Inventory> getByProductAndWarehouseIds(@NotNull UUID productId, @NotNull UUID warehouseId) {

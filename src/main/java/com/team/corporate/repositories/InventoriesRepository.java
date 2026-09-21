@@ -12,6 +12,8 @@ public interface InventoriesRepository {
 
     @NotNull List<Inventory> getAll();
 
+    @NotNull Optional<Inventory> getById(@NotNull UUID id);
+
     @NotNull Optional<Inventory> getByProductAndWarehouseIds(@NotNull UUID productId, @NotNull UUID warehouseId);
 
     @NotNull List<Inventory> getByProductId(@NotNull UUID id);
