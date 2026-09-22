@@ -22,4 +22,6 @@ public interface AuditLogsRepository {
 
     @NotNull
     List<AuditLog> getByUserId(@NotNull UUID id);
+
+    void delete(@NotNull UUID id);
 }
