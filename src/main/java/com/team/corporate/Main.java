@@ -6,6 +6,7 @@ import com.team.corporate.console.ConsoleInput;
 import com.team.corporate.console.ConsoleTerminal;
 import com.team.corporate.repositories.impls.*;
 import com.team.corporate.services.impls.*;
+import com.team.corporate.utils.DataInitializer;
 import com.team.corporate.utils.HibernateFactory;
 import org.jline.reader.LineReaderBuilder;
 
@@ -45,6 +46,8 @@ public class Main {
             var items = new OrderItemsServiceImpl(ordersRepository, productsRepository, itemsRepository);
             var inventories = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository);
             var warehouses = new WarehousesServiceImpl(warehousesRepository);
+
+            new DataInitializer(users, categories, products, orders).run();
 
             new ConsoleApplication(
                     new ConsoleInput(reader),

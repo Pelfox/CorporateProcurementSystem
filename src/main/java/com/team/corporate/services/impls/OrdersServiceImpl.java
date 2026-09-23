@@ -46,7 +46,17 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public void deleteOrder(@NotNull UUID id) {
-        ordersRepository.delete(id);
+        transactions.execute(() -> {
+            // Сначала удаляем дочерние сущности, чтобы не нарушить Foreign Key
+            for (OrderItem item : orderItemsRepository.getByOrderId(id)) {
+                orderItemsRepository.delete(item.getId());
+            }
+            for (AuditLog log : auditLogsRepository.getByOrderId(id)) {
+                auditLogsRepository.delete(log.getId());
+            }
+            // И теперь заказ
+            ordersRepository.delete(id);
+        });
     }
 
     @Override

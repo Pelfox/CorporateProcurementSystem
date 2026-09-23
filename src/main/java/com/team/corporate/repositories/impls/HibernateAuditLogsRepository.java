@@ -20,6 +20,17 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     }
 
     @Override
+    public void delete(@NotNull UUID id) {
+        Objects.requireNonNull(id, "id must not be null");
+        HibernateTransactions.inTransaction(sessionFactory, session -> {
+            AuditLog log = session.find(AuditLog.class, id);
+            if (log != null) {
+                session.remove(log);
+            }
+        });
+    }
+
+    @Override
     @NotNull
     public AuditLog add(@NotNull AuditLog auditLog) {
         Objects.requireNonNull(auditLog, "auditLog must not be null");
