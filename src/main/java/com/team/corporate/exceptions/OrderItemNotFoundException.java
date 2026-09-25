@@ -3,7 +3,7 @@ package com.team.corporate.exceptions;
 public class OrderItemNotFoundException extends RuntimeException {
 
     public OrderItemNotFoundException() {
-        super("Order Item not found.");
+        super("Позиция заказа не найдена.");
     }
 
     public OrderItemNotFoundException(String message) {

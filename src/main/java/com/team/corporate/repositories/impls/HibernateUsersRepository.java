@@ -46,7 +46,7 @@ public class HibernateUsersRepository implements UsersRepository {
     public User update(@NotNull User user) {
         Objects.requireNonNull(user, "user must not be null");
         if (user.getId() == null) {
-            throw new IllegalArgumentException("Cannot update a user without an ID; use add() first");
+            throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
         return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(user));
     }

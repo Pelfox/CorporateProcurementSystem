@@ -14,7 +14,7 @@ public class FileConfigurationProvider implements ConfigurationProvider {
     public ApplicationConfiguration getConfiguration() {
         try (InputStream input = FileConfigurationProvider.class.getClassLoader().getResourceAsStream(CONFIGURATION_FILE_NAME)) {
             if (input == null) {
-                throw new RuntimeException("Configuration file was not found");
+                throw new RuntimeException("Файл настроек приложения не найден.");
             }
 
             Properties properties = new Properties();
@@ -22,7 +22,7 @@ public class FileConfigurationProvider implements ConfigurationProvider {
 
             return ApplicationConfiguration.fromProperties(properties);
         } catch (IOException e) {
-            throw new ExceptionInInitializerError(e);
+            throw new IllegalStateException("Не удалось прочитать файл настроек приложения.", e);
         }
     }
 }

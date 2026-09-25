@@ -10,6 +10,7 @@ import com.team.corporate.repositories.AuditLogsRepository;
 import com.team.corporate.repositories.OrdersRepository;
 import com.team.corporate.repositories.UsersRepository;
 import com.team.corporate.services.AuditLogsService;
+import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -35,10 +36,14 @@ public class AuditLogsServiceImpl implements AuditLogsService {
                                    @NotNull UUID changedByUserId,
                                    @NotNull OrderStatus oldStatus,
                                    @NotNull OrderStatus newStatus) {
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
+        EntityValidation.requireNonNull(changedByUserId, "Идентификатор автора изменения");
+        EntityValidation.requireNonNull(oldStatus, "Предыдущий статус");
+        EntityValidation.requireNonNull(newStatus, "Новый статус");
         Order order = ordersRepository.getById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным идентификатором не найден."));
         User changedByUser = userRepository.getById(changedByUserId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным ID не найден."));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным идентификатором не найден."));
         AuditLog auditLog = new AuditLog(order, changedByUser, oldStatus, newStatus);
         return auditLogsRepository.add(auditLog);
     }
@@ -46,30 +51,35 @@ public class AuditLogsServiceImpl implements AuditLogsService {
     @Override
     @NotNull
     public Optional<AuditLog> getAuditLog(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         return auditLogsRepository.getById(id);
     }
 
     @Override
     @NotNull
     public List<AuditLog> getAllByOrder(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         return auditLogsRepository.getByOrderId(id);
     }
 
     @Override
     @NotNull
     public List<AuditLog> getAllByChangedBy(@NotNull UUID changedByUserId) {
+        EntityValidation.requireNonNull(changedByUserId, "Идентификатор автора изменения");
         return auditLogsRepository.getByUserId(changedByUserId);
     }
 
     @Override
     @NotNull
     public List<AuditLog> getAllByOldStatus(@NotNull OrderStatus status) {
+        EntityValidation.requireNonNull(status, "Статус");
         return auditLogsRepository.getAll();
     }
 
     @Override
     @NotNull
     public List<AuditLog> getAllByNewStatus(@NotNull OrderStatus status) {
+        EntityValidation.requireNonNull(status, "Статус");
         return auditLogsRepository.getAll();
     }
 }

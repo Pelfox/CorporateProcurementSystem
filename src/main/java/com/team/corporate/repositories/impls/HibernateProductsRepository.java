@@ -61,7 +61,7 @@ public class HibernateProductsRepository implements ProductsRepository {
     public Product update(@NotNull Product product) {
         Objects.requireNonNull(product, "product must not be null");
         if (product.getId() == null) {
-            throw new IllegalArgumentException("Cannot update a product without an ID; use add() first");
+            throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
         return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(product));
     }

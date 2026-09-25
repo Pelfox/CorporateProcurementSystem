@@ -1,5 +1,6 @@
 package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -43,10 +44,10 @@ public class AuditLog {
                     @NotNull User changedBy,
                     @NotNull OrderStatus oldStatus,
                     @NotNull OrderStatus newStatus) {
-        this.order = order;
-        this.changedBy = changedBy;
-        this.oldStatus = oldStatus;
-        this.newStatus = newStatus;
+        this.order = EntityValidation.requireNonNull(order, "Заказ");
+        this.changedBy = EntityValidation.requireNonNull(changedBy, "Автор изменения");
+        this.oldStatus = EntityValidation.requireNonNull(oldStatus, "Предыдущий статус");
+        this.newStatus = EntityValidation.requireNonNull(newStatus, "Новый статус");
     }
 
     @NotNull
@@ -60,7 +61,7 @@ public class AuditLog {
     }
 
     public void setOrder(@NotNull Order order) {
-        this.order = order;
+        this.order = EntityValidation.requireNonNull(order, "Заказ");
     }
 
     @NotNull
@@ -69,7 +70,7 @@ public class AuditLog {
     }
 
     public void setChangedBy(@NotNull User changedBy) {
-        this.changedBy = changedBy;
+        this.changedBy = EntityValidation.requireNonNull(changedBy, "Автор изменения");
     }
 
     @NotNull
@@ -78,7 +79,7 @@ public class AuditLog {
     }
 
     public void setOldStatus(@NotNull OrderStatus oldStatus) {
-        this.oldStatus = oldStatus;
+        this.oldStatus = EntityValidation.requireNonNull(oldStatus, "Предыдущий статус");
     }
 
     @NotNull
@@ -87,7 +88,7 @@ public class AuditLog {
     }
 
     public void setNewStatus(@NotNull OrderStatus newStatus) {
-        this.newStatus = newStatus;
+        this.newStatus = EntityValidation.requireNonNull(newStatus, "Новый статус");
     }
 
     @Nullable

@@ -3,7 +3,7 @@ package com.team.corporate.exceptions;
 public class UserNotFoundException extends RuntimeException {
 
     public UserNotFoundException() {
-        super("User not found");
+        super("Пользователь не найден.");
     }
 
     public UserNotFoundException(String message) {

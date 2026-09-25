@@ -32,9 +32,9 @@ public class Inventory {
     public Inventory(@NotNull Product product,
                      @NotNull Warehouse warehouse,
                      int quantity) {
-        this.product = product;
-        this.warehouse = warehouse;
-        this.quantity = EntityValidation.requireAtLeast(quantity, 0, "quantity");
+        this.product = EntityValidation.requireNonNull(product, "Товар");
+        this.warehouse = EntityValidation.requireNonNull(warehouse, "Склад");
+        this.quantity = EntityValidation.requireAtLeast(quantity, 0, "Остаток");
     }
 
     @NotNull
@@ -48,7 +48,7 @@ public class Inventory {
     }
 
     public void setProduct(@NotNull Product product) {
-        this.product = product;
+        this.product = EntityValidation.requireNonNull(product, "Товар");
     }
 
     @NotNull
@@ -57,7 +57,7 @@ public class Inventory {
     }
 
     public void setWarehouse(@NotNull Warehouse warehouse) {
-        this.warehouse = warehouse;
+        this.warehouse = EntityValidation.requireNonNull(warehouse, "Склад");
     }
 
     public int getQuantity() {
@@ -65,6 +65,6 @@ public class Inventory {
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = EntityValidation.requireAtLeast(quantity, 0, "quantity");
+        this.quantity = EntityValidation.requireAtLeast(quantity, 0, "Остаток");
     }
 }

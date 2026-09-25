@@ -10,6 +10,7 @@ import com.team.corporate.repositories.OrderItemsRepository;
 import com.team.corporate.repositories.OrdersRepository;
 import com.team.corporate.repositories.ProductsRepository;
 import com.team.corporate.services.OrderItemsService;
+import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,28 +38,39 @@ public class OrderItemsServiceImpl implements OrderItemsService {
                                              @NotNull UUID productId,
                                              int quantity,
                                              @NotNull BigDecimal purchasePrice) {
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
+        EntityValidation.requireNonNull(productId, "Идентификатор товара");
+        EntityValidation.requireNonNull(purchasePrice, "Цена покупки");
         Order order = ordersRepository.getById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным идентификатором не найден."));
         Product product = productsRepository.getById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
+                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным идентификатором не найден."));
         OrderItem orderItem = new OrderItem(order, product, quantity, purchasePrice);
         return orderItemsRepository.add(orderItem);
     }
 
     @Override
     public void deleteOrderItem(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         orderItemsRepository.getById(id)
-                .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа с указанным ID не найдена."));
+                .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа с указанным идентификатором не найдена."));
         orderItemsRepository.delete(id);
     }
 
     @Override
     @NotNull
     public OrderItem updateOrderItem(@NotNull UUID id, @Nullable Integer quantity, @Nullable BigDecimal purchasePrice) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         OrderItem orderItem = orderItemsRepository.getById(id)
-                .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа с указанным ID не найдена."));
+                .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа с указанным идентификатором не найдена."));
         if (purchasePrice == null && quantity == null) {
             return orderItem;
+        }
+        if (quantity != null) {
+            EntityValidation.requireAtLeast(quantity, 1, "Количество");
+        }
+        if (purchasePrice != null) {
+            EntityValidation.requireMoney(purchasePrice, "Цена покупки");
         }
         if (quantity != null) {
             orderItem.setQuantity(quantity);
@@ -72,22 +84,25 @@ public class OrderItemsServiceImpl implements OrderItemsService {
     @Override
     @NotNull
     public List<OrderItem> getAllByOrder(@NotNull UUID orderId) {
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
         ordersRepository.getById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден."));
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным идентификатором не найден."));
         return orderItemsRepository.getByOrderId(orderId);
     }
 
     @Override
     @NotNull
     public Optional<OrderItem> getOrderItem(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         return orderItemsRepository.getById(id);
     }
 
     @Override
     @NotNull
     public List<OrderItem> getAllByProduct(@NotNull UUID productId) {
+        EntityValidation.requireNonNull(productId, "Идентификатор товара");
         productsRepository.getById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным ID не найден."));
+                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным идентификатором не найден."));
         return orderItemsRepository.getByProductId(productId);
     }
 

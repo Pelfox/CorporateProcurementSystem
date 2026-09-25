@@ -3,6 +3,8 @@ package com.team.corporate.config;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Properties;
+import java.time.DateTimeException;
+import java.time.ZoneId;
 
 public class ApplicationConfiguration {
     private String databaseUrl;
@@ -15,12 +17,21 @@ public class ApplicationConfiguration {
     @NotNull
     public static ApplicationConfiguration fromProperties(@NotNull Properties properties) {
         ApplicationConfiguration configuration = new ApplicationConfiguration();
-        configuration.databaseUrl = properties.getProperty("db.url");
-        configuration.databaseUsername = properties.getProperty("db.username");
+        configuration.databaseUrl = required(properties, "db.url");
+        configuration.databaseUsername = required(properties, "db.username");
         configuration.databasePassword = properties.getProperty("db.password");
-        configuration.hibernateDdl = properties.getProperty("hibernate.ddl.auto");
-        configuration.jdbcTimeZone = properties.getProperty("hibernate.jdbc.time_zone");
+        configuration.hibernateDdl = required(properties, "hibernate.ddl.auto");
+        configuration.jdbcTimeZone = required(properties, "hibernate.jdbc.time_zone");
         return configuration;
+    }
+
+    @NotNull
+    private static String required(Properties properties, String key) {
+        String value = properties.getProperty(key);
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("Не заполнен параметр настроек " + key + ".");
+        }
+        return value.strip();
     }
 
     @NotNull

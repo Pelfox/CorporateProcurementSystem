@@ -3,7 +3,7 @@ package com.team.corporate.exceptions;
 public class ProductNotFoundException extends RuntimeException {
 
     public ProductNotFoundException() {
-        super("Product not found.");
+        super("Товар не найден.");
     }
 
     public ProductNotFoundException(String message) {

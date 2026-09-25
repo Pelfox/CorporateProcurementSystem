@@ -1,10 +1,10 @@
 package com.team.corporate.console;
 
+import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 import org.jline.reader.LineReader;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.function.Function;
 
@@ -21,23 +21,36 @@ public final class ConsoleInput {
     }
 
     public String text(@NotNull String prompt) {
-        return reader.readLine(prompt + ": ").trim();
+        return readText(prompt, false);
+    }
+
+    public String notes(@NotNull String prompt) {
+        return readText(prompt, false);
     }
 
     public String required(@NotNull String prompt) {
+        return readText(prompt, true);
+    }
+
+    private String readText(String prompt, boolean required) {
         while (true) {
-            String value = text(prompt);
-            if (!value.isBlank()) {
-                return value;
+            String value = reader.readLine(prompt + " (макс. " + EntityValidation.TEXT_MAX_LENGTH + " символов): ");
+            try {
+                return required ? EntityValidation.requireText(value, prompt)
+                        : EntityValidation.optionalText(value, prompt);
+            } catch (IllegalArgumentException e) {
+                print(e.getMessage());
             }
-            print("Значение не должно быть пустым.");
         }
     }
 
     public int number(@NotNull String prompt, int min, int max) {
+        if (min > max) {
+            throw new IllegalArgumentException("Некорректный диапазон чисел.");
+        }
         while (true) {
             try {
-                int value = Integer.parseInt(text(prompt));
+                int value = Integer.parseInt(numericText(prompt));
                 if (value >= min && value <= max) {
                     return value;
                 }
@@ -51,14 +64,22 @@ public final class ConsoleInput {
     public BigDecimal money(@NotNull String prompt) {
         while (true) {
             try {
-                BigDecimal value = new BigDecimal(text(prompt).replace(',', '.')).setScale(2, RoundingMode.UNNECESSARY);
-                if (value.signum() >= 0 && value.precision() <= 10) {
-                    return value;
+                String input = numericText(prompt).replace(',', '.');
+                if (input.matches("[+]?[0-9]+(?:\\.[0-9]+)?")) {
+                    return EntityValidation.requireMoney(new BigDecimal(input), "Цена");
                 }
             } catch (IllegalArgumentException | ArithmeticException ignored) {
             }
             print("Введите цену от 0 до 99999999,99, не более двух знаков после запятой.");
         }
+    }
+
+    private String numericText(String prompt) {
+        String value = reader.readLine(prompt + ": ");
+        if (value.length() > EntityValidation.TEXT_MAX_LENGTH) {
+            throw new NumberFormatException("Слишком длинное число.");
+        }
+        return value.strip();
     }
 
     public boolean requestConfirmation(@NotNull String prompt) {

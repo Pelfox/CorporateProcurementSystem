@@ -3,7 +3,7 @@ package com.team.corporate.exceptions;
 public class WarehouseNotFoundException extends RuntimeException {
 
     public WarehouseNotFoundException() {
-        super("Warehouse not found.");
+        super("Склад не найден.");
     }
 
     public WarehouseNotFoundException(String message) {

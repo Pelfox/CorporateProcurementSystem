@@ -46,7 +46,7 @@ public class HibernateWarehousesRepository implements WarehousesRepository {
     public Warehouse update(@NotNull Warehouse warehouse) {
         Objects.requireNonNull(warehouse, "warehouse must not be null");
         if (warehouse.getId() == null) {
-            throw new IllegalArgumentException("Cannot update a warehouse without an ID; use add() first");
+            throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
         return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(warehouse));
     }

@@ -85,7 +85,7 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
     public OrderItem update(@NotNull OrderItem orderItem) {
         Objects.requireNonNull(orderItem, "orderItem must not be null");
         if (orderItem.getId() == null) {
-            throw new IllegalArgumentException("Cannot update an order item without an ID; use add() first");
+            throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
         return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(orderItem));
     }

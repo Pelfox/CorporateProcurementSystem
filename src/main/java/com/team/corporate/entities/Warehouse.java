@@ -1,5 +1,6 @@
 package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,22 +15,22 @@ public class Warehouse {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = EntityValidation.TEXT_MAX_LENGTH)
     private String name;
 
-    @Column(name = "location")
+    @Column(name = "location", length = EntityValidation.TEXT_MAX_LENGTH)
     private String location;
 
     public Warehouse() {
     }
 
     public Warehouse(@NotNull String name, @Nullable String location) {
-        this.name = name;
-        this.location = location;
+        this.name = EntityValidation.requireText(name, "Название склада");
+        this.location = EntityValidation.optionalText(location, "Адрес");
     }
 
     public Warehouse(@NotNull String name) {
-        this.name = name;
+        this.name = EntityValidation.requireText(name, "Название склада");
     }
 
     @NotNull
@@ -43,7 +44,7 @@ public class Warehouse {
     }
 
     public void setName(@NotNull String name) {
-        this.name = name;
+        this.name = EntityValidation.requireText(name, "Название склада");
     }
 
     @Nullable
@@ -52,6 +53,6 @@ public class Warehouse {
     }
 
     public void setLocation(@Nullable String location) {
-        this.location = location;
+        this.location = EntityValidation.optionalText(location, "Адрес");
     }
 }

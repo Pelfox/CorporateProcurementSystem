@@ -90,7 +90,7 @@ public final class ConsoleApplication {
                 } catch (IllegalArgumentException e) {
                     io.print(e.getMessage());
                 } catch (RuntimeException e) {
-                    LOG.error("Console operation failed", e);
+                    LOG.error("Не удалось выполнить действие в консоли", e);
                     io.print("Операция не выполнена. Проверьте данные и подключение к базе.");
                 }
             }
@@ -165,7 +165,7 @@ public final class ConsoleApplication {
                 break;
             }
         }
-        String notes = io.text("Примечание (можно оставить пустым)");
+        String notes = io.notes("Примечание (можно оставить пустым)");
         if (io.requestConfirmation("Создать заказ на " + total + " руб.?")) {
             io.print("Заказ создан: " + orders.createOrder(user.getId(), lines, notes));
         }
@@ -214,7 +214,7 @@ public final class ConsoleApplication {
                 case 2 -> editItem(order, false);
                 case 3 -> editItem(order, true);
                 case 4 ->
-                        orders.updateNotes(user.getId(), order.getId(), io.text("Новое примечание (пустое - очистить)"));
+                        orders.updateNotes(user.getId(), order.getId(), io.notes("Новое примечание (пустое - очистить)"));
             }
         }
     }

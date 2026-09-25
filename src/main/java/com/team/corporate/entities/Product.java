@@ -16,10 +16,10 @@ public class Product {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "sku", nullable = false, unique = true)
+    @Column(name = "sku", nullable = false, unique = true, length = EntityValidation.TEXT_MAX_LENGTH)
     private String sku;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = EntityValidation.TEXT_MAX_LENGTH)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,10 +36,10 @@ public class Product {
                    @NotNull String name,
                    @Nullable Category category,
                    @NotNull BigDecimal price) {
-        this.sku = sku;
-        this.name = name;
+        this.sku = EntityValidation.requireText(sku, "Артикул");
+        this.name = EntityValidation.requireText(name, "Название товара");
         this.category = category;
-        this.price = EntityValidation.requireMoney(price, "price");
+        this.price = EntityValidation.requireMoney(price, "Цена");
     }
 
     @NotNull
@@ -53,7 +53,7 @@ public class Product {
     }
 
     public void setSku(@NotNull String sku) {
-        this.sku = sku;
+        this.sku = EntityValidation.requireText(sku, "Артикул");
     }
 
     @NotNull
@@ -62,7 +62,7 @@ public class Product {
     }
 
     public void setName(@NotNull String name) {
-        this.name = name;
+        this.name = EntityValidation.requireText(name, "Название товара");
     }
 
     @Nullable
@@ -80,6 +80,14 @@ public class Product {
     }
 
     public void setPrice(@NotNull BigDecimal price) {
-        this.price = EntityValidation.requireMoney(price, "price");
+        this.price = EntityValidation.requireMoney(price, "Цена");
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void validate() {
+        EntityValidation.requireText(sku, "Артикул");
+        EntityValidation.requireText(name, "Название товара");
+        EntityValidation.requireMoney(price, "Цена");
     }
 }

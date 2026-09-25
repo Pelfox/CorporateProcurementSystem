@@ -5,6 +5,7 @@ import com.team.corporate.exceptions.OrderNotFoundException;
 import com.team.corporate.exceptions.UserNotFoundException;
 import com.team.corporate.repositories.*;
 import com.team.corporate.services.OrdersService;
+import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,14 +39,17 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     @NotNull
     public Order createOrder(@NotNull UUID userId, @NotNull OrderStatus status, @Nullable String notes) {
+        EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
+        EntityValidation.requireNonNull(status, "Статус");
         User user = usersRepository.getById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным ID не найден"));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным идентификатором не найден"));
         Order order = new Order(user, status, notes);
         return ordersRepository.add(order);
     }
 
     @Override
     public void deleteOrder(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         transactions.execute(() -> {
             // Сначала удаляем дочерние сущности, чтобы не нарушить Foreign Key
             for (OrderItem item : orderItemsRepository.getByOrderId(id)) {
@@ -62,8 +66,10 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     @NotNull
     public Order updateOrder(@NotNull UUID id, @Nullable OrderStatus status, @Nullable String notes) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         Order order = ordersRepository.getById(id)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным ID не найден"));
+                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным идентификатором не найден"));
+        EntityValidation.optionalText(notes, "Примечание");
         if (status != null) {
             order.setStatus(status);
         }
@@ -76,8 +82,9 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     @NotNull
     public List<Order> getAllByUser(@NotNull UUID userId) {
+        EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
         usersRepository.getById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным ID не найден"));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с указанным идентификатором не найден"));
         return ordersRepository.getAll()
                 .stream()
                 .filter(order -> order.getUser().getId().equals(userId))
@@ -87,12 +94,14 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     @NotNull
     public Optional<Order> getOrder(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         return ordersRepository.getById(id);
     }
 
     @Override
     @NotNull
     public List<Order> getAllByStatus(@NotNull OrderStatus status) {
+        EntityValidation.requireNonNull(status, "Статус");
         return ordersRepository.getAll()
                 .stream()
                 .filter(order -> order.getStatus().equals(status))
@@ -121,10 +130,16 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     @NotNull
     public UUID createOrder(@NotNull UUID userId, @NotNull List<Line> lines, @Nullable String notes) {
+        EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
+        EntityValidation.requireNonNull(lines, "Позиции заказа");
+        for (Line line : lines) {
+            EntityValidation.requireNonNull(line, "Позиция заказа");
+        }
         List<Line> snapshot = List.copyOf(lines);
         if (snapshot.isEmpty()) {
             throw new IllegalArgumentException("Добавьте хотя бы один товар.");
         }
+        EntityValidation.optionalText(notes, "Примечание");
         return transactions.execute(() -> {
             Order order = createOrder(userId, OrderStatus.CREATED, notes);
             for (Line line : snapshot) {
@@ -142,6 +157,8 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public void updateNotes(@NotNull UUID userId, @NotNull UUID orderId, @Nullable String notes) {
+        EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
         transactions.execute(() -> {
             Order order = editable(userId, orderId);
             order.setNotes(notes);
@@ -151,11 +168,17 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public void addItem(@NotNull UUID userId, @NotNull UUID orderId, @NotNull Line line) {
+        EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
+        EntityValidation.requireNonNull(line, "Позиция заказа");
         transactions.execute(() -> addItem(editable(userId, orderId), line));
     }
 
     @Override
     public void updateQuantity(@NotNull UUID userId, @NotNull UUID orderId, @NotNull UUID itemId, int quantity) {
+        EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
+        EntityValidation.requireNonNull(itemId, "Идентификатор позиции");
         transactions.execute(() -> {
             editable(userId, orderId);
             OrderItem item = orderItemsRepository.getById(itemId)
@@ -177,6 +200,9 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public void changeStatus(@NotNull UUID managerId, @NotNull UUID orderId, @NotNull OrderStatus status) {
+        EntityValidation.requireNonNull(managerId, "Идентификатор менеджера");
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
+        EntityValidation.requireNonNull(status, "Статус");
         transactions.execute(() -> {
             User manager = usersRepository.getById(managerId)
                     .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));

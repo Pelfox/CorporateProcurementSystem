@@ -36,10 +36,10 @@ public class OrderItem {
                      @NotNull Product product,
                      int quantity,
                      @NotNull BigDecimal purchasePrice) {
-        this.order = order;
-        this.product = product;
-        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "quantity");
-        this.purchasePrice = EntityValidation.requireMoney(purchasePrice, "purchasePrice");
+        this.order = EntityValidation.requireNonNull(order, "Заказ");
+        this.product = EntityValidation.requireNonNull(product, "Товар");
+        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "Количество");
+        this.purchasePrice = EntityValidation.requireMoney(purchasePrice, "Цена покупки");
     }
 
     @NotNull
@@ -53,7 +53,7 @@ public class OrderItem {
     }
 
     public void setOrder(@NotNull Order order) {
-        this.order = order;
+        this.order = EntityValidation.requireNonNull(order, "Заказ");
     }
 
     @NotNull
@@ -62,7 +62,7 @@ public class OrderItem {
     }
 
     public void setProduct(@NotNull Product product) {
-        this.product = product;
+        this.product = EntityValidation.requireNonNull(product, "Товар");
     }
 
     public int getQuantity() {
@@ -70,7 +70,7 @@ public class OrderItem {
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "quantity");
+        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "Количество");
     }
 
     @NotNull
@@ -79,6 +79,6 @@ public class OrderItem {
     }
 
     public void setPurchasePrice(@NotNull BigDecimal purchasePrice) {
-        this.purchasePrice = EntityValidation.requireMoney(purchasePrice, "purchasePrice");
+        this.purchasePrice = EntityValidation.requireMoney(purchasePrice, "Цена покупки");
     }
 }

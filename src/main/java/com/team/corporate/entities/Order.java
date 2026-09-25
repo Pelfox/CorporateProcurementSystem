@@ -1,5 +1,6 @@
 package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -25,7 +26,7 @@ public class Order {
     @Column(name = "order_status", nullable = false)
     private OrderStatus status;
 
-    @Column(name = "notes")
+    @Column(name = "notes", length = EntityValidation.TEXT_MAX_LENGTH)
     private String notes;
 
     @CreationTimestamp
@@ -40,14 +41,14 @@ public class Order {
     }
 
     public Order(@NotNull User user, @NotNull OrderStatus status, @Nullable String notes) {
-        this.user = user;
-        this.status = status;
-        this.notes = notes;
+        this.user = EntityValidation.requireNonNull(user, "Пользователь");
+        this.status = EntityValidation.requireNonNull(status, "Статус");
+        this.notes = EntityValidation.optionalText(notes, "Примечание");
     }
 
     public Order(@NotNull User user, @NotNull OrderStatus status) {
-        this.user = user;
-        this.status = status;
+        this.user = EntityValidation.requireNonNull(user, "Пользователь");
+        this.status = EntityValidation.requireNonNull(status, "Статус");
     }
 
     @NotNull
@@ -61,7 +62,7 @@ public class Order {
     }
 
     public void setUser(@NotNull User user) {
-        this.user = user;
+        this.user = EntityValidation.requireNonNull(user, "Пользователь");
     }
 
     @NotNull
@@ -70,7 +71,7 @@ public class Order {
     }
 
     public void setStatus(@NotNull OrderStatus status) {
-        this.status = status;
+        this.status = EntityValidation.requireNonNull(status, "Статус");
     }
 
     @Nullable
@@ -79,7 +80,7 @@ public class Order {
     }
 
     public void setNotes(@Nullable String notes) {
-        this.notes = notes;
+        this.notes = EntityValidation.optionalText(notes, "Примечание");
     }
 
     @Nullable

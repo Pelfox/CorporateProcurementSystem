@@ -1,5 +1,6 @@
 package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,7 @@ public class User {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "username", nullable = false, unique = true)
+    @Column(name = "username", nullable = false, unique = true, length = EntityValidation.TEXT_MAX_LENGTH)
     private String username;
 
     @Enumerated(EnumType.STRING)
@@ -31,8 +32,8 @@ public class User {
     }
 
     public User(@NotNull String username, @NotNull UserRole userRole) {
-        this.username = username;
-        this.userRole = userRole;
+        this.username = EntityValidation.requireText(username, "Имя пользователя");
+        this.userRole = EntityValidation.requireNonNull(userRole, "Роль");
     }
 
     @NotNull
@@ -46,7 +47,7 @@ public class User {
     }
 
     public void setUsername(@NotNull String username) {
-        this.username = username;
+        this.username = EntityValidation.requireText(username, "Имя пользователя");
     }
 
     @NotNull
@@ -55,7 +56,7 @@ public class User {
     }
 
     public void setUserRole(@NotNull UserRole userRole) {
-        this.userRole = userRole;
+        this.userRole = EntityValidation.requireNonNull(userRole, "Роль");
     }
 
     @Nullable

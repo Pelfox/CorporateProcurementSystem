@@ -1,5 +1,6 @@
 package com.team.corporate.entities;
 
+import com.team.corporate.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,14 +14,14 @@ public class Category {
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = EntityValidation.TEXT_MAX_LENGTH)
     private String name;
 
     public Category() {
     }
 
     public Category(@NotNull String name) {
-        this.name = name;
+        this.name = EntityValidation.requireText(name, "Название категории");
     }
 
     @NotNull
@@ -34,6 +35,6 @@ public class Category {
     }
 
     public void setName(@NotNull String name) {
-        this.name = name;
+        this.name = EntityValidation.requireText(name, "Название категории");
     }
 }

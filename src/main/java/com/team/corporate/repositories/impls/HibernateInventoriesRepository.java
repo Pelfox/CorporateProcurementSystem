@@ -81,7 +81,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     public Inventory update(@NotNull Inventory inventory) {
         Objects.requireNonNull(inventory, "inventory must not be null");
         if (inventory.getId() == null) {
-            throw new IllegalArgumentException("Cannot update an inventory without an ID; use add() first");
+            throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
         return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(inventory));
     }

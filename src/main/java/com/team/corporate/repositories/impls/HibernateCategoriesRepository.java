@@ -46,7 +46,7 @@ public class HibernateCategoriesRepository implements CategoriesRepository {
     public Category update(@NotNull Category category) {
         Objects.requireNonNull(category, "category must not be null");
         if (category.getId() == null) {
-            throw new IllegalArgumentException("Cannot update a category without an ID; use add() first");
+            throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
         return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(category));
     }

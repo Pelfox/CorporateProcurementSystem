@@ -6,6 +6,7 @@ import com.team.corporate.repositories.CategoriesRepository;
 import com.team.corporate.repositories.ProductsRepository;
 import com.team.corporate.repositories.Transactions;
 import com.team.corporate.services.CategoriesService;
+import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Override
     @NotNull
     public Category createCategory(@NotNull String categoryName) {
+        EntityValidation.requireNonNull(categoryName, "Название категории");
         return categoriesRepository.add(new Category(categoryName));
     }
 
@@ -40,6 +42,7 @@ public class CategoriesServiceImpl implements CategoriesService {
 
     @Override
     public void deleteCategory(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         transactions.execute(() -> {
             boolean used = productsRepository.getAll().stream()
                     .anyMatch(product -> product.getCategory() != null && product.getCategory().getId().equals(id));
@@ -55,14 +58,17 @@ public class CategoriesServiceImpl implements CategoriesService {
     @Override
     @NotNull
     public Optional<Category> getCategory(@NotNull UUID id) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
         return categoriesRepository.getById(id);
     }
 
     @Override
     @NotNull
     public Category updateCategory(@NotNull UUID id, @NotNull String name) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
+        EntityValidation.requireNonNull(name, "Название");
         Category categoryToUpdate = categoriesRepository.getById(id)
-                .orElseThrow(() -> new CategoryNotFoundException("Категория с указанным ID не найдена."));
+                .orElseThrow(() -> new CategoryNotFoundException("Категория с указанным идентификатором не найдена."));
         categoryToUpdate.setName(name);
         return categoriesRepository.update(categoryToUpdate);
     }

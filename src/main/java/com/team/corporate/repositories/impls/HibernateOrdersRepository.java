@@ -52,7 +52,7 @@ public class HibernateOrdersRepository implements OrdersRepository {
     public Order update(@NotNull Order order) {
         Objects.requireNonNull(order, "order must not be null");
         if (order.getId() == null) {
-            throw new IllegalArgumentException("Cannot update an order without an ID; use add() first");
+            throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
         return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(order));
     }
