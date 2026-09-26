@@ -8,7 +8,10 @@ import org.jline.reader.UserInterruptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +26,7 @@ public final class ConsoleApplication {
     private final OrderItemsService items;
     private final InventoriesService inventories;
     private final WarehousesService warehouses;
+    private final CsvExportService csvExport;
     private User user;
 
     public ConsoleApplication(@NotNull ConsoleInput io,
@@ -32,7 +36,8 @@ public final class ConsoleApplication {
                               @NotNull OrdersService orders,
                               @NotNull OrderItemsService items,
                               @NotNull InventoriesService inventories,
-                              @NotNull WarehousesService warehouses) {
+                              @NotNull WarehousesService warehouses,
+                              @NotNull CsvExportService csvExport) {
         this.io = io;
         this.users = users;
         this.products = products;
@@ -41,6 +46,7 @@ public final class ConsoleApplication {
         this.items = items;
         this.inventories = inventories;
         this.warehouses = warehouses;
+        this.csvExport = csvExport;
     }
 
     public void run() {
@@ -63,6 +69,7 @@ public final class ConsoleApplication {
                     io.print("1. Создать заказ\n2. История заказов\n3. Каталог");
                     if (isManager()) {
                         io.print("4. Редактирование заказа (только для менеджера)\n5. Редактирование склада (только для менеджера)");
+                        io.print("6. Экспорт данных в CSV (только для менеджера)");
                     }
                     io.print("9. Сменить пользователя\n0. Выход");
                     switch (io.number("Выбор", 0, 9)) {
@@ -80,6 +87,7 @@ public final class ConsoleApplication {
                             requireManager();
                             manageWarehouse();
                         }
+                        case 6 -> exportCsv();
                         case 9 -> user = null;
                         default -> io.print("Нет такого пункта меню.");
                     }
@@ -96,6 +104,23 @@ public final class ConsoleApplication {
             }
         } catch (EndOfFileException e) {
             io.print("До свидания.");
+        }
+    }
+
+    private void exportCsv() {
+        requireManager();
+        String directory = io.required("Папка для экспорта (0 - отмена)");
+        if (directory.equals("0")) {
+            return;
+        }
+        try {
+            Path result = csvExport.exportAll(user.getId(), Path.of(directory));
+            io.print("Экспорт завершён. CSV-файлы сохранены в: " + result);
+        } catch (InvalidPathException e) {
+            io.print("Некорректный путь к папке экспорта.");
+        } catch (IOException e) {
+            LOG.error("Не удалось сохранить CSV-файлы", e);
+            io.print("Не удалось сохранить CSV-файлы. Проверьте путь, права на запись и свободное место.");
         }
     }
 

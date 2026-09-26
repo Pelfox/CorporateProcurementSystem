@@ -69,6 +69,17 @@ public class Main {
             var items = new OrderItemsServiceImpl(ordersRepository, productsRepository, itemsRepository);
             var inventories = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository);
             var warehouses = new WarehousesServiceImpl(warehousesRepository);
+            var csvExport = new CsvExportServiceImpl(
+                    usersRepository,
+                    categoriesRepository,
+                    productsRepository,
+                    warehousesRepository,
+                    inventoriesRepository,
+                    ordersRepository,
+                    itemsRepository,
+                    auditLogsRepository,
+                    transactions
+            );
 
             transactions.execute(() -> new DataInitializer(users, categories, products, orders).run());
 
@@ -80,7 +91,8 @@ public class Main {
                     orders,
                     items,
                     inventories,
-                    warehouses
+                    warehouses,
+                    csvExport
             ).run();
         }
     }
