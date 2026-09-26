@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.InvalidPathException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,18 +131,23 @@ public final class ConsoleApplication {
 
     private void exportCsv() {
         requireManager();
-        String directory = io.required("Папка для экспорта (0 - отмена)");
-        if (directory.equals("0")) {
-            return;
-        }
-        try {
-            Path result = csvExport.exportAll(user.getId(), Path.of(directory));
-            io.print("Экспорт завершён. CSV-файлы сохранены в: " + result);
-        } catch (InvalidPathException e) {
-            io.print("Некорректный путь к папке экспорта.");
-        } catch (IOException e) {
-            LOG.error("Не удалось сохранить CSV-файлы", e);
-            io.print("Не удалось сохранить CSV-файлы. Проверьте путь, права на запись и свободное место.");
+        while (true) {
+            Path directory = io.directory("Папка для экспорта");
+            if (directory == null) {
+                return;
+            }
+            try {
+                Path result = csvExport.exportAll(user.getId(), directory);
+                io.print("Экспорт завершён. CSV-файлы сохранены в: " + result);
+                return;
+            } catch (FileAlreadyExistsException | NotDirectoryException e) {
+                io.print("Путь указывает на файл или проходит через файл. Укажите папку.");
+            } catch (AccessDeniedException | SecurityException e) {
+                io.print("Нет доступа к папке экспорта. Выберите другую папку.");
+            } catch (IOException e) {
+                LOG.error("Не удалось сохранить CSV-файлы", e);
+                io.print("Не удалось сохранить CSV-файлы. Проверьте путь, права на запись и свободное место.");
+            }
         }
     }
 

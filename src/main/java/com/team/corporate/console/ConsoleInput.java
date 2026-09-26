@@ -2,9 +2,12 @@ package com.team.corporate.console;
 
 import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jline.reader.LineReader;
 
 import java.math.BigDecimal;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Function;
 
@@ -30,6 +33,32 @@ public final class ConsoleInput {
 
     public String required(@NotNull String prompt) {
         return readText(prompt, true);
+    }
+
+    @Nullable
+    public Path directory(@NotNull String prompt) {
+        while (true) {
+            String value = reader.readLine(prompt + " (0 - отмена): ").strip();
+            if (value.length() >= 2 && ((value.startsWith("\"") && value.endsWith("\""))
+                    || (value.startsWith("'") && value.endsWith("'")))) {
+                value = value.substring(1, value.length() - 1);
+            }
+            if (value.equals("0")) {
+                return null;
+            }
+            if (value.isBlank() || value.chars().anyMatch(Character::isISOControl)) {
+                print("Укажите непустой путь к папке без управляющих символов.");
+                continue;
+            }
+            try {
+                if (value.equals("~") || value.startsWith("~/")) {
+                    return Path.of(System.getProperty("user.home")).resolve(value.equals("~") ? "" : value.substring(2));
+                }
+                return Path.of(value);
+            } catch (InvalidPathException e) {
+                print("Некорректный путь к папке экспорта.");
+            }
+        }
     }
 
     private String readText(String prompt, boolean required) {

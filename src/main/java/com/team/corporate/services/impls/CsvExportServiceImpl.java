@@ -49,6 +49,9 @@ public final class CsvExportServiceImpl implements CsvExportService {
     public Path exportAll(@NotNull UUID managerId, @NotNull Path directory) throws IOException {
         EntityValidation.requireNonNull(managerId, "Идентификатор менеджера");
         EntityValidation.requireNonNull(directory, "Папка экспорта");
+        if (directory.toString().isBlank() || directory.toString().chars().anyMatch(Character::isISOControl)) {
+            throw new IllegalArgumentException("Укажите непустой путь к папке без управляющих символов.");
+        }
         List<Table> tables = transactions.execute(() -> {
             var manager = users.getById(managerId)
                     .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
@@ -62,20 +65,24 @@ public final class CsvExportServiceImpl implements CsvExportService {
         Path destination = Files.createTempDirectory(parent, "csv-export-");
         try {
             for (Table table : tables) {
-                CsvWriter.write(destination.resolve(table.name()), table.headers(), table.rows());
+                try {
+                    CsvWriter.write(destination.resolve(table.name()), table.headers(), table.rows());
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Ошибка в " + table.name() + ": " + e.getMessage(), e);
+                }
             }
             return destination;
         } catch (IOException | RuntimeException e) {
             for (Table table : tables) {
                 try {
                     Files.deleteIfExists(destination.resolve(table.name()));
-                } catch (IOException cleanupError) {
+                } catch (IOException | SecurityException cleanupError) {
                     e.addSuppressed(cleanupError);
                 }
             }
             try {
                 Files.deleteIfExists(destination);
-            } catch (IOException cleanupError) {
+            } catch (IOException | SecurityException cleanupError) {
                 e.addSuppressed(cleanupError);
             }
             throw e;

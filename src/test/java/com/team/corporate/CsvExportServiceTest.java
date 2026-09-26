@@ -129,4 +129,39 @@ class CsvExportServiceTest extends BaseServiceTest {
         assertThrows(IOException.class, () -> exporter.exportAll(manager.getId(), target));
         assertEquals("original", Files.readString(target));
     }
+
+    @Test
+    void rejectsEmptyAndControlCharacterPaths() {
+        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        for (Path path : List.of(Path.of(""), Path.of("   "), directory.resolve("bad\nfolder"))) {
+            assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), path));
+        }
+        assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), null));
+        assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(null, directory));
+    }
+
+    @Test
+    void protectsFormulaValuesWithoutChangingDatabase() throws Exception {
+        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var category = categoriesService.createCategory("=1+1");
+        Path result = exporter.exportAll(manager.getId(), directory);
+        assertTrue(Files.readString(result.resolve("categories.csv")).contains(
+                category.getId() + ",'=1+1\r\n"));
+        assertEquals("=1+1", categoriesRepository.getById(category.getId()).orElseThrow().getName());
+    }
+
+    @Test
+    void validationFailureRemovesPartialExportAndPreservesEarlierExports() throws Exception {
+        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        Path previous = exporter.exportAll(manager.getId(), directory);
+        String original = Files.readString(previous.resolve("orders.csv"));
+        ordersService.createOrder(manager.getId(), OrderStatus.CREATED, "bad\u0000note");
+
+        var error = assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), directory));
+        assertTrue(error.getMessage().contains("orders.csv"));
+        try (var files = Files.list(directory)) {
+            assertEquals(List.of(previous), files.toList());
+        }
+        assertEquals(original, Files.readString(previous.resolve("orders.csv")));
+    }
 }
