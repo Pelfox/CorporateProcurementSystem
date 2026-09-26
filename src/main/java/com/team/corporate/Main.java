@@ -69,6 +69,9 @@ public class Main {
             var items = new OrderItemsServiceImpl(ordersRepository, productsRepository, itemsRepository);
             var inventories = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository);
             var warehouses = new WarehousesServiceImpl(warehousesRepository);
+            var statistics = new StatisticsServiceImpl(
+                    usersRepository, productsRepository, categoriesRepository, warehousesRepository,
+                    ordersRepository, inventoriesRepository, transactions);
             var csvExport = new CsvExportServiceImpl(
                     usersRepository,
                     categoriesRepository,
@@ -92,7 +95,8 @@ public class Main {
                     items,
                     inventories,
                     warehouses,
-                    csvExport
+                    csvExport,
+                    statistics
             ).run();
         }
     }

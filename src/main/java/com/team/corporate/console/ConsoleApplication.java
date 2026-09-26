@@ -27,6 +27,7 @@ public final class ConsoleApplication {
     private final InventoriesService inventories;
     private final WarehousesService warehouses;
     private final CsvExportService csvExport;
+    private final StatisticsService statistics;
     private User user;
 
     public ConsoleApplication(@NotNull ConsoleInput io,
@@ -37,7 +38,8 @@ public final class ConsoleApplication {
                               @NotNull OrderItemsService items,
                               @NotNull InventoriesService inventories,
                               @NotNull WarehousesService warehouses,
-                              @NotNull CsvExportService csvExport) {
+                              @NotNull CsvExportService csvExport,
+                              @NotNull StatisticsService statistics) {
         this.io = io;
         this.users = users;
         this.products = products;
@@ -47,6 +49,7 @@ public final class ConsoleApplication {
         this.inventories = inventories;
         this.warehouses = warehouses;
         this.csvExport = csvExport;
+        this.statistics = statistics;
     }
 
     public void run() {
@@ -71,7 +74,7 @@ public final class ConsoleApplication {
                         io.print("4. Редактирование заказа (только для менеджера)\n5. Редактирование склада (только для менеджера)");
                         io.print("6. Экспорт данных в CSV (только для менеджера)");
                     }
-                    io.print("9. Сменить пользователя\n0. Выход");
+                    io.print("7. Статистика системы\n9. Сменить пользователя\n0. Выход");
                     switch (io.number("Выбор", 0, 9)) {
                         case 0 -> {
                             return;
@@ -88,6 +91,7 @@ public final class ConsoleApplication {
                             manageWarehouse();
                         }
                         case 6 -> exportCsv();
+                        case 7 -> showStatistics();
                         case 9 -> user = null;
                         default -> io.print("Нет такого пункта меню.");
                     }
@@ -105,6 +109,22 @@ public final class ConsoleApplication {
         } catch (EndOfFileException e) {
             io.print("До свидания.");
         }
+    }
+
+    private void showStatistics() {
+        var summary = statistics.getStatistics();
+        io.print("\nСтатистика системы");
+        io.print("Всего пользователей: " + summary.totalUsers());
+        io.print("Всего товаров в каталоге: " + summary.totalProducts());
+        io.print("Всего категорий: " + summary.totalCategories());
+        io.print("Всего складов: " + summary.totalWarehouses());
+        io.print("Всего заказов: " + summary.totalOrders());
+        io.print("Активных заказов (созданных и одобренных): " + summary.activeOrders());
+        io.print("Созданных заказов: " + summary.createdOrders());
+        io.print("Одобренных заказов: " + summary.approvedOrders());
+        io.print("Завершённых заказов (доставленных): " + summary.deliveredOrders());
+        io.print("Отменённых заказов: " + summary.cancelledOrders());
+        io.print("Общий остаток на складах (шт.): " + summary.totalStockQuantity());
     }
 
     private void exportCsv() {
