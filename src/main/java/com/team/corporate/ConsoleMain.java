@@ -13,10 +13,10 @@ import org.jline.reader.LineReaderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Main {
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+public class ConsoleMain {
+    private static final Logger LOG = LoggerFactory.getLogger(ConsoleMain.class);
 
-    static void main() {
+    public static void main(String[] args) {
         int result = run(new FileConfigurationProvider());
         if (result != 0) {
             System.exit(result);

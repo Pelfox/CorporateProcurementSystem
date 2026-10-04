@@ -42,11 +42,15 @@ javafx {
 }
 
 application {
-    mainClass = "com.team.corporate.Main"
+    mainClass = "com.team.corporate.MainApp"
     applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
 }
 
-tasks.withType<JavaExec>().configureEach {
+tasks.register<JavaExec>("runConsole") {
+    group = "application"
+    description = "Запуск консольного приложения (КР №1)"
+    mainClass.set("com.team.corporate.ConsoleMain")
+    classpath = sourceSets["main"].runtimeClasspath
     standardInput = System.`in`
     jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
