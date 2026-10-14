@@ -1,7 +1,7 @@
-package com.team.corporate;
+package com.team.corporate.services;
 
+import com.team.corporate.BaseTest;
 import com.team.corporate.entities.*;
-import com.team.corporate.services.CsvExportService;
 import com.team.corporate.services.impls.CsvExportServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CsvExportServiceTest extends BaseServiceTest {
+class CsvExportServiceTest extends BaseTest {
     @TempDir
     Path directory;
     private CsvExportService exporter;

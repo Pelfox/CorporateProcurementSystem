@@ -1,5 +1,6 @@
-package com.team.corporate;
+package com.team.corporate.services;
 
+import com.team.corporate.BaseTest;
 import com.team.corporate.entities.Category;
 import com.team.corporate.entities.Product;
 import com.team.corporate.exceptions.CategoryNotFoundException;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ProductsServiceTest extends BaseServiceTest {
+public class ProductsServiceTest extends BaseTest {
 
     // method create
 

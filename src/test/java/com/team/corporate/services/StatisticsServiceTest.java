@@ -1,11 +1,10 @@
-package com.team.corporate;
+package com.team.corporate.services;
 
+import com.team.corporate.BaseTest;
 import com.team.corporate.console.ConsoleApplication;
 import com.team.corporate.console.ConsoleInput;
 import com.team.corporate.entities.OrderStatus;
 import com.team.corporate.entities.UserRole;
-import com.team.corporate.services.StatisticsService;
-import com.team.corporate.services.SystemStatistics;
 import com.team.corporate.services.impls.CsvExportServiceImpl;
 import com.team.corporate.services.impls.StatisticsServiceImpl;
 import org.jline.reader.EndOfFileException;
@@ -25,7 +24,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StatisticsServiceTest extends BaseServiceTest {
+class StatisticsServiceTest extends BaseTest {
     private StatisticsService statistics;
 
     @BeforeEach

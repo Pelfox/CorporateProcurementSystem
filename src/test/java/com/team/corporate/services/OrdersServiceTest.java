@@ -1,8 +1,8 @@
-package com.team.corporate;
+package com.team.corporate.services;
 
+import com.team.corporate.BaseTest;
 import com.team.corporate.entities.*;
 import com.team.corporate.exceptions.UserNotFoundException;
-import com.team.corporate.services.OrdersService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class OrdersServiceTest extends BaseServiceTest {
+public class OrdersServiceTest extends BaseTest {
 
     // подготовка данных
     private User createUser(String name, UserRole role) {

@@ -31,6 +31,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("com.h2database:h2:2.3.232")
+    testImplementation("org.testfx:testfx-core:4.0.18")
+    testImplementation("org.testfx:testfx-junit5:4.0.18")
+    testImplementation("org.testfx:openjfx-monocle:21.0.2")
+    testImplementation("org.hamcrest:hamcrest:3.0")
 }
 
 javafx {
@@ -55,4 +59,15 @@ tasks.withType<Jar>().configureEach {
     manifest.attributes["Enable-Native-Access"] = "ALL-UNNAMED"
 }
 
-tasks.test { useJUnitPlatform() }
+tasks.test {
+    useJUnitPlatform()
+    systemProperty("java.awt.headless", "true")
+    systemProperty("testfx.robot", "glass")
+    systemProperty("testfx.headless", "true")
+    systemProperty("testfx.verbose", "true")
+    failFast = false
+    reports {
+        junitXml.required.set(true)
+        html.required.set(true)
+    }
+}

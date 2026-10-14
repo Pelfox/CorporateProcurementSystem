@@ -5,53 +5,37 @@ import com.team.corporate.repositories.*;
 import com.team.corporate.repositories.impls.*;
 import com.team.corporate.services.*;
 import com.team.corporate.services.impls.*;
+import com.team.corporate.utils.DataInitializer;
 import com.team.corporate.utils.HibernateFactory;
 import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 
-public abstract class BaseServiceTest {
 
-    protected static SessionFactory sessionFactory;
-    protected static HibernateTransactions transactions;
+final class TestDatabase implements AutoCloseable {
+    final SessionFactory sessionFactory;
+    final HibernateTransactions transactions;
 
-    // Repositories
-    protected UsersRepository usersRepository;
-    protected ProductsRepository productsRepository;
-    protected CategoriesRepository categoriesRepository;
-    protected OrdersRepository ordersRepository;
-    protected OrderItemsRepository orderItemsRepository;
-    protected InventoriesRepository inventoriesRepository;
-    protected WarehousesRepository warehousesRepository;
-    protected AuditLogsRepository auditLogsRepository;
+    final UsersRepository usersRepository;
+    final ProductsRepository productsRepository;
+    final CategoriesRepository categoriesRepository;
+    final OrdersRepository ordersRepository;
+    final OrderItemsRepository orderItemsRepository;
+    final InventoriesRepository inventoriesRepository;
+    final WarehousesRepository warehousesRepository;
+    final AuditLogsRepository auditLogsRepository;
 
-    // Services
-    protected UsersService usersService;
-    protected ProductsService productsService;
-    protected CategoriesService categoriesService;
-    protected OrdersService ordersService;
-    protected OrderItemsService orderItemsService;
-    protected InventoriesService inventoriesService;
-    protected WarehousesService warehousesService;
-    protected AuditLogsService auditLogsService;
+    final UsersService usersService;
+    final ProductsService productsService;
+    final CategoriesService categoriesService;
+    final OrdersService ordersService;
+    final OrderItemsService orderItemsService;
+    final InventoriesService inventoriesService;
+    final WarehousesService warehousesService;
+    final AuditLogsService auditLogsService;
 
-    @BeforeAll
-    static void initSessionFactory() {
-        var config = new FileConfigurationProvider().getConfiguration();
-        sessionFactory = HibernateFactory.createSessionFactory(config);
+    private TestDatabase() {
+        sessionFactory = HibernateFactory.createSessionFactory(new FileConfigurationProvider().getConfiguration());
         transactions = new HibernateTransactions(sessionFactory);
-    }
 
-    @AfterAll
-    static void closeSessionFactory() {
-        if (sessionFactory != null) {
-            sessionFactory.close();
-        }
-    }
-
-    @BeforeEach
-    void setUp() {
         usersRepository = new HibernateUsersRepository(sessionFactory);
         productsRepository = new HibernateProductsRepository(sessionFactory);
         categoriesRepository = new HibernateCategoriesRepository(sessionFactory);
@@ -71,11 +55,13 @@ public abstract class BaseServiceTest {
         inventoriesService = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository);
         warehousesService = new WarehousesServiceImpl(warehousesRepository);
         auditLogsService = new AuditLogsServiceImpl(usersRepository, ordersRepository, auditLogsRepository);
-
-        cleanDatabase();
     }
 
-    private void cleanDatabase() {
+    static TestDatabase open() {
+        return new TestDatabase();
+    }
+
+    void clean() {
         sessionFactory.inTransaction(session -> {
             session.createMutationQuery("DELETE FROM AuditLog").executeUpdate();
             session.createMutationQuery("DELETE FROM OrderItem").executeUpdate();
@@ -86,5 +72,14 @@ public abstract class BaseServiceTest {
             session.createMutationQuery("DELETE FROM User").executeUpdate();
             session.createMutationQuery("DELETE FROM Warehouse").executeUpdate();
         });
+    }
+
+    void seedData() {
+        transactions.execute(() -> new DataInitializer(usersService, categoriesService, productsService, ordersService).run());
+    }
+
+    @Override
+    public void close() {
+        sessionFactory.close();
     }
 }

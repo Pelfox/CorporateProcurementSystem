@@ -1,5 +1,6 @@
-package com.team.corporate;
+package com.team.corporate.services;
 
+import com.team.corporate.BaseTest;
 import com.team.corporate.entities.User;
 import com.team.corporate.entities.UserRole;
 import org.junit.jupiter.api.DisplayName;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UsersServiceTest extends BaseServiceTest {
+public class UsersServiceTest extends BaseTest {
 
     @Test
     @DisplayName("Создание пользователя: должен сохраниться и получить ID")
