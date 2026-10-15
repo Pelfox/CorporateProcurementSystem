@@ -33,6 +33,10 @@ dependencies {
     testImplementation("com.h2database:h2:2.3.232")
 
     implementation("org.sharegov:mjson:1.4.1")
+    testImplementation("org.testfx:testfx-core:4.0.18")
+    testImplementation("org.testfx:testfx-junit5:4.0.18")
+    testImplementation("org.testfx:openjfx-monocle:21.0.2")
+    testImplementation("org.hamcrest:hamcrest:3.0")
 }
 
 javafx {
@@ -77,4 +81,13 @@ tasks.withType<Jar>().configureEach {
 
 tasks.test {
     useJUnitPlatform()
+    systemProperty("java.awt.headless", "true")
+    systemProperty("testfx.robot", "glass")
+    systemProperty("testfx.headless", "true")
+    systemProperty("testfx.verbose", "true")
+    failFast = false
+    reports {
+        junitXml.required.set(true)
+        html.required.set(true)
+    }
 }
