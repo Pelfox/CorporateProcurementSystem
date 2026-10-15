@@ -9,9 +9,7 @@ import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class OrdersServiceImpl implements OrdersService {
     private final OrdersRepository ordersRepository;
@@ -146,6 +144,46 @@ public class OrdersServiceImpl implements OrdersService {
                 addItem(order, line);
             }
             return order.getId();
+        });
+    }
+
+    @Override
+    public void saveOrder(@NotNull UUID userId,
+                          @NotNull UUID orderId,
+                          @NotNull List<Line> lines,
+                          @Nullable String notes) {
+        EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
+        EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
+        EntityValidation.requireNonNull(lines, "Позиции заказа");
+        for (Line line : lines) {
+            EntityValidation.requireNonNull(line, "Позиция заказа");
+        }
+        List<Line> snapshot = List.copyOf(lines);
+        if (snapshot.isEmpty()) {
+            throw new IllegalArgumentException("В заказе должна остаться хотя бы одна позиция.");
+        }
+        EntityValidation.optionalText(notes, "Примечание");
+
+        transactions.execute(() -> {
+            Order order = editable(userId, orderId);
+            Map<UUID, OrderItem> current = new LinkedHashMap<>();
+            for (OrderItem item : orderItemsRepository.getByOrderId(orderId)) {
+                current.put(item.getProduct().getId(), item);
+            }
+            for (Line line : snapshot) {
+                OrderItem existing = current.remove(line.productId());
+                if (existing == null) {
+                    addItem(order, line);
+                } else if (existing.getQuantity() != line.quantity()) {
+                    existing.setQuantity(line.quantity());
+                    orderItemsRepository.update(existing);
+                }
+            }
+            for (OrderItem removed : current.values()) {
+                orderItemsRepository.delete(removed.getId());
+            }
+            order.setNotes(notes);
+            ordersRepository.update(order);
         });
     }
 

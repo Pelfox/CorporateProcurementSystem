@@ -33,6 +33,9 @@ public interface OrdersService {
     @NotNull
     UUID createOrder(@NotNull UUID userId, @NotNull List<Line> lines, @Nullable String notes);
 
+    @NotNull
+    void saveOrder(@NotNull UUID userId, @NotNull UUID orderId, @NotNull List<Line> lines, @Nullable String notes);
+
     void updateNotes(@NotNull UUID userId, @NotNull UUID orderId, @Nullable String notes);
 
     void addItem(@NotNull UUID userId, @NotNull UUID orderId, @NotNull Line line);

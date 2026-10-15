@@ -49,17 +49,10 @@ application {
     applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
 }
 
-tasks.register<JavaExec>("runConsole") {
-    group = "application"
-    description = "Запуск консольного приложения (КР №1)"
-    mainClass.set("com.team.corporate.ConsoleMain")
-    classpath = sourceSets["main"].runtimeClasspath
-    standardInput = System.`in`
-    jvmArgs("--enable-native-access=ALL-UNNAMED")
-}
-
 tasks.withType<Jar>().configureEach {
     manifest.attributes["Enable-Native-Access"] = "ALL-UNNAMED"
 }
 
-tasks.test { useJUnitPlatform() }
+tasks.test {
+    useJUnitPlatform()
+}

@@ -15,6 +15,9 @@ public interface WarehousesService {
     @NotNull
     Warehouse updateWarehouse(@NotNull UUID id, @Nullable String name, @Nullable String location);
 
+    @NotNull
+    Warehouse saveWarehouse(@NotNull UUID id, @NotNull String name, @Nullable String location);
+
     void deleteWarehouse(@NotNull UUID id);
 
     @NotNull

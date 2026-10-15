@@ -47,6 +47,19 @@ public class WarehousesServiceImpl implements WarehousesService {
     }
 
     @Override
+    @NotNull
+    public Warehouse saveWarehouse(@NotNull UUID id, @NotNull String name, @Nullable String location) {
+        EntityValidation.requireNonNull(id, "Идентификатор");
+        EntityValidation.requireNonNull(name, "Название склада");
+        EntityValidation.optionalText(location, "Адрес");
+        Warehouse warehouse = warehousesRepository.getById(id)
+                .orElseThrow(() -> new WarehouseNotFoundException("Склад с указанным идентификатором не найден"));
+        warehouse.setName(name);
+        warehouse.setLocation(location);
+        return warehousesRepository.update(warehouse);
+    }
+
+    @Override
     public void deleteWarehouse(@NotNull UUID id) {
         EntityValidation.requireNonNull(id, "Идентификатор");
         warehousesRepository.delete(id);

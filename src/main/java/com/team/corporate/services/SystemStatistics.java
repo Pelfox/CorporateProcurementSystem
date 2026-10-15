@@ -1,5 +1,7 @@
 package com.team.corporate.services;
 
+import java.math.BigDecimal;
+
 public record SystemStatistics(
         long totalUsers,
         long totalProducts,
@@ -10,7 +12,8 @@ public record SystemStatistics(
         long approvedOrders,
         long deliveredOrders,
         long cancelledOrders,
-        long totalStockQuantity
+        long totalStockQuantity,
+        BigDecimal totalOrderValue
 ) {
     public long activeOrders() {
         return createdOrders + approvedOrders;
