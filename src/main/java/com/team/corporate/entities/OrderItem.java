@@ -38,7 +38,7 @@ public class OrderItem {
                      @NotNull BigDecimal purchasePrice) {
         this.order = EntityValidation.requireNonNull(order, "Заказ");
         this.product = EntityValidation.requireNonNull(product, "Товар");
-        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "Количество");
+        this.quantity = EntityValidation.requireOrderQuantity(quantity);
         this.purchasePrice = EntityValidation.requireMoney(purchasePrice, "Цена покупки");
     }
 
@@ -70,7 +70,7 @@ public class OrderItem {
     }
 
     public void setQuantity(int quantity) {
-        this.quantity = EntityValidation.requireAtLeast(quantity, 1, "Количество");
+        this.quantity = EntityValidation.requireOrderQuantity(quantity);
     }
 
     @NotNull

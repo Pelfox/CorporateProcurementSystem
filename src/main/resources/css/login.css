@@ -12,7 +12,7 @@
     -fx-spacing: 0;
     -fx-pref-width: 420;
     -fx-max-width: 420;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 40, 0, 0, 10);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 40, 0, 0, 10);
 }
 
 /* Логотип */
@@ -76,13 +76,15 @@
     -fx-text-fill: #1a1a2e;
     -fx-prompt-text-fill: #9ca3af;
 }
+
 .login-input:focused {
     -fx-border-color: #6366f1;
-    -fx-effect: dropshadow(gaussian, rgba(99,102,241,0.1), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(99, 102, 241, 0.1), 6, 0, 0, 0);
 }
+
 .login-input.field-error {
     -fx-border-color: #ef4444;
-    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.1), 6, 0, 0, 0);
+    -fx-effect: dropshadow(gaussian, rgba(239, 68, 68, 0.1), 6, 0, 0, 0);
 }
 
 .login-error {

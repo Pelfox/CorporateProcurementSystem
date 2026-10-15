@@ -32,7 +32,6 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("com.h2database:h2:2.3.232")
 
-    implementation(files("libs/JavaFXEmojiTextFlow_twemoji-1.0.jar"))
     implementation("org.sharegov:mjson:1.4.1")
 }
 
@@ -47,6 +46,29 @@ javafx {
 application {
     mainClass = "com.team.corporate.MainApp"
     applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
+}
+
+val javafxModuleNames = javafx.modules.joinToString(",")
+
+tasks.withType<JavaExec>().configureEach {
+    doFirst {
+        // The JavaFX plugin configures only :run; IntelliJ creates its own JavaExec tasks.
+        if (name == "run") {
+            jvmArgs("--enable-native-access=javafx.graphics,ALL-UNNAMED")
+        } else {
+            val javafxJars = classpath.filter { it.name.startsWith("javafx-") && it.extension == "jar" }
+            if (!javafxJars.isEmpty) {
+                classpath = classpath.minus(javafxJars)
+                jvmArgs(
+                    "--module-path", javafxJars.asPath,
+                    "--add-modules", javafxModuleNames,
+                    "--enable-native-access=javafx.graphics,ALL-UNNAMED"
+                )
+            } else {
+                jvmArgs("--enable-native-access=ALL-UNNAMED")
+            }
+        }
+    }
 }
 
 tasks.withType<Jar>().configureEach {

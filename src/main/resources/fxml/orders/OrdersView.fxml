@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
-<ScrollPane xmlns="http://javafx.com/javafx/25"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.team.corporate.fx.controller.OrdersController"
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.OrdersController"
             fitToWidth="true"
             styleClass="page-scroll">
 
@@ -25,7 +16,7 @@
 
         <!-- Кнопка назад -->
         <HBox styleClass="page-header">
-            <Button text="←" styleClass="back-btn"/>
+            <Button fx:id="backBtn" onAction="#onBackClick" text="←" styleClass="back-btn"/>
             <Label text="Заказы" styleClass="page-title"/>
         </HBox>
 
@@ -34,28 +25,28 @@
 
             <HBox styleClass="search-row">
                 <TextField fx:id="searchField" styleClass="search-input"
-                           promptText="Поиск по названию или артикулу..."
+                           promptText="Поиск по номеру или примечанию..."
                            HBox.hgrow="ALWAYS"/>
                 <ComboBox fx:id="statusFilter" styleClass="filter-select"
                           promptText="Все статусы"/>
                 <ComboBox fx:id="userFilter" styleClass="filter-select"
                           promptText="Все пользователи"/>
                 <TextField fx:id="priceFromField" styleClass="filter-input"
-                           promptText="Цена от"/>
+                           promptText="Сумма от"/>
                 <TextField fx:id="priceToField" styleClass="filter-input"
-                           promptText="Цена до"/>
+                           promptText="Сумма до"/>
                 <ComboBox fx:id="sortCombo" styleClass="filter-select"
                           promptText="Сортировка"/>
             </HBox>
 
             <HBox styleClass="action-row">
-                <Button fx:id="createBtn" text="Создать заказ"
+                <Button fx:id="createBtn" onAction="#onCreateClick" text="Создать заказ"
                         styleClass="btn, btn-create"/>
-                <Button fx:id="editBtn" text="Редактировать примечание"
+                <Button fx:id="editBtn" onAction="#onEditClick" text="Редактировать примечание"
                         styleClass="btn, btn-edit"/>
-                <Button fx:id="statusBtn" text="Сменить статус"
+                <Button fx:id="statusBtn" onAction="#onChangeStatusClick" text="Сменить статус"
                         styleClass="btn, btn-warning"/>
-                <Button fx:id="deleteBtn" text="Удалить"
+                <Button fx:id="deleteBtn" onAction="#onDeleteClick" text="Удалить"
                         styleClass="btn, btn-delete"/>
             </HBox>
 
@@ -68,14 +59,14 @@
                     <Label text="Заказы не найдены" styleClass="table-placeholder"/>
                 </placeholder>
                 <columns>
-                    <TableColumn fx:id="numCol"    text="№"                prefWidth="60"/>
-                    <TableColumn fx:id="userCol"   text="Пользователь"     prefWidth="140"/>
-                    <TableColumn fx:id="statusCol" text="Статус"           prefWidth="140"/>
-                    <TableColumn fx:id="dateCol"   text="Дата создания"    prefWidth="170"/>
-                    <TableColumn fx:id="itemsCol"  text="Количество"       prefWidth="120"/>
-                    <TableColumn fx:id="priceCol"  text="Цена за 1 товар"  prefWidth="150"/>
-                    <TableColumn fx:id="sumCol"    text="Сумма"            prefWidth="130"/>
-                    <TableColumn fx:id="notesCol"  text="Примечание"       prefWidth="220"/>
+                    <TableColumn fx:id="numCol" text="№" prefWidth="60"/>
+                    <TableColumn fx:id="userCol" text="Пользователь" prefWidth="140"/>
+                    <TableColumn fx:id="statusCol" text="Статус" prefWidth="140"/>
+                    <TableColumn fx:id="dateCol" text="Дата создания" prefWidth="170"/>
+                    <TableColumn fx:id="itemsCol" text="Количество" prefWidth="120"/>
+                    <TableColumn fx:id="priceCol" text="Цена за 1 товар" prefWidth="150"/>
+                    <TableColumn fx:id="sumCol" text="Сумма" prefWidth="130"/>
+                    <TableColumn fx:id="notesCol" text="Примечание" prefWidth="220"/>
                 </columns>
             </TableView>
         </VBox>

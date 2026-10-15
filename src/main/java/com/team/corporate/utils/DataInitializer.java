@@ -12,13 +12,18 @@ public class DataInitializer {
     private final CategoriesService categoriesService;
     private final ProductsService productsService;
     private final OrdersService ordersService;
+    private final WarehousesService warehousesService;
+    private final InventoriesService inventoriesService;
 
     public DataInitializer(UsersService usersService, CategoriesService categoriesService,
-                           ProductsService productsService, OrdersService ordersService) {
+                           ProductsService productsService, OrdersService ordersService,
+                           WarehousesService warehousesService, InventoriesService inventoriesService) {
         this.usersService = usersService;
         this.categoriesService = categoriesService;
         this.productsService = productsService;
         this.ordersService = ordersService;
+        this.warehousesService = warehousesService;
+        this.inventoriesService = inventoriesService;
     }
 
     public void run() {
@@ -52,6 +57,11 @@ public class DataInitializer {
         Product p8 = productsService.createProduct("Блокнот А5", "NOTEBOOK-008", stationery.getId(), new BigDecimal("150.00"));
         Product p9 = productsService.createProduct("Настольная лампа", "LAMP-009", office.getId(), new BigDecimal("3500.00"));
         Product p10 = productsService.createProduct("Шкаф для документов", "CABINET-010", furniture.getId(), new BigDecimal("18000.00"));
+
+        Warehouse warehouse = warehousesService.createWarehouse("Основной склад", null);
+        for (Product product : List.of(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)) {
+            inventoriesService.placeProductInWarehouse(product.getId(), warehouse.getId(), 1_000);
+        }
 
         // Заказы в статусе CREATED
         ordersService.createOrder(user1.getId(), List.of(new OrdersService.Line(p1.getId(), 2)), "Заказ на новое оборудование");

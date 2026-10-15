@@ -16,7 +16,7 @@ public interface UsersService {
     @NotNull
     Optional<User> getUser(@NotNull UUID id);
 
-    void deleteUser(@NotNull UUID id);
+    void deleteUser(@NotNull UUID actingUserId, @NotNull UUID id);
 
     @NotNull
     User updateUser(@NotNull UUID id, @Nullable String username, @Nullable UserRole role);

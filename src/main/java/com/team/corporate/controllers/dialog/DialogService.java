@@ -1,5 +1,7 @@
 package com.team.corporate.controllers.dialog;
 
+import com.team.corporate.controllers.utils.UiErrors;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -24,6 +26,10 @@ public class DialogService {
         return showModal(viewType, owner, null);
     }
 
+    public boolean confirmDelete(Window owner, String name) {
+        return this.<String, Boolean>showModal(ViewType.CONFIRM_DELETE, owner, name).orElse(false);
+    }
+
     @SuppressWarnings("unchecked")
     public <T, R> Optional<R> showModal(ViewType viewType, Window owner, T payload) {
         // Перегрузка модалки с предварительной передачей данных
@@ -36,6 +42,9 @@ public class DialogService {
             FXMLLoader loader = new FXMLLoader(location);
             loader.setControllerFactory(controllerFactory);
             Parent root = loader.load();
+            if (loader.getNamespace().get("titleLabel") instanceof javafx.scene.control.Label title) {
+                title.setText(viewType.getTitle());
+            }
 
             var controller = loader.getController();
             if (controller instanceof DataReceiver<?> receiver) {
@@ -62,8 +71,9 @@ public class DialogService {
                 return Optional.ofNullable(((ResultCarrier<R>) carrier).getResult());
             }
             return Optional.empty();
-        } catch (IOException e) {
-            throw new RuntimeException("Не удалось загрузить окно: " + viewType, e);
+        } catch (IOException | RuntimeException e) {
+            UiErrors.show(owner, "Не удалось открыть окно", e);
+            return Optional.empty();
         }
     }
 }

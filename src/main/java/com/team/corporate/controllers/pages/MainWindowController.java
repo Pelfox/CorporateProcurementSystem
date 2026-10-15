@@ -1,10 +1,14 @@
 package com.team.corporate.controllers.pages;
 
-import com.team.corporate.entities.*;
-import com.team.corporate.services.InventoriesService;
 import com.team.corporate.controllers.dialog.DataReceiver;
 import com.team.corporate.controllers.dialog.DialogService;
 import com.team.corporate.controllers.dialog.ViewType;
+import com.team.corporate.controllers.requests.OrderEditorRequest;
+import com.team.corporate.entities.Category;
+import com.team.corporate.entities.Inventory;
+import com.team.corporate.entities.Product;
+import com.team.corporate.entities.Warehouse;
+import com.team.corporate.services.InventoriesService;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -12,30 +16,37 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
 public class MainWindowController implements DataReceiver<UUID> {
-    @FXML private TextField searchField;
-    @FXML private TableView<Inventory> inventoryTable;
-
-    @FXML private TableColumn<Inventory, String> productNameColumn;
-    @FXML private TableColumn<Inventory, String> productSkuColumn;
-    @FXML private TableColumn<Inventory, String> productCategoryColumn;
-    @FXML private TableColumn<Inventory, String> warehouseNameColumn;
-    @FXML private TableColumn<Inventory, Integer> quantityColumn;
-    @FXML private TableColumn<Inventory, BigDecimal> productPriceColumn;
-
-    @FXML private Button createOrderButton;
-
     private final InventoriesService inventoriesService;
     private final DialogService dialogService;
-
     private final ObservableList<Inventory> inventoryList = FXCollections.observableArrayList();
-
+    @FXML
+    private TextField searchField;
+    @FXML
+    private TableView<Inventory> inventoryTable;
+    @FXML
+    private TableColumn<Inventory, String> productNameColumn;
+    @FXML
+    private TableColumn<Inventory, String> productSkuColumn;
+    @FXML
+    private TableColumn<Inventory, String> productCategoryColumn;
+    @FXML
+    private TableColumn<Inventory, String> warehouseNameColumn;
+    @FXML
+    private TableColumn<Inventory, Integer> quantityColumn;
+    @FXML
+    private TableColumn<Inventory, BigDecimal> productPriceColumn;
+    @FXML
+    private Button createOrderButton;
     private UUID currentUserId;
 
     public MainWindowController(InventoriesService inventoriesService, DialogService dialogService) {
@@ -62,7 +73,7 @@ public class MainWindowController implements DataReceiver<UUID> {
         Optional<UUID> created = dialogService.showModal(
                 ViewType.CREATE_ORDER,
                 inventoryTable.getScene().getWindow(),
-                currentUserId
+                OrderEditorRequest.forCreate(currentUserId)
         );
         loadData();
     }

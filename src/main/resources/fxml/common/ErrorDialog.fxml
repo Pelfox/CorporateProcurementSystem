@@ -5,18 +5,16 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import com.pavlobu.emojitextflow.EmojiTextFlow?>
-
-<StackPane xmlns="http://javafx.com/javafx/25"
-           xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.team.corporate.fx.controller.dialog.ErrorController"
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           xmlns="http://javafx.com/javafx/25"
+           fx:controller="com.team.corporate.controllers.modals.ErrorController"
            styleClass="dialog-stage"
            alignment="CENTER">
 
     <VBox fx:id="dialogRoot"
           styleClass="dialog-root">
 
-        <EmojiTextFlow fx:id="errorEmoji" styleClass="dialog-emoji"/>
+        <Label fx:id="errorEmoji" styleClass="dialog-emoji" maxWidth="Infinity"/>
 
         <Label text="Ошибка"
                styleClass="dialog-title-plain, error"
@@ -30,7 +28,7 @@
                wrapText="true"/>
 
         <HBox styleClass="dialog-actions, centered">
-            <Button fx:id="okBtn" text="Понятно"
+            <Button fx:id="okBtn" onAction="#onCloseClick" text="Понятно"
                     styleClass="btn, btn-primary"/>
         </HBox>
 

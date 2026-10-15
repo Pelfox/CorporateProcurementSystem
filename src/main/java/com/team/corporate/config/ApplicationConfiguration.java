@@ -3,8 +3,6 @@ package com.team.corporate.config;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Properties;
-import java.time.DateTimeException;
-import java.time.ZoneId;
 
 public class ApplicationConfiguration {
     private String databaseUrl;

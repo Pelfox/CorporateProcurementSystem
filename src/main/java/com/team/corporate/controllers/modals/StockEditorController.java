@@ -1,13 +1,13 @@
 package com.team.corporate.controllers.modals;
 
-import com.sun.javafx.scene.control.IntegerField;
+import com.team.corporate.controllers.dialog.ResultCarrier;
+import com.team.corporate.controllers.utils.IntegerInput;
 import com.team.corporate.entities.Inventory;
 import com.team.corporate.entities.Product;
 import com.team.corporate.entities.Warehouse;
 import com.team.corporate.services.InventoriesService;
 import com.team.corporate.services.ProductsService;
 import com.team.corporate.services.WarehousesService;
-import com.team.corporate.controllers.dialog.ResultCarrier;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,16 +21,19 @@ import java.util.Comparator;
 import java.util.UUID;
 
 public class StockEditorController implements ResultCarrier<UUID> {
-    @FXML private ComboBox<Warehouse> warehouseComboBox;
-    @FXML private ComboBox<Product> productComboBox;
-    @FXML private IntegerField quantityField;
-    @FXML private Button saveButton;
-    @FXML private Button cancelButton;
-
     private final InventoriesService inventoriesService;
     private final WarehousesService warehousesService;
     private final ProductsService productsService;
-
+    @FXML
+    private ComboBox<Warehouse> warehouseCombo;
+    @FXML
+    private ComboBox<Product> productCombo;
+    @FXML
+    private TextField quantityField;
+    @FXML
+    private Button saveBtn;
+    @FXML
+    private Button cancelBtn;
     private UUID savedStockId;
 
     public StockEditorController(InventoriesService inventoriesService, WarehousesService warehousesService, ProductsService productsService) {
@@ -47,12 +50,13 @@ public class StockEditorController implements ResultCarrier<UUID> {
     @FXML
     public void initialize() {
         setupInputs();
+        IntegerInput.configure(quantityField, 0);
 
-        saveButton.disableProperty().bind(Bindings.createBooleanBinding(
+        saveBtn.disableProperty().bind(Bindings.createBooleanBinding(
                 this::isFormInvalid,
-                warehouseComboBox.valueProperty(),
-                productComboBox.valueProperty(),
-                quantityField.valueProperty()));
+                warehouseCombo.valueProperty(),
+                productCombo.valueProperty(),
+                quantityField.textProperty()));
     }
 
     @FXML
@@ -61,9 +65,9 @@ public class StockEditorController implements ResultCarrier<UUID> {
             return;
         }
 
-        Warehouse warehouse = warehouseComboBox.getValue();
-        Product product = productComboBox.getValue();
-        int quantity = quantityField.getValue();
+        Warehouse warehouse = warehouseCombo.getValue();
+        Product product = productCombo.getValue();
+        int quantity = IntegerInput.value(quantityField);
 
         try {
             Inventory saved = inventoriesService
@@ -84,13 +88,16 @@ public class StockEditorController implements ResultCarrier<UUID> {
     }
 
     private boolean isFormInvalid() {
-        return warehouseComboBox.getValue() == null
-                || productComboBox.getValue() == null
-                || quantityField.getValue() < 0;
+        return warehouseCombo.getValue() == null
+                || productCombo.getValue() == null
+                || !warehouseCombo.getItems().contains(warehouseCombo.getValue())
+                || !productCombo.getItems().contains(productCombo.getValue())
+                || IntegerInput.value(quantityField) == null
+                || IntegerInput.value(quantityField) < 0;
     }
 
     private void close() {
-        Window window = saveButton.getScene().getWindow();
+        Window window = saveBtn.getScene().getWindow();
         if (window instanceof Stage stage) {
             stage.close();
         }
@@ -100,8 +107,8 @@ public class StockEditorController implements ResultCarrier<UUID> {
         ObservableList<Warehouse> warehouses =
                 FXCollections.observableArrayList(warehousesService.getAll());
         warehouses.sort(Comparator.comparing(Warehouse::getName));
-        warehouseComboBox.setItems(FXCollections.observableArrayList(warehouses));
-        warehouseComboBox.setConverter(new StringConverter<>() {
+        warehouseCombo.setItems(FXCollections.observableArrayList(warehouses));
+        warehouseCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(Warehouse warehouse) {
                 return warehouse != null ? warehouse.getName() : "";
@@ -116,8 +123,8 @@ public class StockEditorController implements ResultCarrier<UUID> {
         ObservableList<Product> products =
                 FXCollections.observableArrayList(productsService.getAll());
         products.sort(Comparator.comparing(Product::getName));
-        productComboBox.setItems(FXCollections.observableArrayList(products));
-        productComboBox.setConverter(new StringConverter<>() {
+        productCombo.setItems(FXCollections.observableArrayList(products));
+        productCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(Product product) {
                 return product != null ? product.getName() : "";
@@ -134,7 +141,7 @@ public class StockEditorController implements ResultCarrier<UUID> {
         Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
         alert.setTitle("Остаток товара");
         alert.setHeaderText(null);
-        alert.initOwner(saveButton.getScene().getWindow());
+        alert.initOwner(saveBtn.getScene().getWindow());
         alert.showAndWait();
     }
 }

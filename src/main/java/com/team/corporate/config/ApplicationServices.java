@@ -14,21 +14,12 @@ public final class ApplicationServices implements AutoCloseable {
     private final ProductsService products;
     private final CategoriesService categories;
     private final OrdersService orders;
+    private final OrderStock stock;
     private final OrderItemsService items;
     private final InventoriesService inventories;
     private final WarehousesService warehouses;
     private final StatisticsService statistics;
     private final CsvExportService csvExport;
-
-    public static ApplicationServices open(ApplicationConfiguration configuration) {
-        SessionFactory sessionFactory = HibernateFactory.createSessionFactory(configuration);
-        try {
-            return new ApplicationServices(sessionFactory);
-        } catch (Exception | Error e) {
-            sessionFactory.close();
-            throw e;
-        }
-    }
 
     private ApplicationServices(SessionFactory sessionFactory) {
         this.factory = sessionFactory;
@@ -43,14 +34,16 @@ public final class ApplicationServices implements AutoCloseable {
         var warehousesRepository = new HibernateWarehousesRepository(factory);
         var auditLogsRepository = new HibernateAuditLogsRepository(factory);
 
+        stock = new OrderStock(productsRepository, inventoriesRepository, itemsRepository, transactions);
+
         users = new UsersServiceImpl(usersRepository);
         products = new ProductsServiceImpl(productsRepository, categoriesRepository,
                 itemsRepository, inventoriesRepository, transactions);
         categories = new CategoriesServiceImpl(categoriesRepository, productsRepository, transactions);
         orders = new OrdersServiceImpl(ordersRepository, usersRepository, productsRepository,
-                itemsRepository, auditLogsRepository, transactions);
-        items = new OrderItemsServiceImpl(ordersRepository, productsRepository, itemsRepository);
-        inventories = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository);
+                itemsRepository, auditLogsRepository, transactions, stock);
+        items = new OrderItemsServiceImpl(ordersRepository, productsRepository, itemsRepository, transactions, stock);
+        inventories = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository, stock, transactions);
         warehouses = new WarehousesServiceImpl(warehousesRepository);
         statistics = new StatisticsServiceImpl(usersRepository, productsRepository, categoriesRepository,
                 warehousesRepository, ordersRepository, itemsRepository, inventoriesRepository, transactions);
@@ -58,18 +51,58 @@ public final class ApplicationServices implements AutoCloseable {
                 warehousesRepository, inventoriesRepository, ordersRepository, itemsRepository,
                 auditLogsRepository, transactions);
 
-        transactions.execute(() -> new DataInitializer(users, categories, products, orders).run());
+        transactions.execute(() -> new DataInitializer(users, categories, products, orders, warehouses, inventories).run());
     }
 
-    public UsersService users() { return users; }
-    public ProductsService products() { return products; }
-    public CategoriesService categories() { return categories; }
-    public OrdersService orders() { return orders; }
-    public OrderItemsService items() { return items; }
-    public InventoriesService inventories() { return inventories; }
-    public WarehousesService warehouses() { return warehouses; }
-    public StatisticsService statistics() { return statistics; }
-    public CsvExportService csvExport() { return csvExport; }
+    public static ApplicationServices open(ApplicationConfiguration configuration) {
+        SessionFactory sessionFactory = HibernateFactory.createSessionFactory(configuration);
+        try {
+            return new ApplicationServices(sessionFactory);
+        } catch (Exception | Error e) {
+            sessionFactory.close();
+            throw e;
+        }
+    }
+
+    public UsersService users() {
+        return users;
+    }
+
+    public ProductsService products() {
+        return products;
+    }
+
+    public CategoriesService categories() {
+        return categories;
+    }
+
+    public StockService stock() {
+        return stock;
+    }
+
+    public OrdersService orders() {
+        return orders;
+    }
+
+    public OrderItemsService items() {
+        return items;
+    }
+
+    public InventoriesService inventories() {
+        return inventories;
+    }
+
+    public WarehousesService warehouses() {
+        return warehouses;
+    }
+
+    public StatisticsService statistics() {
+        return statistics;
+    }
+
+    public CsvExportService csvExport() {
+        return csvExport;
+    }
 
     @Override
     public void close() {

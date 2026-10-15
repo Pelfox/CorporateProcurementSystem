@@ -1,11 +1,11 @@
 package com.team.corporate.controllers.modals;
 
-import com.team.corporate.controllers.requests.WarehouseEditorRequest;
-import com.team.corporate.entities.Warehouse;
-import com.team.corporate.services.WarehousesService;
 import com.team.corporate.controllers.dialog.DataReceiver;
 import com.team.corporate.controllers.dialog.ResultCarrier;
-import com.team.corporate.utils.EntityValidation;
+import com.team.corporate.controllers.requests.WarehouseEditorRequest;
+import com.team.corporate.controllers.utils.TextLengthInput;
+import com.team.corporate.entities.Warehouse;
+import com.team.corporate.services.WarehousesService;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -15,13 +15,23 @@ import javafx.stage.Window;
 import java.util.UUID;
 
 public class WarehouseEditorController implements DataReceiver<WarehouseEditorRequest>, ResultCarrier<UUID> {
-    @FXML private TextField nameField;
-    @FXML private TextField addressField;
-    @FXML private Button saveButton;
-    @FXML private Button cancelButton;
-
     private final WarehousesService warehousesService;
-
+    @FXML
+    private TextField nameField;
+    @FXML
+    private TextField locationField;
+    @FXML
+    private Label nameLengthLabel;
+    @FXML
+    private Label nameError;
+    @FXML
+    private Label locationLengthLabel;
+    @FXML
+    private Label locationError;
+    @FXML
+    private Button saveBtn;
+    @FXML
+    private Button cancelBtn;
     private WarehouseEditorRequest request;
     private UUID savedWarehouseId;
 
@@ -46,23 +56,23 @@ public class WarehouseEditorController implements DataReceiver<WarehouseEditorRe
     public void initialize() {
         setupInputs();
 
-        saveButton.disableProperty().bind(Bindings.createBooleanBinding(
+        saveBtn.disableProperty().bind(Bindings.createBooleanBinding(
                 this::isFormInvalid,
-                nameField.textProperty()));
+                nameField.textProperty(), locationField.textProperty()));
     }
 
     @FXML
     private void onSaveClick() {
         if (request == null) {
-            throw new IllegalStateException("Режим окна не инициализирован (payload не передан).");
+            return;
         }
 
         if (isFormInvalid()) {
             return;
         }
 
-        String name = nameField.getText().strip();
-        String address = addressField.getText().isBlank() ? null : addressField.getText().strip();
+        String name = TextLengthInput.text(nameField).strip();
+        String address = TextLengthInput.text(locationField).isBlank() ? null : TextLengthInput.text(locationField).strip();
 
         try {
             Warehouse saved = request.isEditing()
@@ -84,32 +94,30 @@ public class WarehouseEditorController implements DataReceiver<WarehouseEditorRe
         Warehouse warehouse = warehousesService.getWarehouse(warehouseId)
                 .orElseThrow(() -> new IllegalStateException("Редактируемый склад не найден. Возможно, он был удален."));
         nameField.setText(warehouse.getName());
-        addressField.setText(warehouse.getLocation());
+        locationField.setText(warehouse.getLocation() == null ? "" : warehouse.getLocation());
     }
 
     private boolean isFormInvalid() {
-        return nameField.getText().isBlank();
+        return !TextLengthInput.isValid(nameField, true) || !TextLengthInput.isValid(locationField, false);
     }
 
     private void close() {
-        Window window = saveButton.getScene().getWindow();
+        Window window = saveBtn.getScene().getWindow();
         if (window instanceof Stage stage) {
             stage.close();
         }
     }
 
     private void setupInputs() {
-        nameField.setTextFormatter(new TextFormatter<>(change ->
-                change.getControlNewText().length() <= EntityValidation.TEXT_MAX_LENGTH ? change : null));
-        addressField.setTextFormatter(new TextFormatter<>(change ->
-                change.getControlNewText().length() <= EntityValidation.TEXT_MAX_LENGTH ? change : null));
+        TextLengthInput.configure(nameField, nameLengthLabel, nameError, "Название склада");
+        TextLengthInput.configure(locationField, locationLengthLabel, locationError, "Адрес");
     }
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
         alert.setTitle("Склад");
         alert.setHeaderText(null);
-        alert.initOwner(saveButton.getScene().getWindow());
+        alert.initOwner(saveBtn.getScene().getWindow());
         alert.showAndWait();
     }
 }

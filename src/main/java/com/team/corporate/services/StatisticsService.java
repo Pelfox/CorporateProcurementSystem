@@ -11,5 +11,6 @@ public interface StatisticsService {
     @NotNull
     List<WarehouseStock> getWarehouseStocks();
 
-    record WarehouseStock(String warehouseName, long quantity) {}
+    record WarehouseStock(String warehouseName, long quantity) {
+    }
 }

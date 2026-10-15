@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +23,7 @@ class CsvWriterTest {
     @Test
     void preservesUnicodeAndEscapesCsvFields() throws Exception {
         Path file = directory.resolve("data.csv");
-        CsvWriter.write(file, List.of("text", "price", "empty"), List.<Object[]>of(
+        CsvWriter.write(file, List.of("text", "price", "empty"), List.of(
                 new Object[]{"Бумага, \"А4\"\r\nВторая строка", new BigDecimal("1234.50"), null},
                 new Object[]{"Строка\nс переносом", new BigDecimal("1E+3"), ""},
                 new Object[]{"Возврат\rкаретки", BigDecimal.ZERO, "обычный текст"}));

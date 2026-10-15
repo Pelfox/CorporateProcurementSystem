@@ -2,6 +2,7 @@ package com.team.corporate.repositories.impls;
 
 import com.team.corporate.entities.Inventory;
 import com.team.corporate.repositories.InventoriesRepository;
+import jakarta.persistence.LockModeType;
 import org.hibernate.SessionFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,6 +42,16 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     public Optional<Inventory> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null.");
         return HibernateTransactions.fromTransaction(sessionFactory, session -> Optional.ofNullable(session.find(Inventory.class, id)));
+    }
+
+    @Override
+    public Optional<Inventory> getByIdForUpdate(@NotNull UUID id) {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+            session.flush();
+            Inventory inventory = session.find(Inventory.class, id);
+            if (inventory != null) session.refresh(inventory, LockModeType.PESSIMISTIC_WRITE);
+            return Optional.ofNullable(inventory);
+        });
     }
 
     /*Not practical*/

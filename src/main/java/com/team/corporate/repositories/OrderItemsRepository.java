@@ -21,6 +21,9 @@ public interface OrderItemsRepository {
     Optional<OrderItem> getById(@NotNull UUID id);
 
     @NotNull
+    Optional<OrderItem> getByIdForUpdate(@NotNull UUID id);
+
+    @NotNull
     List<OrderItem> getByOrderId(@NotNull UUID id);
 
     @NotNull

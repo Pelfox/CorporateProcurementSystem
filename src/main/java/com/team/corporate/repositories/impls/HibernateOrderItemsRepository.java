@@ -2,6 +2,7 @@ package com.team.corporate.repositories.impls;
 
 import com.team.corporate.entities.OrderItem;
 import com.team.corporate.repositories.OrderItemsRepository;
+import jakarta.persistence.LockModeType;
 import org.hibernate.SessionFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,6 +59,16 @@ public class HibernateOrderItemsRepository implements OrderItemsRepository {
                 session.createSelectionQuery(SELECT + " WHERE i.id = :id", OrderItem.class)
                         .setParameter("id", id)
                         .uniqueResultOptional());
+    }
+
+    @Override
+    public Optional<OrderItem> getByIdForUpdate(@NotNull UUID id) {
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+            session.flush();
+            OrderItem item = session.find(OrderItem.class, id);
+            if (item != null) session.refresh(item, LockModeType.PESSIMISTIC_WRITE);
+            return Optional.ofNullable(item);
+        });
     }
 
     @Override

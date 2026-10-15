@@ -5,6 +5,7 @@ import com.team.corporate.controllers.session.UserSession;
 import com.team.corporate.controllers.utils.DateTimeFormat;
 import com.team.corporate.controllers.utils.MoneyFormat;
 import com.team.corporate.controllers.utils.OrderStatusDisplay;
+import com.team.corporate.controllers.utils.TextLengthInput;
 import com.team.corporate.entities.Order;
 import com.team.corporate.entities.OrderItem;
 import com.team.corporate.entities.OrderStatus;
@@ -27,28 +28,43 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class MyOrdersController implements DataReceiver<UserSession> {
-    @FXML private TextField searchField;
-    @FXML private ComboBox<StatusFilter> statusComboBox;
-    @FXML private DatePicker fromDateField;
-    @FXML private DatePicker toDateField;
-    @FXML private ComboBox<SortMode> sortComboBox;
-
-    @FXML private TableView<Order> ordersTable;
-    @FXML private TableColumn<Order, String> orderNumberColumn;
-    @FXML private TableColumn<Order, OrderStatus> statusColumn;
-    @FXML private TableColumn<Order, Number> itemsCountColumn;
-    @FXML private TableColumn<Order, BigDecimal> totalColumn;
-    @FXML private TableColumn<Order, LocalDateTime> createdColumn;
-    @FXML private TableColumn<Order, LocalDateTime> updatedColumn;
-    @FXML private TableColumn<Order, String> notesColumn;
-
+public class MyOrdersController extends PageController implements DataReceiver<UserSession> {
     private final OrdersService ordersService;
     private final OrderItemsService orderItemsService;
-
     private final ObservableList<Order> orders = FXCollections.observableArrayList();
     private final Map<UUID, OrderSummary> summaries = new HashMap<>();
-
+    @FXML
+    private Label welcomeLabel;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<StatusFilter> statusFilter;
+    @FXML
+    private DatePicker dateFromPicker;
+    @FXML
+    private DatePicker dateToPicker;
+    @FXML
+    private Button clearDatesBtn;
+    @FXML
+    private Label dateError;
+    @FXML
+    private ComboBox<SortMode> sortCombo;
+    @FXML
+    private TableView<Order> ordersTable;
+    @FXML
+    private TableColumn<Order, String> numCol;
+    @FXML
+    private TableColumn<Order, OrderStatus> statusCol;
+    @FXML
+    private TableColumn<Order, Number> itemsCol;
+    @FXML
+    private TableColumn<Order, BigDecimal> sumCol;
+    @FXML
+    private TableColumn<Order, LocalDateTime> dateCol;
+    @FXML
+    private TableColumn<Order, LocalDateTime> updatedColumn;
+    @FXML
+    private TableColumn<Order, String> notesColumn;
     private UserSession session;
 
     public MyOrdersController(OrdersService ordersService, OrderItemsService orderItemsService) {
@@ -56,15 +72,22 @@ public class MyOrdersController implements DataReceiver<UserSession> {
         this.orderItemsService = orderItemsService;
     }
 
+    private static String shortId(UUID id) {
+        return id.toString().substring(0, 8);
+    }
+
     @Override
     public void receiveData(UserSession session) {
         this.session = session;
+        welcomeLabel.setText("Здравствуйте, " + session.username() + "!");
         loadData();
     }
 
     @FXML
     public void initialize() {
+        TextLengthInput.configure(searchField);
         configureTable();
+        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         configureFilters();
     }
 
@@ -77,37 +100,38 @@ public class MyOrdersController implements DataReceiver<UserSession> {
             summaries.put(item.getOrder().getId(), current.plus(item));
         }
     }
+
     private OrderSummary summaryOf(Order order) {
         return order == null ? OrderSummary.EMPTY
                 : summaries.getOrDefault(order.getId(), OrderSummary.EMPTY);
     }
 
     private void configureTable() {
-        orderNumberColumn.setCellValueFactory(cell ->
+        numCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(shortId(cell.getValue().getId())));
 
-        statusColumn.setCellValueFactory(cell ->
+        statusCol.setCellValueFactory(cell ->
                 new ReadOnlyObjectWrapper<>(cell.getValue().getStatus()));
-        statusColumn.setCellFactory(column -> new TableCell<>() {
+        statusCol.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(OrderStatus status, boolean empty) {
                 super.updateItem(status, empty);
+                getStyleClass().removeIf(style -> style.startsWith("status-"));
                 if (empty || status == null) {
                     setText(null);
-                    setStyle("");
                 } else {
                     setText(OrderStatusDisplay.name(status));
-                    setStyle(OrderStatusDisplay.badgeStyle(status));
+                    getStyleClass().add(OrderStatusDisplay.badgeStyle(status));
                 }
             }
         });
 
-        itemsCountColumn.setCellValueFactory(cell ->
+        itemsCol.setCellValueFactory(cell ->
                 new ReadOnlyIntegerWrapper(summaryOf(cell.getValue()).itemCount()));
 
-        totalColumn.setCellValueFactory(cell ->
+        sumCol.setCellValueFactory(cell ->
                 new ReadOnlyObjectWrapper<>(summaryOf(cell.getValue()).total()));
-        totalColumn.setCellFactory(column -> new TableCell<>() {
+        sumCol.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(BigDecimal value, boolean empty) {
                 super.updateItem(value, empty);
@@ -116,8 +140,8 @@ public class MyOrdersController implements DataReceiver<UserSession> {
             }
         });
 
-        createdColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(DateTimeFormat.toLocalDateTime(cell.getValue().getCreatedAt())));
-        createdColumn.setCellFactory(column -> new TableCell<>() {
+        dateCol.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(DateTimeFormat.toLocalDateTime(cell.getValue().getCreatedAt())));
+        dateCol.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(LocalDateTime value, boolean empty) {
                 super.updateItem(value, empty);
@@ -138,32 +162,59 @@ public class MyOrdersController implements DataReceiver<UserSession> {
     }
 
     private void configureFilters() {
-        statusComboBox.setItems(FXCollections.observableArrayList(StatusFilter.all()));
-        statusComboBox.setValue(StatusFilter.ALL);
-        statusComboBox.setConverter(new StringConverter<>() {
-            @Override public String toString(StatusFilter filter) { return filter == null ? "" : filter.label(); }
-            @Override public StatusFilter fromString(String string) { return null; }
+        dateError.visibleProperty().bind(javafx.beans.binding.Bindings.createBooleanBinding(() ->
+                        dateFromPicker.getValue() != null && dateToPicker.getValue() != null
+                                && dateFromPicker.getValue().isAfter(dateToPicker.getValue()),
+                dateFromPicker.valueProperty(), dateToPicker.valueProperty()));
+        dateError.managedProperty().bind(dateError.visibleProperty());
+        clearDatesBtn.disableProperty().bind(dateFromPicker.valueProperty().isNull()
+                .and(dateToPicker.valueProperty().isNull()));
+        statusFilter.setItems(FXCollections.observableArrayList(StatusFilter.all()));
+        statusFilter.setValue(StatusFilter.ALL);
+        statusFilter.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(StatusFilter filter) {
+                return filter == null ? "" : filter.label();
+            }
+
+            @Override
+            public StatusFilter fromString(String string) {
+                return null;
+            }
         });
 
-        sortComboBox.setItems(FXCollections.observableArrayList(SortMode.values()));
-        sortComboBox.setConverter(new StringConverter<>() {
-            @Override public String toString(SortMode mode) { return mode == null ? "" : mode.label(); }
-            @Override public SortMode fromString(String string) { return null; }
+        sortCombo.setItems(FXCollections.observableArrayList(SortMode.values()));
+        sortCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(SortMode mode) {
+                return mode == null ? "" : mode.label();
+            }
+
+            @Override
+            public SortMode fromString(String string) {
+                return null;
+            }
         });
 
         FilteredList<Order> filtered = new FilteredList<>(orders, p -> true);
         Runnable reapply = () -> filtered.setPredicate(this::matchesFilters);
         searchField.textProperty().addListener((obs, old, value) -> reapply.run());
-        statusComboBox.valueProperty().addListener((obs, old, value) -> reapply.run());
-        fromDateField.valueProperty().addListener((obs, old, value) -> reapply.run());
-        toDateField.valueProperty().addListener((obs, old, value) -> reapply.run());
+        statusFilter.valueProperty().addListener((obs, old, value) -> reapply.run());
+        dateFromPicker.valueProperty().addListener((obs, old, value) -> reapply.run());
+        dateToPicker.valueProperty().addListener((obs, old, value) -> reapply.run());
 
         SortedList<Order> sorted = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(ordersTable.comparatorProperty());
         ordersTable.setItems(sorted);
 
-        sortComboBox.valueProperty().addListener((obs, old, mode) -> applySortMode(mode));
-        sortComboBox.setValue(SortMode.NEWEST_FIRST);
+        sortCombo.valueProperty().addListener((obs, old, mode) -> applySortMode(mode));
+        sortCombo.setValue(SortMode.NEWEST_FIRST);
+    }
+
+    @FXML
+    private void onClearDatesClick() {
+        dateFromPicker.setValue(null);
+        dateToPicker.setValue(null);
     }
 
     private void applySortMode(SortMode mode) {
@@ -171,10 +222,10 @@ public class MyOrdersController implements DataReceiver<UserSession> {
         if (mode == null) {
             return;
         }
-        createdColumn.setSortType(mode == SortMode.NEWEST_FIRST
+        dateCol.setSortType(mode == SortMode.NEWEST_FIRST
                 ? TableColumn.SortType.DESCENDING
                 : TableColumn.SortType.ASCENDING);
-        ordersTable.getSortOrder().add(createdColumn);
+        ordersTable.getSortOrder().add(dateCol);
     }
 
     private boolean matchesFilters(Order order) {
@@ -188,21 +239,33 @@ public class MyOrdersController implements DataReceiver<UserSession> {
             }
         }
 
-        StatusFilter status = statusComboBox.getValue();
+        StatusFilter status = statusFilter.getValue();
         if (status != null && status.status() != null && order.getStatus() != status.status()) {
             return false;
         }
 
         LocalDate createdDate = DateTimeFormat.toLocalDate(order.getCreatedAt());
-        LocalDate from = fromDateField.getValue();
+        LocalDate from = dateFromPicker.getValue();
         if (from != null && createdDate.isBefore(from)) {
             return false;
         }
-        LocalDate to = toDateField.getValue();
-        if (to != null && createdDate.isAfter(to)) {
-            return false;
+        LocalDate to = dateToPicker.getValue();
+        return to == null || !createdDate.isAfter(to);
+    }
+
+    private enum SortMode {
+        NEWEST_FIRST("Сначала новые"),
+        OLDEST_FIRST("Сначала старые");
+
+        private final String label;
+
+        SortMode(String label) {
+            this.label = label;
         }
-        return true;
+
+        String label() {
+            return label;
+        }
     }
 
     private record OrderSummary(int itemCount, BigDecimal total) {
@@ -225,18 +288,5 @@ public class MyOrdersController implements DataReceiver<UserSession> {
             }
             return filters;
         }
-    }
-
-    private enum SortMode {
-        NEWEST_FIRST("Сначала новые"),
-        OLDEST_FIRST("Сначала старые");
-
-        private final String label;
-        SortMode(String label) { this.label = label; }
-        String label() { return label; }
-    }
-
-    private static String shortId(UUID id) {
-        return id.toString().substring(0, 8);
     }
 }

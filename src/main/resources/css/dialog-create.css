@@ -23,9 +23,11 @@
     -fx-min-width: 90;
     -fx-max-width: 90;
 }
+
 .dialog-qty-field:focused {
     -fx-border-color: -primary;
 }
+
 .dialog-qty-field.field-error {
     -fx-border-color: #ef4444;
 }
@@ -46,6 +48,7 @@
     -fx-max-height: 44;
     -fx-alignment: CENTER;
 }
+
 .btn-add-icon:hover {
     -fx-background-color: linear-gradient(to bottom right, #1a7f42, #1eab52);
 }
@@ -66,6 +69,7 @@
     -fx-max-height: 28;
     -fx-alignment: CENTER;
 }
+
 .btn-remove-icon:hover {
     -fx-background-color: linear-gradient(to bottom right, #b22828, #dd3c3c);
 }
@@ -82,16 +86,19 @@
     -fx-min-height: 180;
     -fx-max-height: 180;
 }
+
 .dialog-items-table .column-header-background {
     -fx-background-color: -bg-soft;
     -fx-background-radius: 10 10 0 0;
 }
+
 .dialog-items-table .column-header,
 .dialog-items-table .filler {
     -fx-background-color: transparent;
     -fx-border-color: transparent transparent -border-color transparent;
     -fx-size: 38;
 }
+
 .dialog-items-table .column-header .label {
     -fx-text-fill: -text-muted;
     -fx-font-weight: bold;
@@ -99,16 +106,19 @@
     -fx-alignment: CENTER_LEFT;
     -fx-padding: 0 12 0 12;
 }
+
 .dialog-items-table .table-row-cell {
     -fx-background-color: transparent;
     -fx-border-color: transparent transparent -border-soft transparent;
     -fx-border-width: 0 0 1 0;
     -fx-cell-size: 40;
 }
+
 .dialog-items-table .table-row-cell:empty {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
+
 .dialog-items-table .table-cell {
     -fx-text-fill: -text-secondary;
     -fx-font-size: 13px;
@@ -122,6 +132,7 @@
     -fx-alignment: CENTER_RIGHT;
     -fx-padding: 4 0 4 0;
 }
+
 .dialog-total-label {
     -fx-font-size: 15px;
     -fx-font-weight: bold;

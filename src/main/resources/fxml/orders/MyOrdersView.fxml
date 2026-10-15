@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
-<ScrollPane xmlns="http://javafx.com/javafx/25"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.team.corporate.fx.controller.MyOrdersController"
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.MyOrdersController"
             fitToWidth="true"
             styleClass="page-scroll">
 
@@ -32,15 +25,24 @@
         <VBox styleClass="content-block" spacing="0">
 
             <HBox styleClass="search-row">
+                <TextField fx:id="searchField" promptText="Поиск по номеру или примечанию..."
+                           styleClass="search-input"/>
                 <ComboBox fx:id="statusFilter" styleClass="filter-select"
                           promptText="Все статусы"/>
                 <DatePicker fx:id="dateFromPicker" styleClass="filter-date"
-                            promptText="Дата от"/>
+                            promptText="Дата от" editable="false"/>
                 <Label text="—" styleClass="date-separator"/>
                 <DatePicker fx:id="dateToPicker" styleClass="filter-date"
-                            promptText="Дата до"/>
+                            promptText="Дата до" editable="false"/>
                 <ComboBox fx:id="sortCombo" styleClass="filter-select"
                           promptText="Сортировка"/>
+            </HBox>
+
+            <Label fx:id="dateError" text="Дата «от» не должна быть позже даты «до»."
+                   styleClass="form-error" visible="false" managed="false"/>
+            <HBox alignment="CENTER_RIGHT">
+                <Button fx:id="clearDatesBtn" text="Сбросить даты" onAction="#onClearDatesClick"
+                        styleClass="btn, btn-cancel"/>
             </HBox>
 
             <TableView fx:id="ordersTable" styleClass="data-table">
@@ -48,11 +50,13 @@
                     <Label text="Заказы не найдены" styleClass="table-placeholder"/>
                 </placeholder>
                 <columns>
-                    <TableColumn fx:id="numCol"    text="№"        prefWidth="60"/>
-                    <TableColumn fx:id="dateCol"   text="Дата"     prefWidth="160"/>
-                    <TableColumn fx:id="statusCol" text="Статус"   prefWidth="160"/>
-                    <TableColumn fx:id="itemsCol"  text="Позиций"  prefWidth="120"/>
-                    <TableColumn fx:id="sumCol"    text="Сумма"    prefWidth="160"/>
+                    <TableColumn fx:id="numCol" text="№" prefWidth="60"/>
+                    <TableColumn fx:id="dateCol" text="Дата" prefWidth="160"/>
+                    <TableColumn fx:id="statusCol" text="Статус" prefWidth="160"/>
+                    <TableColumn fx:id="itemsCol" text="Позиций" prefWidth="120"/>
+                    <TableColumn fx:id="updatedColumn" text="Обновлён" prefWidth="160"/>
+                    <TableColumn fx:id="notesColumn" text="Примечание" prefWidth="200"/>
+                    <TableColumn fx:id="sumCol" text="Сумма" prefWidth="160"/>
                 </columns>
             </TableView>
 

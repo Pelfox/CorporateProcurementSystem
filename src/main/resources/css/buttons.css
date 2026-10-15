@@ -13,6 +13,7 @@
 .btn-success {
     -fx-background-color: linear-gradient(to bottom right, #22c55e, #4eed88);
 }
+
 .btn-add:hover,
 .btn-create:hover,
 .btn-success:hover {
@@ -23,6 +24,7 @@
 .btn-primary {
     -fx-background-color: linear-gradient(to bottom right, #4d51f2, #788cec);
 }
+
 .btn-edit:hover,
 .btn-primary:hover {
     -fx-background-color: linear-gradient(to bottom right, #443fb5, #5850e0);
@@ -31,6 +33,7 @@
 .btn-warning {
     -fx-background-color: linear-gradient(to bottom right, #f59e0b, #f8cc3d);
 }
+
 .btn-warning:hover {
     -fx-background-color: linear-gradient(to bottom right, #b45309, #ea8a0a);
 }
@@ -39,6 +42,7 @@
 .btn-danger {
     -fx-background-color: linear-gradient(to bottom right, #ec3030, #f55959);
 }
+
 .btn-delete:hover,
 .btn-danger:hover {
     -fx-background-color: linear-gradient(to bottom right, #b22828, #dd3c3c);
@@ -47,6 +51,7 @@
 .btn-cancel {
     -fx-background-color: linear-gradient(to bottom right, #aeacac, #bdbcbc);
 }
+
 .btn-cancel:hover {
     -fx-background-color: linear-gradient(to bottom right, #8d8b8b, #9c9b9b);
 }
@@ -71,6 +76,7 @@
     -fx-padding: 0 0 2 0;
     -fx-alignment: CENTER;
 }
+
 .back-btn:hover {
     -fx-background-color: #f5f5f5;
     -fx-border-color: -primary;

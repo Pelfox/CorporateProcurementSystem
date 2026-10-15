@@ -3,7 +3,10 @@ package com.team.corporate.controllers.pages;
 import com.team.corporate.controllers.dialog.DialogService;
 import com.team.corporate.controllers.dialog.ViewType;
 import com.team.corporate.controllers.requests.ProductEditorRequest;
+import com.team.corporate.controllers.utils.DigitsOnlyInput;
 import com.team.corporate.controllers.utils.MoneyFormat;
+import com.team.corporate.controllers.utils.TextLengthInput;
+import com.team.corporate.controllers.utils.UiErrors;
 import com.team.corporate.entities.Category;
 import com.team.corporate.entities.Product;
 import com.team.corporate.services.CategoriesService;
@@ -22,29 +25,39 @@ import javafx.util.StringConverter;
 import java.math.BigDecimal;
 import java.util.*;
 
-public class CatalogController {
-
-    @FXML private TextField searchField;
-    @FXML private ComboBox<CategoryFilter> categoryComboBox;
-    @FXML private ComboBox<SortMode> sortComboBox;
-
-    @FXML private Button addButton;
-    @FXML private Button editButton;
-    @FXML private Button deleteButton;
-
-    @FXML private TableView<Product> productsTable;
-    @FXML private TableColumn<Product, String> numberColumn;
-    @FXML private TableColumn<Product, String> nameColumn;
-    @FXML private TableColumn<Product, String> skuColumn;
-    @FXML private TableColumn<Product, BigDecimal> priceColumn;
-    @FXML private TableColumn<Product, String> categoryColumn;
+public class CatalogController extends PageController {
 
     private final ProductsService productsService;
     private final CategoriesService categoriesService;
     private final DialogService dialogService;
-
     private final ObservableList<Product> products = FXCollections.observableArrayList();
     private final Map<UUID, String> categoryNames = new HashMap<>();
+    @FXML
+    private TextField searchField;
+    @FXML
+    private TextField priceFromField, priceToField;
+    @FXML
+    private ComboBox<CategoryFilter> categoryFilter;
+    @FXML
+    private ComboBox<SortMode> sortCombo;
+    @FXML
+    private Button addBtn;
+    @FXML
+    private Button editBtn;
+    @FXML
+    private Button deleteBtn;
+    @FXML
+    private TableView<Product> productsTable;
+    @FXML
+    private TableColumn<Product, String> idCol;
+    @FXML
+    private TableColumn<Product, String> nameCol;
+    @FXML
+    private TableColumn<Product, String> skuCol;
+    @FXML
+    private TableColumn<Product, BigDecimal> priceCol;
+    @FXML
+    private TableColumn<Product, String> categoryCol;
 
     public CatalogController(ProductsService productsService,
                              CategoriesService categoriesService,
@@ -54,9 +67,16 @@ public class CatalogController {
         this.dialogService = dialogService;
     }
 
+    private static String shortId(UUID id) {
+        return id.toString().substring(0, 8);
+    }
+
     @FXML
     public void initialize() {
+        TextLengthInput.configure(searchField);
+        DigitsOnlyInput.configure(priceFromField, priceToField);
         configureTable();
+        productsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         configureFilters();
         configureButtons();
         loadData();
@@ -76,18 +96,18 @@ public class CatalogController {
     }
 
     private void configureTable() {
-        numberColumn.setCellValueFactory(cell ->
+        idCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(shortId(cell.getValue().getId())));
 
-        nameColumn.setCellValueFactory(cell ->
+        nameCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(cell.getValue().getName()));
 
-        skuColumn.setCellValueFactory(cell ->
+        skuCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(cell.getValue().getSku()));
 
-        priceColumn.setCellValueFactory(cell ->
+        priceCol.setCellValueFactory(cell ->
                 new ReadOnlyObjectWrapper<>(cell.getValue().getPrice()));
-        priceColumn.setCellFactory(column -> new TableCell<>() {
+        priceCol.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(BigDecimal value, boolean empty) {
                 super.updateItem(value, empty);
@@ -96,36 +116,52 @@ public class CatalogController {
             }
         });
 
-        categoryColumn.setCellValueFactory(cell ->
+        categoryCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(categoryNameOf(cell.getValue())));
     }
 
     private void configureFilters() {
-        categoryComboBox.setItems(FXCollections.observableArrayList(
+        categoryFilter.setItems(FXCollections.observableArrayList(
                 CategoryFilter.all(categoriesService.getAll())));
-        categoryComboBox.setConverter(new StringConverter<>() {
-            @Override public String toString(CategoryFilter filter) { return filter == null ? "" : filter.label(); }
-            @Override public CategoryFilter fromString(String string) { return null; }
+        categoryFilter.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(CategoryFilter filter) {
+                return filter == null ? "" : filter.label();
+            }
+
+            @Override
+            public CategoryFilter fromString(String string) {
+                return null;
+            }
         });
 
-        sortComboBox.setItems(FXCollections.observableArrayList(SortMode.values()));
-        sortComboBox.setConverter(new StringConverter<>() {
-            @Override public String toString(SortMode mode) { return mode == null ? "" : mode.label(); }
-            @Override public SortMode fromString(String string) { return null; }
+        sortCombo.setItems(FXCollections.observableArrayList(SortMode.values()));
+        sortCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(SortMode mode) {
+                return mode == null ? "" : mode.label();
+            }
+
+            @Override
+            public SortMode fromString(String string) {
+                return null;
+            }
         });
 
         FilteredList<Product> filtered = new FilteredList<>(products, p -> true);
         Runnable reapply = () -> filtered.setPredicate(this::matchesFilters);
         searchField.textProperty().addListener((obs, old, value) -> reapply.run());
-        categoryComboBox.valueProperty().addListener((obs, old, value) -> reapply.run());
+        priceFromField.textProperty().addListener((obs, old, value) -> reapply.run());
+        priceToField.textProperty().addListener((obs, old, value) -> reapply.run());
+        categoryFilter.valueProperty().addListener((obs, old, value) -> reapply.run());
 
         SortedList<Product> sorted = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(productsTable.comparatorProperty());
         productsTable.setItems(sorted);
 
-        sortComboBox.valueProperty().addListener((obs, old, mode) -> applySortMode(mode));
-        sortComboBox.setValue(SortMode.NAME_ASC);
-        categoryComboBox.setValue(CategoryFilter.ALL);
+        sortCombo.valueProperty().addListener((obs, old, mode) -> applySortMode(mode));
+        sortCombo.setValue(SortMode.NAME_ASC);
+        categoryFilter.setValue(CategoryFilter.ALL);
     }
 
     private void applySortMode(SortMode mode) {
@@ -135,32 +171,40 @@ public class CatalogController {
         }
         switch (mode) {
             case NAME_ASC -> {
-                nameColumn.setSortType(TableColumn.SortType.ASCENDING);
-                productsTable.getSortOrder().add(nameColumn);
+                nameCol.setSortType(TableColumn.SortType.ASCENDING);
+                productsTable.getSortOrder().add(nameCol);
             }
             case NAME_DESC -> {
-                nameColumn.setSortType(TableColumn.SortType.DESCENDING);
-                productsTable.getSortOrder().add(nameColumn);
+                nameCol.setSortType(TableColumn.SortType.DESCENDING);
+                productsTable.getSortOrder().add(nameCol);
             }
             case PRICE_ASC -> {
-                priceColumn.setSortType(TableColumn.SortType.ASCENDING);
-                productsTable.getSortOrder().add(priceColumn);
+                priceCol.setSortType(TableColumn.SortType.ASCENDING);
+                productsTable.getSortOrder().add(priceCol);
             }
             case PRICE_DESC -> {
-                priceColumn.setSortType(TableColumn.SortType.DESCENDING);
-                productsTable.getSortOrder().add(priceColumn);
+                priceCol.setSortType(TableColumn.SortType.DESCENDING);
+                productsTable.getSortOrder().add(priceCol);
             }
         }
     }
 
     private void configureButtons() {
-        editButton.disableProperty().bind(
+        editBtn.disableProperty().bind(
                 productsTable.getSelectionModel().selectedItemProperty().isNull());
-        deleteButton.disableProperty().bind(
+        deleteBtn.disableProperty().bind(
                 productsTable.getSelectionModel().selectedItemProperty().isNull());
     }
 
     private boolean matchesFilters(Product product) {
+        try {
+            if (!TextLengthInput.text(priceFromField).isBlank() && product.getPrice().compareTo(
+                    DigitsOnlyInput.value(priceFromField)) < 0) return false;
+            if (!TextLengthInput.text(priceToField).isBlank() && product.getPrice().compareTo(
+                    DigitsOnlyInput.value(priceToField)) > 0) return false;
+        } catch (NumberFormatException e) {
+            return false;
+        }
         String query = searchField.getText();
         if (query != null && !query.isBlank()) {
             String q = query.strip().toLowerCase(Locale.ROOT);
@@ -172,39 +216,49 @@ public class CatalogController {
             }
         }
 
-        CategoryFilter filter = categoryComboBox.getValue();
+        CategoryFilter filter = categoryFilter.getValue();
         if (filter != null && filter.category() != null) {
             Category productCategory = product.getCategory();
-            if (productCategory == null || !productCategory.getId().equals(filter.category().getId())) {
-                return false;
-            }
+            return productCategory != null && productCategory.getId().equals(filter.category().getId());
         }
         return true;
     }
 
     @FXML
     private void onAddClick() {
-        Optional<UUID> saved = dialogService.showModal(
-                ViewType.CREATE_PRODUCT,
-                addButton.getScene().getWindow(),
-                ProductEditorRequest.forCreate());
-        if (saved.isPresent()) {
-            loadData();
+        try {
+            Optional<UUID> saved = dialogService.showModal(
+                    ViewType.CREATE_PRODUCT,
+                    addBtn.getScene().getWindow(),
+                    ProductEditorRequest.forCreate());
+            if (saved.isPresent()) {
+                loadData();
+            }
+
+        } catch (RuntimeException e) {
+            UiErrors.show(productsTable.getScene() == null ? null : productsTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
     }
 
     @FXML
     private void onEditClick() {
-        Product selected = productsTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            return;
-        }
-        Optional<UUID> saved = dialogService.showModal(
-                ViewType.EDIT_PRODUCT,
-                editButton.getScene().getWindow(),
-                ProductEditorRequest.forEdit(selected));
-        if (saved.isPresent()) {
-            loadData();
+        try {
+            Product selected = productsTable.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                return;
+            }
+            Optional<UUID> saved = dialogService.showModal(
+                    ViewType.EDIT_PRODUCT,
+                    editBtn.getScene().getWindow(),
+                    ProductEditorRequest.forEdit(selected));
+            if (saved.isPresent()) {
+                loadData();
+            }
+
+        } catch (RuntimeException e) {
+            UiErrors.show(productsTable.getScene() == null ? null : productsTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
     }
 
@@ -215,7 +269,8 @@ public class CatalogController {
             return;
         }
 
-        // TODO: перед productsService.deleteProduct(...) открыть подтверждение удаления.
+        if (!dialogService.confirmDelete(productsTable.getScene().getWindow(), selected.getName())) return;
+
         try {
             productsService.deleteProduct(selected.getId());
             loadData();
@@ -232,6 +287,23 @@ public class CatalogController {
         alert.showAndWait();
     }
 
+    private enum SortMode {
+        NAME_ASC("По названию (А→Я)"),
+        NAME_DESC("По названию (Я→А)"),
+        PRICE_ASC("По цене (сначала дешёвые)"),
+        PRICE_DESC("По цене (сначала дорогие)");
+
+        private final String label;
+
+        SortMode(String label) {
+            this.label = label;
+        }
+
+        String label() {
+            return label;
+        }
+    }
+
     private record CategoryFilter(String label, Category category) {
         static final CategoryFilter ALL = new CategoryFilter("Все категории", null);
 
@@ -243,20 +315,5 @@ public class CatalogController {
             }
             return filters;
         }
-    }
-
-    private enum SortMode {
-        NAME_ASC("По названию (А→Я)"),
-        NAME_DESC("По названию (Я→А)"),
-        PRICE_ASC("По цене (сначала дешёвые)"),
-        PRICE_DESC("По цене (сначала дорогие)");
-
-        private final String label;
-        SortMode(String label) { this.label = label; }
-        String label() { return label; }
-    }
-
-    private static String shortId(UUID id) {
-        return id.toString().substring(0, 8);
     }
 }

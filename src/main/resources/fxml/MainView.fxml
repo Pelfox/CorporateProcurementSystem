@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-
-<BorderPane xmlns="http://javafx.com/javafx/25"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.team.corporate.fx.controller.MainController"
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.MainController"
             stylesheets="@../css/styles.css"
             styleClass="root">
 
@@ -28,15 +24,15 @@
                 </ImageView>
             </StackPane>
 
-            <Label fx:id="appTitleLabel" text="СКЗ АРГУС" styleClass="app-title"/>
+            <Label fx:id="appTitleLabel" text="СКЗ АРГУС" styleClass="app-title" minWidth="-Infinity"/>
 
             <!-- Меню навигации -->
-            <HBox fx:id="navMenu" styleClass="nav-menu">
-                <Button fx:id="myOrdersNavBtn" text="Мои заказы"
+            <HBox fx:id="navMenu" styleClass="nav-menu" minWidth="-Infinity">
+                <Button fx:id="myOrdersNavBtn" onAction="#onMyOrdersClick" text="Мои заказы"
                         styleClass="nav-item, active"/>
-                <Button fx:id="servicesNavBtn" text="Сервисы"
+                <Button fx:id="servicesNavBtn" onAction="#onServicesClick" text="Сервисы"
                         styleClass="nav-item"/>
-                <Button fx:id="statisticsNavBtn" text="Статистика"
+                <Button fx:id="statisticsNavBtn" onAction="#onStatisticsClick" text="Статистика"
                         styleClass="nav-item"/>
             </HBox>
 
@@ -52,7 +48,7 @@
             </HBox>
 
             <!-- Выход -->
-            <Button fx:id="logoutBtn" text="➡" styleClass="logout-btn"/>
+            <Button fx:id="logoutBtn" onAction="#onLogoutClick" text="➡" styleClass="logout-btn"/>
         </HBox>
     </top>
 

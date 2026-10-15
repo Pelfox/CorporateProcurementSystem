@@ -8,6 +8,7 @@ import com.team.corporate.exceptions.ProductNotFoundException;
 import com.team.corporate.exceptions.WarehouseNotFoundException;
 import com.team.corporate.repositories.InventoriesRepository;
 import com.team.corporate.repositories.ProductsRepository;
+import com.team.corporate.repositories.Transactions;
 import com.team.corporate.repositories.WarehousesRepository;
 import com.team.corporate.services.InventoriesService;
 import com.team.corporate.utils.EntityValidation;
@@ -19,13 +20,18 @@ import java.util.UUID;
 
 public class InventoriesServiceImpl implements InventoriesService {
     private final ProductsRepository productsRepository;
+    private final OrderStock stock;
+    private final Transactions transactions;
     private final WarehousesRepository warehousesRepository;
     private final InventoriesRepository inventoriesRepository;
 
     public InventoriesServiceImpl(@NotNull ProductsRepository productsRepository,
                                   @NotNull WarehousesRepository warehousesRepository,
-                                  @NotNull InventoriesRepository inventoriesRepository) {
+                                  @NotNull InventoriesRepository inventoriesRepository,
+                                  @NotNull OrderStock stock, @NotNull Transactions transactions) {
         this.inventoriesRepository = inventoriesRepository;
+        this.stock = stock;
+        this.transactions = transactions;
         this.productsRepository = productsRepository;
         this.warehousesRepository = warehousesRepository;
     }
@@ -38,15 +44,18 @@ public class InventoriesServiceImpl implements InventoriesService {
         EntityValidation.requireNonNull(productId, "Идентификатор товара");
         EntityValidation.requireNonNull(warehouseId, "Идентификатор склада");
         EntityValidation.requireAtLeast(quantity, 0, "Остаток");
-        if (inventoriesRepository.getByProductAndWarehouseIds(productId, warehouseId).isPresent()) {
-            throw new IllegalArgumentException("Товар уже размещён на этом складе. Измените существующий остаток.");
-        }
-        Product product = productsRepository.getById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным идентификатором не найден."));
-        Warehouse warehouse = warehousesRepository.getById(warehouseId)
-                .orElseThrow(() -> new WarehouseNotFoundException("Склад с указанным идентификатором не найден."));
-        Inventory inventory = new Inventory(product, warehouse, quantity);
-        return inventoriesRepository.add(inventory);
+        return transactions.execute(() -> {
+            stock.lockProducts(List.of(productId));
+            if (inventoriesRepository.getByProductAndWarehouseIds(productId, warehouseId).isPresent()) {
+                throw new IllegalArgumentException("Товар уже размещён на этом складе. Измените существующий остаток.");
+            }
+            Product product = productsRepository.getById(productId)
+                    .orElseThrow(() -> new ProductNotFoundException("Продукт с указанным идентификатором не найден."));
+            Warehouse warehouse = warehousesRepository.getById(warehouseId)
+                    .orElseThrow(() -> new WarehouseNotFoundException("Склад с указанным идентификатором не найден."));
+            Inventory inventory = new Inventory(product, warehouse, quantity);
+            return inventoriesRepository.add(inventory);
+        });
     }
 
     @Override
@@ -89,12 +98,13 @@ public class InventoriesServiceImpl implements InventoriesService {
     @Override
     public void deleteInventory(@NotNull UUID id) {
         EntityValidation.requireNonNull(id, "Идентификатор");
-        Optional<Inventory> inventory = inventoriesRepository.getById(id);
-        if (inventory.isPresent()) {
+        transactions.execute(() -> {
+            Inventory inventory = lockedInventory(id);
+            long total = inventoriesRepository.getByProductId(inventory.getProduct().getId()).stream()
+                    .mapToLong(Inventory::getQuantity).sum();
+            stock.requireInventoryFloor(inventory.getProduct().getId(), total - inventory.getQuantity());
             inventoriesRepository.delete(id);
-        } else {
-            throw new InventoryNotFoundException("Инвентарь с указанным идентификатором не найден.");
-        }
+        });
     }
 
     @Override
@@ -107,9 +117,23 @@ public class InventoriesServiceImpl implements InventoriesService {
     @NotNull
     public Inventory updateInventory(@NotNull UUID inventoryId, int quantity) {
         EntityValidation.requireNonNull(inventoryId, "Идентификатор складского остатка");
-        Inventory inventory = inventoriesRepository.getById(inventoryId)
-                .orElseThrow(() -> new InventoryNotFoundException("Инвентарь с указанным идентификатором не найден."));
-        inventory.setQuantity(quantity);
-        return inventoriesRepository.update(inventory);
+        EntityValidation.requireAtLeast(quantity, 0, "Остаток");
+        return transactions.execute(() -> {
+            Inventory inventory = lockedInventory(inventoryId);
+            long total = inventoriesRepository.getByProductId(inventory.getProduct().getId()).stream()
+                    .mapToLong(Inventory::getQuantity).sum();
+            stock.requireInventoryFloor(inventory.getProduct().getId(), total - inventory.getQuantity() + quantity);
+            inventory.setQuantity(quantity);
+            return inventoriesRepository.update(inventory);
+        });
     }
+
+    private Inventory lockedInventory(UUID id) {
+        Inventory reference = inventoriesRepository.getById(id)
+                .orElseThrow(() -> new InventoryNotFoundException("Инвентарь с указанным идентификатором не найден."));
+        stock.lockProducts(List.of(reference.getProduct().getId()));
+        return inventoriesRepository.getByIdForUpdate(id)
+                .orElseThrow(() -> new InventoryNotFoundException("Инвентарь с указанным идентификатором не найден."));
+    }
+
 }

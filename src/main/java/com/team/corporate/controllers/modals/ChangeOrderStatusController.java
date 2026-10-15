@@ -1,12 +1,12 @@
 package com.team.corporate.controllers.modals;
 
+import com.team.corporate.controllers.dialog.DataReceiver;
+import com.team.corporate.controllers.dialog.ResultCarrier;
 import com.team.corporate.controllers.requests.OrderStatusChangeRequest;
 import com.team.corporate.controllers.utils.OrderStatusDisplay;
 import com.team.corporate.entities.Order;
 import com.team.corporate.entities.OrderStatus;
 import com.team.corporate.services.OrdersService;
-import com.team.corporate.controllers.dialog.DataReceiver;
-import com.team.corporate.controllers.dialog.ResultCarrier;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -16,14 +16,17 @@ import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 public class ChangeOrderStatusController implements DataReceiver<OrderStatusChangeRequest>, ResultCarrier<OrderStatus> {
-    @FXML private Label orderIdLabel;
-    @FXML private Label currentStatusLabel;
-    @FXML private ComboBox<OrderStatus> newStatusComboBox;
-    @FXML private Button changeButton;
-    @FXML private Button cancelButton;
-
     private final OrdersService ordersService;
-
+    @FXML
+    private Label orderNumberLabel;
+    @FXML
+    private Label currentStatusLabel;
+    @FXML
+    private ComboBox<OrderStatus> newStatusCombo;
+    @FXML
+    private Button changeBtn;
+    @FXML
+    private Button cancelBtn;
     private OrderStatusChangeRequest request;
     private OrderStatus currentStatus;
     private OrderStatus changedStatus;
@@ -40,9 +43,11 @@ public class ChangeOrderStatusController implements DataReceiver<OrderStatusChan
                 .orElseThrow(() -> new IllegalStateException("Заказ не найден. Возможно, он был удалён."));
         currentStatus = order.getStatus();
 
-        orderIdLabel.setText("Заказ № " + order.getId());
+        orderNumberLabel.setText("Заказ № " + order.getId());
         currentStatusLabel.setText(OrderStatusDisplay.name(currentStatus));
         currentStatusLabel.getStyleClass().add(OrderStatusDisplay.badgeStyle(currentStatus));
+        if (currentStatus == OrderStatus.DELIVERED) newStatusCombo.getItems().clear();
+        else newStatusCombo.getItems().remove(currentStatus);
     }
 
     @Override
@@ -54,22 +59,22 @@ public class ChangeOrderStatusController implements DataReceiver<OrderStatusChan
     public void initialize() {
         setupInputs();
 
-        changeButton.disableProperty().bind(Bindings.createBooleanBinding(
+        changeBtn.disableProperty().bind(Bindings.createBooleanBinding(
                 this::isFormInvalid,
-                newStatusComboBox.valueProperty()));
+                newStatusCombo.valueProperty()));
     }
 
     @FXML
     private void onChangeStatusClick() {
         if (request == null) {
-            throw new IllegalStateException("Режим окна не инициализирован (payload не передан).");
+            return;
         }
 
         if (isFormInvalid()) {
             return;
         }
 
-        OrderStatus selectedStatus = newStatusComboBox.getValue();
+        OrderStatus selectedStatus = newStatusCombo.getValue();
 
         try {
             ordersService.changeStatus(request.managerId(), request.orderId(), selectedStatus);
@@ -86,20 +91,21 @@ public class ChangeOrderStatusController implements DataReceiver<OrderStatusChan
     }
 
     private boolean isFormInvalid() {
-        OrderStatus selected = newStatusComboBox.getValue();
-        return selected == null || selected == currentStatus;
+        OrderStatus selected = newStatusCombo.getValue();
+        return selected == null || selected == currentStatus || currentStatus == OrderStatus.DELIVERED
+                || !newStatusCombo.getItems().contains(selected);
     }
 
     private void close() {
-        Window window = changeButton.getScene().getWindow();
+        Window window = changeBtn.getScene().getWindow();
         if (window instanceof Stage stage) {
             stage.close();
         }
     }
 
     private void setupInputs() {
-        newStatusComboBox.setItems(FXCollections.observableArrayList(OrderStatus.values()));
-        newStatusComboBox.setConverter(new StringConverter<>() {
+        newStatusCombo.setItems(FXCollections.observableArrayList(OrderStatus.values()));
+        newStatusCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(OrderStatus status) {
                 return status == null ? "" : OrderStatusDisplay.name(status);
@@ -116,7 +122,7 @@ public class ChangeOrderStatusController implements DataReceiver<OrderStatusChan
         Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
         alert.setTitle("Изменение статуса");
         alert.setHeaderText(null);
-        alert.initOwner(changeButton.getScene().getWindow());
+        alert.initOwner(changeBtn.getScene().getWindow());
         alert.showAndWait();
     }
 }

@@ -8,7 +8,7 @@
     -fx-max-width: 380;
     -fx-pref-height: 280;
     -fx-max-height: 280;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 60, 0, 0, 20);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 60, 0, 0, 20);
 }
 
 .dialog-root.wide {
@@ -51,6 +51,7 @@
     -fx-padding: 0;
     -fx-alignment: CENTER;
 }
+
 .dialog-close:hover {
     -fx-background-color: #e2e8f0;
 }
@@ -69,8 +70,14 @@
     -fx-alignment: CENTER;
     -fx-padding: 0 0 16 0;
 }
-.dialog-title-plain.error   { -fx-text-fill: #ef4444; }
-.dialog-title-plain.success { -fx-text-fill: #10b981; }
+
+.dialog-title-plain.error {
+    -fx-text-fill: #ef4444;
+}
+
+.dialog-title-plain.success {
+    -fx-text-fill: #10b981;
+}
 
 /* Эмодзи */
 .dialog-emoji {
@@ -164,9 +171,11 @@
     -fx-text-fill: -text-secondary;
     -fx-prompt-text-fill: #9ca3af;
 }
+
 .form-input:focused {
     -fx-border-color: -primary;
 }
+
 .form-input.field-error {
     -fx-border-color: #ef4444;
 }
@@ -182,15 +191,18 @@
     -fx-prompt-text-fill: #9ca3af;
     -fx-wrap-text: true;
 }
+
 .form-textarea .content {
     -fx-background-color: white;
     -fx-background-radius: 10;
     -fx-padding: 12 16 12 16;
 }
+
 .form-textarea .scroll-pane,
 .form-textarea .scroll-pane .viewport {
     -fx-background-color: transparent;
 }
+
 .form-textarea:focused {
     -fx-border-color: -primary;
 }
@@ -205,20 +217,25 @@
     -fx-pref-width: 10000;
     -fx-max-width: Infinity;
 }
+
 .form-select .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 8 8 8 8;
     -fx-text-fill: -text-secondary;
 }
+
 .form-select .arrow-button {
     -fx-background-color: transparent;
 }
+
 .form-select .arrow {
     -fx-background-color: -text-muted;
 }
+
 .form-select:focused {
     -fx-border-color: -primary;
 }
+
 .form-select.field-error {
     -fx-border-color: #ef4444;
 }

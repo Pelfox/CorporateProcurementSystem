@@ -11,24 +11,24 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
 
 import java.util.List;
 import java.util.Locale;
 
-public class StatisticsController {
-
-    @FXML private TilePane statCardsPane;
-    @FXML private PieChart statusPieChart;
-    @FXML private VBox statusLegendBox;
-    @FXML private BarChart<String, Number> warehouseStockChart;
-    @FXML private CategoryAxis warehouseAxis;
-    @FXML private NumberAxis stockAxis;
+public class StatisticsController extends PageController {
 
     private final StatisticsService statisticsService;
+    @FXML
+    private Label usersCountLabel, productsCountLabel, categoriesCountLabel, warehousesCountLabel,
+            ordersCountLabel, activeOrdersLabel, totalSumLabel;
+    @FXML
+    private PieChart statusPieChart;
+    @FXML
+    private BarChart<String, Number> stockBarChart;
+    @FXML
+    private CategoryAxis warehouseAxis;
+    @FXML
+    private NumberAxis quantityAxis;
 
     public StatisticsController(StatisticsService statisticsService) {
         this.statisticsService = statisticsService;
@@ -36,11 +36,11 @@ public class StatisticsController {
 
     @FXML
     public void initialize() {
-        statusPieChart.setLegendVisible(false);
+        statusPieChart.setLegendVisible(true);
         statusPieChart.setLabelsVisible(false);
-        warehouseStockChart.setLegendVisible(false);
+        stockBarChart.setLegendVisible(false);
         warehouseAxis.setLabel("Склад");
-        stockAxis.setLabel("Остаток, шт.");
+        quantityAxis.setLabel("Остаток, шт.");
         loadData();
     }
 
@@ -52,25 +52,13 @@ public class StatisticsController {
     }
 
     private void buildCards(SystemStatistics stats) {
-        statCardsPane.getChildren().setAll(
-                statCard(String.valueOf(stats.totalUsers()), "Пользователей"),
-                statCard(String.valueOf(stats.totalProducts()), "Товаров"),
-                statCard(String.valueOf(stats.totalCategories()), "Категорий"),
-                statCard(String.valueOf(stats.totalWarehouses()), "Складов"),
-                statCard(String.valueOf(stats.totalOrders()), "Заказов"),
-                statCard(String.valueOf(stats.activeOrders()), "Активных заказов"),   // метод рекорда
-                statCard(MoneyFormat.format(stats.totalOrderValue()) + " ₽", "Общая стоимость"));
-    }
-
-    private VBox statCard(String value, String caption) {
-        Label valueLabel = new Label(value);
-        valueLabel.getStyleClass().add("stat-card-value");
-        Label captionLabel = new Label(caption);
-        captionLabel.getStyleClass().add("stat-card-caption");
-        VBox card = new VBox(valueLabel, captionLabel);
-        card.getStyleClass().add("stat-card");
-        card.setPrefSize(170, 92);
-        return card;
+        usersCountLabel.setText(String.valueOf(stats.totalUsers()));
+        productsCountLabel.setText(String.valueOf(stats.totalProducts()));
+        categoriesCountLabel.setText(String.valueOf(stats.totalCategories()));
+        warehousesCountLabel.setText(String.valueOf(stats.totalWarehouses()));
+        ordersCountLabel.setText(String.valueOf(stats.totalOrders()));
+        activeOrdersLabel.setText(String.valueOf(stats.activeOrders()));
+        totalSumLabel.setText(MoneyFormat.format(stats.totalOrderValue()) + " ₽");
     }
 
     private void buildStatusChart(SystemStatistics stats) {
@@ -94,18 +82,6 @@ public class StatisticsController {
             data.add(pie);
         }
         statusPieChart.setData(data);
-
-        statusLegendBox.getChildren().setAll(slices.stream().map(this::legendRow).toList());
-    }
-
-    private HBox legendRow(StatusSlice slice) {
-        Region swatch = new Region();
-        swatch.getStyleClass().addAll("legend-swatch", "pie-" + slice.key());
-        Label label = new Label(OrderStatusDisplay.name(slice.status()) + " · " + slice.count());
-        label.getStyleClass().add("legend-label");
-        HBox row = new HBox(swatch, label);
-        row.getStyleClass().add("status-legend-row");
-        return row;
     }
 
     private void buildWarehouseChart(List<StatisticsService.WarehouseStock> stocks) {
@@ -114,10 +90,12 @@ public class StatisticsController {
         for (StatisticsService.WarehouseStock stock : stocks) {
             series.getData().add(new XYChart.Data<>(stock.warehouseName(), stock.quantity()));
         }
-        warehouseStockChart.getData().setAll(series);
+        stockBarChart.getData().setAll(List.of(series));
     }
 
     private record StatusSlice(OrderStatus status, long count) {
-        String key() { return status().name().toLowerCase(Locale.ROOT); }
+        String key() {
+            return status().name().toLowerCase(Locale.ROOT);
+        }
     }
 }

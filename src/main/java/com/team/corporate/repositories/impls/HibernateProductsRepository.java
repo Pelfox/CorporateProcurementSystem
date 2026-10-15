@@ -2,6 +2,7 @@ package com.team.corporate.repositories.impls;
 
 import com.team.corporate.entities.Product;
 import com.team.corporate.repositories.ProductsRepository;
+import jakarta.persistence.LockModeType;
 import org.hibernate.SessionFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,6 +45,13 @@ public class HibernateProductsRepository implements ProductsRepository {
                 session.createSelectionQuery(SELECT + " WHERE p.id = :id", Product.class)
                         .setParameter("id", id)
                         .uniqueResultOptional());
+    }
+
+    @Override
+    public Optional<Product> getByIdForUpdate(@NotNull UUID id) {
+        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+                session.createSelectionQuery("SELECT p FROM Product p WHERE p.id = :id", Product.class)
+                        .setParameter("id", id).setLockMode(LockModeType.PESSIMISTIC_WRITE).uniqueResultOptional());
     }
 
     @Override

@@ -18,6 +18,9 @@ public interface ProductsRepository {
     Optional<Product> getById(@NotNull UUID id);
 
     @NotNull
+    Optional<Product> getByIdForUpdate(@NotNull UUID id);
+
+    @NotNull
     Optional<Product> getBySKU(@NotNull String sku);
 
     @NotNull

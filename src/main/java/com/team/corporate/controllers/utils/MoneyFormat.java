@@ -6,9 +6,13 @@ import java.text.DecimalFormatSymbols;
 
 public final class MoneyFormat {
     private static final DecimalFormat FORMAT = build();
-    private MoneyFormat() {}
 
-    public static String format(BigDecimal amount) { return FORMAT.format(amount); }
+    private MoneyFormat() {
+    }
+
+    public static String format(BigDecimal amount) {
+        return FORMAT.format(amount);
+    }
 
     private static DecimalFormat build() {
         DecimalFormatSymbols s = new DecimalFormatSymbols();

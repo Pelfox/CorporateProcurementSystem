@@ -8,7 +8,7 @@
     -fx-padding: 22 20 22 20;
     -fx-min-height: 68;
     -fx-alignment: CENTER;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 6, 0, 0, 2);
     -fx-cursor: default;
 }
 
@@ -21,14 +21,53 @@
     -fx-alignment: CENTER;
 }
 
+.category-card-count {
+    -fx-text-fill: white;
+}
+
+.category-card:selected {
+    -fx-border-color: -text-main;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+}
+
 /* Цвета для карточек категорий */
-.cat-purple { -fx-background-color: linear-gradient(to bottom right, #7c3aed, #a855f7); }
-.cat-orange { -fx-background-color: linear-gradient(to bottom right, #f97316, #fb923c); }
-.cat-teal   { -fx-background-color: linear-gradient(to bottom right, #14b8a6, #5eead4); }
-.cat-green  { -fx-background-color: linear-gradient(to bottom right, #22c55e, #86efac); }
-.cat-indigo { -fx-background-color: linear-gradient(to bottom right, #6366f1, #a5b4fc); }
-.cat-cyan   { -fx-background-color: linear-gradient(to bottom right, #06b6d4, #67e8f9); }
-.cat-red    { -fx-background-color: linear-gradient(to bottom right, #ef4444, #f87171); }
-.cat-blue   { -fx-background-color: linear-gradient(to bottom right, #2563eb, #60a5fa); }
-.cat-rose   { -fx-background-color: linear-gradient(to bottom right, #e11d48, #fb7185); }
-.cat-amber  { -fx-background-color: linear-gradient(to bottom right, #d97706, #fbbf24); }
+.cat-purple {
+    -fx-background-color: linear-gradient(to bottom right, #7c3aed, #a855f7);
+}
+
+.cat-orange {
+    -fx-background-color: linear-gradient(to bottom right, #f97316, #fb923c);
+}
+
+.cat-teal {
+    -fx-background-color: linear-gradient(to bottom right, #14b8a6, #5eead4);
+}
+
+.cat-green {
+    -fx-background-color: linear-gradient(to bottom right, #22c55e, #86efac);
+}
+
+.cat-indigo {
+    -fx-background-color: linear-gradient(to bottom right, #6366f1, #a5b4fc);
+}
+
+.cat-cyan {
+    -fx-background-color: linear-gradient(to bottom right, #06b6d4, #67e8f9);
+}
+
+.cat-red {
+    -fx-background-color: linear-gradient(to bottom right, #ef4444, #f87171);
+}
+
+.cat-blue {
+    -fx-background-color: linear-gradient(to bottom right, #2563eb, #60a5fa);
+}
+
+.cat-rose {
+    -fx-background-color: linear-gradient(to bottom right, #e11d48, #fb7185);
+}
+
+.cat-amber {
+    -fx-background-color: linear-gradient(to bottom right, #d97706, #fbbf24);
+}

@@ -1,12 +1,14 @@
 package com.team.corporate.controllers.modals;
 
+import com.team.corporate.controllers.dialog.DataReceiver;
+import com.team.corporate.controllers.dialog.ResultCarrier;
 import com.team.corporate.controllers.requests.ProductEditorRequest;
+import com.team.corporate.controllers.utils.MoneyInput;
+import com.team.corporate.controllers.utils.TextLengthInput;
 import com.team.corporate.entities.Category;
 import com.team.corporate.entities.Product;
 import com.team.corporate.services.CategoriesService;
 import com.team.corporate.services.ProductsService;
-import com.team.corporate.controllers.dialog.DataReceiver;
-import com.team.corporate.controllers.dialog.ResultCarrier;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,36 +19,45 @@ import javafx.stage.Window;
 import javafx.util.StringConverter;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 public class ProductEditorController implements DataReceiver<ProductEditorRequest>, ResultCarrier<UUID> {
-    @FXML private TextField nameField;
-    @FXML private TextField skuField;
-    @FXML private ComboBox<Category> categoryComboBox;
-    @FXML private TextField priceField;
-    @FXML private Button saveButton;
-    @FXML private Button cancelButton;
-
-    private final ProductsService productsService;
-    private final CategoriesService categoriesService;
-
     private static final Pattern SKU_INPUT = Pattern.compile("[A-Z0-9-]{0,40}");
     private static final Pattern SKU_FORMAT = Pattern.compile("[A-Z0-9]{3,10}(-[A-Z0-9]{3,10})*");
-    private static final Pattern MONEY_INPUT = Pattern.compile("[0-9]{0,8}([.,][0-9]{0,2})?");
-
-    private final TextFormatter<BigDecimal> priceFormatter =
-            new TextFormatter<>(moneyConverter(), null, moneyFilter());
-
+    private final ProductsService productsService;
+    private final CategoriesService categoriesService;
+    @FXML
+    private TextField nameField;
+    @FXML
+    private TextField skuField;
+    @FXML
+    private Label nameError;
+    @FXML
+    private ComboBox<Category> categoryCombo;
+    @FXML
+    private TextField priceField;
+    @FXML
+    private Button saveBtn;
+    @FXML
+    private Button cancelBtn;
     private ProductEditorRequest request;
     private UUID savedProductId;
 
     public ProductEditorController(ProductsService productsService, CategoriesService categoriesService) {
         this.productsService = productsService;
         this.categoriesService = categoriesService;
+    }
+
+    private static UnaryOperator<TextFormatter.Change> skuFilter() {
+        return change -> {
+            if (change.getText() != null && !change.getText().isEmpty()) {
+                change.setText(change.getText().toUpperCase(java.util.Locale.ROOT));
+            }
+            return SKU_INPUT.matcher(TextLengthInput.proposedText(change)).matches() ? change : null;
+        };
     }
 
     @Override
@@ -66,29 +77,28 @@ public class ProductEditorController implements DataReceiver<ProductEditorReques
     public void initialize() {
         setupInputs();
 
-        saveButton.disableProperty().bind(Bindings.createBooleanBinding(
+        saveBtn.disableProperty().bind(Bindings.createBooleanBinding(
                 this::isFormInvalid,
                 nameField.textProperty(),
                 skuField.textProperty(),
-                categoryComboBox.valueProperty(),
-                priceFormatter.valueProperty()));
+                categoryCombo.valueProperty(),
+                priceField.textProperty()));
     }
 
     @FXML
     private void onSaveClick() {
         if (request == null) {
-            throw new IllegalStateException("Режим окна не инициализирован (payload не передан).");
+            return;
         }
 
-        priceField.commitValue();
         if (isFormInvalid()) {
             return;
         }
 
-        String name = nameField.getText().strip();
-        String sku = skuField.getText().strip();
-        UUID categoryId = categoryComboBox.getValue().getId();
-        BigDecimal price = priceFormatter.getValue();
+        String name = TextLengthInput.text(nameField).strip();
+        String sku = TextLengthInput.text(skuField).strip();
+        UUID categoryId = categoryCombo.getValue().getId();
+        BigDecimal price = MoneyInput.value(priceField);
 
         try {
             Product saved = request.isEditing()
@@ -108,13 +118,13 @@ public class ProductEditorController implements DataReceiver<ProductEditorReques
 
     private void setupInputs() {
         skuField.setTextFormatter(new TextFormatter<>(skuFilter()));
-        priceField.setTextFormatter(priceFormatter);
-        priceField.textProperty().addListener((obs, old, text) -> priceField.commitValue());
+        TextLengthInput.configure(nameField, null, nameError, "Название товара");
+        MoneyInput.configure(priceField);
         ObservableList<Category> categories =
                 FXCollections.observableArrayList(categoriesService.getAll());
         categories.sort(Comparator.comparing(Category::getName));
-        categoryComboBox.setItems(categories);
-        categoryComboBox.setConverter(new StringConverter<>() {
+        categoryCombo.setItems(categories);
+        categoryCombo.setConverter(new StringConverter<>() {
             @Override
             public String toString(Category category) {
                 return category != null ? category.getName() : "";
@@ -132,65 +142,27 @@ public class ProductEditorController implements DataReceiver<ProductEditorReques
                 .orElseThrow(() -> new IllegalStateException("Редактируемый товар не найден. Возможно, он был удалён."));
         nameField.setText(product.getName());
         skuField.setText(product.getSku());
-        priceFormatter.setValue(product.getPrice());
+        priceField.setText(product.getPrice().toPlainString().replace('.', ','));
         if (product.getCategory() != null) {
             UUID categoryId = product.getCategory().getId();
-            categoryComboBox.getItems().stream()
+            categoryCombo.getItems().stream()
                     .filter(category -> category.getId().equals(categoryId))
                     .findFirst()
-                    .ifPresent(categoryComboBox::setValue);
+                    .ifPresent(categoryCombo::setValue);
         }
     }
 
     private boolean isFormInvalid() {
-        return nameField.getText().isBlank()
-                || !SKU_FORMAT.matcher(skuField.getText()).matches()
-                || categoryComboBox.getValue() == null
-                || priceFormatter.getValue() == null
-                || priceFormatter.getValue().signum() <= 0;
-    }
-
-    private static UnaryOperator<TextFormatter.Change> skuFilter() {
-        return change -> {
-            if (change.getText() != null && !change.getText().isEmpty()) {
-                change.setText(change.getText().toUpperCase());
-            }
-            return SKU_INPUT.matcher(change.getControlNewText()).matches() ? change : null;
-        };
-    }
-
-    private static UnaryOperator<TextFormatter.Change> moneyFilter() {
-        return change -> MONEY_INPUT.matcher(change.getControlNewText()).matches() ? change : null;
-    }
-
-    private static StringConverter<BigDecimal> moneyConverter() {
-        return new StringConverter<>() {
-            @Override
-            public String toString(BigDecimal value) {
-                return value == null ? ""
-                        : value.setScale(2, RoundingMode.HALF_UP).toPlainString().replace('.', ',');
-            }
-
-            @Override
-            public BigDecimal fromString(String text) {
-                String cleaned = text == null ? "" : text.strip();
-                if (cleaned.endsWith(",") || cleaned.endsWith(".")) {
-                    cleaned = cleaned.substring(0, cleaned.length() - 1);
-                }
-                if (cleaned.isEmpty()) {
-                    return null;
-                }
-                try {
-                    return new BigDecimal(cleaned.replace(',', '.'));
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            }
-        };
+        return !TextLengthInput.isValid(nameField, true)
+                || !TextLengthInput.isValid(skuField, true)
+                || skuField.getLength() > 40 || !SKU_FORMAT.matcher(skuField.getText()).matches()
+                || categoryCombo.getValue() == null || !categoryCombo.getItems().contains(categoryCombo.getValue())
+                || MoneyInput.value(priceField) == null
+                || MoneyInput.value(priceField).signum() <= 0;
     }
 
     private void close() {
-        Window window = saveButton.getScene().getWindow();
+        Window window = saveBtn.getScene().getWindow();
         if (window instanceof Stage stage) {
             stage.close();
         }
@@ -200,7 +172,7 @@ public class ProductEditorController implements DataReceiver<ProductEditorReques
         Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
         alert.setTitle("Товар");
         alert.setHeaderText(null);
-        alert.initOwner(saveButton.getScene().getWindow());
+        alert.initOwner(saveBtn.getScene().getWindow());
         alert.showAndWait();
     }
 }

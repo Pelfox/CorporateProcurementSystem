@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 
 public final class EntityValidation {
     public static final int TEXT_MAX_LENGTH = 255;
+    public static final int ORDER_LINE_MAX_QUANTITY = 100_000;
     public static final BigDecimal MAX_MONEY = new BigDecimal("99999999.99");
 
     public static <T> T requireNonNull(T value, @NotNull String name) {
@@ -34,12 +35,27 @@ public final class EntityValidation {
         if (value.length() > TEXT_MAX_LENGTH) {
             throw new IllegalArgumentException(name + ": максимум " + TEXT_MAX_LENGTH + " символов.");
         }
+        if (hasUnsupportedCharacters(value)) {
+            throw new IllegalArgumentException(name + ": недопустимые управляющие символы.");
+        }
         return value.strip();
+    }
+
+    public static boolean hasUnsupportedCharacters(String value) {
+        return value != null && value.chars().anyMatch(c ->
+                Character.isISOControl(c) && c != '\n' && c != '\r' && c != '\t');
     }
 
     public static int requireAtLeast(int value, int minimum, @NotNull String name) {
         if (value < minimum) {
             throw new IllegalArgumentException(name + ": минимум " + minimum + ".");
+        }
+        return value;
+    }
+
+    public static int requireOrderQuantity(int value) {
+        if (value < 1 || value > ORDER_LINE_MAX_QUANTITY) {
+            throw new IllegalArgumentException("Количество: введите число от 1 до " + ORDER_LINE_MAX_QUANTITY + ".");
         }
         return value;
     }

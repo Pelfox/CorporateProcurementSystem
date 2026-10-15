@@ -2,6 +2,7 @@ package com.team.corporate.services;
 
 import com.team.corporate.entities.Order;
 import com.team.corporate.entities.OrderStatus;
+import com.team.corporate.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,9 +47,10 @@ public interface OrdersService {
 
     record Line(UUID productId, int quantity) {
         public Line {
-            if (productId == null || quantity < 1) {
+            if (productId == null) {
                 throw new IllegalArgumentException("Некорректная позиция заказа.");
             }
+            EntityValidation.requireOrderQuantity(quantity);
         }
     }
 }

@@ -17,17 +17,22 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public class HubController implements DataReceiver<UserSession> {
-    @FXML private Button catalogCard;
-    @FXML private Button ordersCard;
-    @FXML private Button categoriesCard;
-    @FXML private Button usersCard;
-    @FXML private Button warehousesCard;
-    @FXML private Button statisticsCard;
-    @FXML private Button exportCard;
-
     private final Consumer<Page> onNavigate;
     private final CsvExportService csvExportService;
-
+    @FXML
+    private Button catalogCard;
+    @FXML
+    private Button ordersCard;
+    @FXML
+    private Button categoriesCard;
+    @FXML
+    private Button usersCard;
+    @FXML
+    private Button warehousesCard;
+    @FXML
+    private Button statisticsCard;
+    @FXML
+    private Button exportCard;
     private UserSession session;
 
     public HubController(Consumer<Page> onNavigate, CsvExportService csvExportService) {
@@ -37,7 +42,7 @@ public class HubController implements DataReceiver<UserSession> {
 
     @FXML
     public void initialize() {
-        catalogCard.setOnAction(event -> onNavigate.accept(Page.CATALOG));
+        catalogCard.setOnAction(event -> onNavigate.accept(Page.PRODUCTS));
         ordersCard.setOnAction(event -> onNavigate.accept(Page.MY_ORDERS));
         categoriesCard.setOnAction(event -> onNavigate.accept(Page.CATEGORIES));
         usersCard.setOnAction(event -> onNavigate.accept(Page.USERS));

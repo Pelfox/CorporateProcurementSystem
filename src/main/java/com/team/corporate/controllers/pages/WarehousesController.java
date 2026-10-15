@@ -3,6 +3,8 @@ package com.team.corporate.controllers.pages;
 import com.team.corporate.controllers.dialog.DialogService;
 import com.team.corporate.controllers.dialog.ViewType;
 import com.team.corporate.controllers.requests.WarehouseEditorRequest;
+import com.team.corporate.controllers.utils.TextLengthInput;
+import com.team.corporate.controllers.utils.UiErrors;
 import com.team.corporate.entities.Inventory;
 import com.team.corporate.entities.Product;
 import com.team.corporate.entities.Warehouse;
@@ -23,34 +25,41 @@ import javafx.scene.layout.VBox;
 
 import java.util.*;
 
-public class WarehousesController {
-
-    @FXML private TextField searchField;
-    @FXML private Button createButton;
-    @FXML private Button editButton;
-    @FXML private Button changeStockButton;
-    @FXML private Button deleteButton;
-
-    @FXML private VBox cardsBox;
-    @FXML private Label listPlaceholderLabel;
-    @FXML private TableView<Inventory> stockTable;
-    @FXML private TableColumn<Inventory, String> productColumn;
-    @FXML private TableColumn<Inventory, String> skuColumn;
-    @FXML private TableColumn<Inventory, Number> quantityColumn;
-    @FXML private Label stockPlaceholderLabel;
+public class WarehousesController extends PageController {
 
     private final WarehousesService warehousesService;
     private final InventoriesService inventoriesService;
     private final ProductsService productsService;
     private final DialogService dialogService;
-
     private final ObservableList<Warehouse> warehouses = FXCollections.observableArrayList();
     private final ObservableList<Inventory> stockItems = FXCollections.observableArrayList();
-
     private final Map<UUID, Product> productsById = new HashMap<>();
-
     private final ObjectProperty<Warehouse> selectedWarehouse = new SimpleObjectProperty<>(null);
     private final ToggleGroup cardGroup = new ToggleGroup();
+    @FXML
+    private TextField searchField;
+    @FXML
+    private Button createWarehouseBtn;
+    @FXML
+    private Button editWarehouseBtn;
+    @FXML
+    private Button changeQtyBtn;
+    @FXML
+    private Button deleteBtn;
+    @FXML
+    private VBox warehousesListItems;
+    @FXML
+    private Label listPlaceholderLabel;
+    @FXML
+    private TableView<Inventory> inventoryTable;
+    @FXML
+    private TableColumn<Inventory, String> productCol;
+    @FXML
+    private TableColumn<Inventory, String> skuCol;
+    @FXML
+    private TableColumn<Inventory, Number> qtyCol;
+    @FXML
+    private Label stockPlaceholderLabel;
 
     public WarehousesController(WarehousesService warehousesService,
                                 InventoriesService inventoriesService,
@@ -62,21 +71,27 @@ public class WarehousesController {
         this.dialogService = dialogService;
     }
 
+    private static String addressOf(Warehouse warehouse) {
+        String location = warehouse.getLocation();
+        return location == null || location.isBlank() ? "Адрес не указан" : location;
+    }
+
     @FXML
     public void initialize() {
+        TextLengthInput.configure(searchField);
         configureTable();
-        stockTable.setItems(stockItems);
+        inventoryTable.setItems(stockItems);
 
         cardGroup.selectedToggleProperty().addListener((obs, old, toggle) -> {
             selectedWarehouse.set(toggle == null ? null : (Warehouse) toggle.getUserData());
             reloadStock();
         });
 
-        editButton.disableProperty().bind(selectedWarehouse.isNull());
-        deleteButton.disableProperty().bind(selectedWarehouse.isNull());
+        editWarehouseBtn.disableProperty().bind(selectedWarehouse.isNull());
+        deleteBtn.disableProperty().bind(selectedWarehouse.isNull());
 
         listPlaceholderLabel.managedProperty().bind(listPlaceholderLabel.visibleProperty());
-        listPlaceholderLabel.visibleProperty().bind(Bindings.isEmpty(cardsBox.getChildren()));
+        listPlaceholderLabel.visibleProperty().bind(Bindings.isEmpty(warehousesListItems.getChildren()));
 
         stockPlaceholderLabel.textProperty().bind(Bindings.createStringBinding(
                 () -> selectedWarehouse.get() == null ? "Выберите склад" : "На этом складе нет остатков",
@@ -101,19 +116,25 @@ public class WarehousesController {
     }
 
     private void reloadStock() {
-        Warehouse selected = selectedWarehouse.get();
-        if (selected == null) {
-            stockItems.clear();
-            return;
+        try {
+            Warehouse selected = selectedWarehouse.get();
+            if (selected == null) {
+                stockItems.clear();
+                return;
+            }
+            stockItems.setAll(inventoriesService.getAllByWarehouse(selected.getId()));
+
+        } catch (RuntimeException e) {
+            UiErrors.show(inventoryTable.getScene() == null ? null : inventoryTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
-        stockItems.setAll(inventoriesService.getAllByWarehouse(selected.getId()));
     }
 
     private void rebuildCards() {
         UUID selectedId = selectedWarehouse.get() == null ? null : selectedWarehouse.get().getId();
 
         cardGroup.getToggles().clear();
-        cardsBox.getChildren().clear();
+        warehousesListItems.getChildren().clear();
 
         String query = searchField.getText();
         String q = query == null ? "" : query.strip().toLowerCase(Locale.ROOT);
@@ -122,11 +143,11 @@ public class WarehousesController {
             if (!q.isEmpty() && !matchesSearch(warehouse, q)) {
                 continue;
             }
-            cardsBox.getChildren().add(createCard(warehouse));
+            warehousesListItems.getChildren().add(createCard(warehouse));
         }
 
         if (selectedId != null) {
-            for (Node node : cardsBox.getChildren()) {
+            for (Node node : warehousesListItems.getChildren()) {
                 ToggleButton card = (ToggleButton) node;
                 if (((Warehouse) card.getUserData()).getId().equals(selectedId)) {
                     card.setSelected(true);
@@ -145,18 +166,17 @@ public class WarehousesController {
 
     private ToggleButton createCard(Warehouse warehouse) {
         Label nameLabel = new Label(warehouse.getName());
-        nameLabel.getStyleClass().add("warehouse-card-name");
+        nameLabel.getStyleClass().add("warehouse-item-name");
         nameLabel.setWrapText(true);
 
         Label addressLabel = new Label(addressOf(warehouse));
-        addressLabel.getStyleClass().add("warehouse-card-address");
+        addressLabel.getStyleClass().add("warehouse-item-address");
         addressLabel.setWrapText(true);
 
-        VBox content = new VBox(nameLabel, addressLabel);
-        content.getStyleClass().add("warehouse-card-content");
+        VBox content = new VBox(4, nameLabel, addressLabel);
 
         ToggleButton card = new ToggleButton();
-        card.getStyleClass().add("warehouse-card");
+        card.getStyleClass().add("warehouse-item");
         card.setToggleGroup(cardGroup);
         card.setUserData(warehouse);
         card.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
@@ -174,11 +194,11 @@ public class WarehousesController {
     }
 
     private void configureTable() {
-        productColumn.setCellValueFactory(cell ->
+        productCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(productNameOf(cell.getValue())));
-        skuColumn.setCellValueFactory(cell ->
+        skuCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(productSkuOf(cell.getValue())));
-        quantityColumn.setCellValueFactory(cell ->
+        qtyCol.setCellValueFactory(cell ->
                 new ReadOnlyIntegerWrapper(cell.getValue().getQuantity()));
     }
 
@@ -192,35 +212,42 @@ public class WarehousesController {
         return product == null ? "" : product.getSku();
     }
 
-    private static String addressOf(Warehouse warehouse) {
-        String location = warehouse.getLocation();
-        return location == null || location.isBlank() ? "Адрес не указан" : location;
-    }
-
     @FXML
     private void onCreateClick() {
-        Optional<UUID> saved = dialogService.showModal(
-                ViewType.CREATE_WAREHOUSE,
-                createButton.getScene().getWindow(),
-                WarehouseEditorRequest.forCreate());
-        if (saved.isPresent()) {
-            loadData();
+        try {
+            Optional<UUID> saved = dialogService.showModal(
+                    ViewType.CREATE_WAREHOUSE,
+                    createWarehouseBtn.getScene().getWindow(),
+                    WarehouseEditorRequest.forCreate());
+            if (saved.isPresent()) {
+                loadData();
+            }
+
+        } catch (RuntimeException e) {
+            UiErrors.show(inventoryTable.getScene() == null ? null : inventoryTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
     }
 
     @FXML
     private void onEditClick() {
-        Warehouse selected = selectedWarehouse.get();
-        if (selected == null) {
-            return;
+        try {
+            Warehouse selected = selectedWarehouse.get();
+            if (selected == null) {
+                return;
+            }
+            openEditDialog(selected);
+
+        } catch (RuntimeException e) {
+            UiErrors.show(inventoryTable.getScene() == null ? null : inventoryTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
-        openEditDialog(selected);
     }
 
     private void openEditDialog(Warehouse warehouse) {
         Optional<UUID> saved = dialogService.showModal(
                 ViewType.EDIT_WAREHOUSE,
-                editButton.getScene().getWindow(),
+                editWarehouseBtn.getScene().getWindow(),
                 WarehouseEditorRequest.forEdit(warehouse));
         if (saved.isPresent()) {
             loadData();
@@ -229,11 +256,17 @@ public class WarehousesController {
 
     @FXML
     private void onChangeStockClick() {
-        Optional<UUID> saved = dialogService.showModal(
-                ViewType.SET_STOCK,
-                changeStockButton.getScene().getWindow());
-        if (saved.isPresent()) {
-            reloadStock();
+        try {
+            Optional<UUID> saved = dialogService.showModal(
+                    ViewType.SET_STOCK,
+                    changeQtyBtn.getScene().getWindow());
+            if (saved.isPresent()) {
+                reloadStock();
+            }
+
+        } catch (RuntimeException e) {
+            UiErrors.show(inventoryTable.getScene() == null ? null : inventoryTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
     }
 
@@ -244,7 +277,8 @@ public class WarehousesController {
             return;
         }
 
-        // TODO: перед warehousesService.deleteWarehouse(...) открыть модалку подтверждения.
+
+        if (!dialogService.confirmDelete(inventoryTable.getScene().getWindow(), selected.getName())) return;
 
         try {
             warehousesService.deleteWarehouse(selected.getId());
@@ -258,7 +292,7 @@ public class WarehousesController {
         Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
         alert.setTitle("Склады и остатки");
         alert.setHeaderText(null);
-        alert.initOwner(stockTable.getScene().getWindow());
+        alert.initOwner(inventoryTable.getScene().getWindow());
         alert.showAndWait();
     }
 }

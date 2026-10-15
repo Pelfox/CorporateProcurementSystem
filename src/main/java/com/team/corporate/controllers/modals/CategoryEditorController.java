@@ -1,11 +1,11 @@
 package com.team.corporate.controllers.modals;
 
-import com.team.corporate.controllers.requests.CategoryEditorRequest;
-import com.team.corporate.entities.Category;
-import com.team.corporate.services.CategoriesService;
 import com.team.corporate.controllers.dialog.DataReceiver;
 import com.team.corporate.controllers.dialog.ResultCarrier;
-import com.team.corporate.utils.EntityValidation;
+import com.team.corporate.controllers.requests.CategoryEditorRequest;
+import com.team.corporate.controllers.utils.TextLengthInput;
+import com.team.corporate.entities.Category;
+import com.team.corporate.services.CategoriesService;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -15,12 +15,17 @@ import javafx.stage.Window;
 import java.util.UUID;
 
 public class CategoryEditorController implements DataReceiver<CategoryEditorRequest>, ResultCarrier<UUID> {
-    @FXML private TextField nameField;
-    @FXML private Button saveButton;
-    @FXML private Button cancelButton;
-
     private final CategoriesService categoriesService;
-
+    @FXML
+    private TextField nameField;
+    @FXML
+    private Label nameError;
+    @FXML
+    private Label nameLengthLabel;
+    @FXML
+    private Button saveBtn;
+    @FXML
+    private Button cancelBtn;
     private CategoryEditorRequest request;
     private UUID savedCategoryId;
 
@@ -45,7 +50,7 @@ public class CategoryEditorController implements DataReceiver<CategoryEditorRequ
     public void initialize() {
         setupInputs();
 
-        saveButton.disableProperty().bind(Bindings.createBooleanBinding(
+        saveBtn.disableProperty().bind(Bindings.createBooleanBinding(
                 this::isFormInvalid,
                 nameField.textProperty()));
     }
@@ -53,14 +58,14 @@ public class CategoryEditorController implements DataReceiver<CategoryEditorRequ
     @FXML
     private void onSaveClick() {
         if (request == null) {
-            throw new IllegalStateException("Режим окна не инициализирован (payload не передан).");
+            return;
         }
 
         if (isFormInvalid()) {
             return;
         }
 
-        String name = nameField.getText().strip();
+        String name = TextLengthInput.text(nameField).strip();
 
         try {
             Category saved = request.isEditing()
@@ -85,26 +90,25 @@ public class CategoryEditorController implements DataReceiver<CategoryEditorRequ
     }
 
     private boolean isFormInvalid() {
-        return nameField.getText().isBlank();
+        return !TextLengthInput.isValid(nameField, true);
     }
 
     private void close() {
-        Window window = saveButton.getScene().getWindow();
+        Window window = saveBtn.getScene().getWindow();
         if (window instanceof Stage stage) {
             stage.close();
         }
     }
 
     private void setupInputs() {
-        nameField.setTextFormatter(new TextFormatter<>(change ->
-                change.getControlNewText().length() <= EntityValidation.TEXT_MAX_LENGTH ? change : null));
+        TextLengthInput.configure(nameField, nameLengthLabel, nameError, "Название категории");
     }
 
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
         alert.setTitle("Категория");
         alert.setHeaderText(null);
-        alert.initOwner(saveButton.getScene().getWindow());
+        alert.initOwner(saveBtn.getScene().getWindow());
         alert.showAndWait();
     }
 }

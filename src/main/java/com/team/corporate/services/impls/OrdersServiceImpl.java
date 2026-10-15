@@ -19,19 +19,39 @@ public class OrdersServiceImpl implements OrdersService {
     private final OrderItemsRepository orderItemsRepository;
     private final AuditLogsRepository auditLogsRepository;
     private final Transactions transactions;
+    private final OrderStock stock;
 
     public OrdersServiceImpl(@NotNull OrdersRepository ordersRepository,
                              @NotNull UsersRepository usersRepository,
                              @NotNull ProductsRepository productsRepository,
                              @NotNull OrderItemsRepository orderItemsRepository,
                              @NotNull AuditLogsRepository auditLogsRepository,
-                             @NotNull Transactions transactions) {
+                             @NotNull Transactions transactions,
+                             @NotNull OrderStock stock) {
         this.ordersRepository = ordersRepository;
         this.usersRepository = usersRepository;
         this.productsRepository = productsRepository;
         this.orderItemsRepository = orderItemsRepository;
         this.auditLogsRepository = auditLogsRepository;
         this.transactions = transactions;
+        this.stock = stock;
+    }
+
+    private static Map<UUID, Long> quantities(List<Line> lines) {
+        Map<UUID, Long> quantities = new HashMap<>();
+        for (Line line : lines) quantities.merge(line.productId(), (long) line.quantity(), Long::sum);
+        return quantities;
+    }
+
+    private static List<Line> normalized(List<Line> lines) {
+        Map<UUID, Long> quantities = quantities(lines);
+        List<Line> result = new ArrayList<>();
+        quantities.forEach((product, count) -> {
+            if (count > EntityValidation.ORDER_LINE_MAX_QUANTITY)
+                throw new IllegalArgumentException("Слишком большое количество товара в заказе.");
+            result.add(new Line(product, count.intValue()));
+        });
+        return result;
     }
 
     @Override
@@ -49,6 +69,7 @@ public class OrdersServiceImpl implements OrdersService {
     public void deleteOrder(@NotNull UUID id) {
         EntityValidation.requireNonNull(id, "Идентификатор");
         transactions.execute(() -> {
+            if (ordersRepository.getByIdForUpdate(id).isEmpty()) return;
             // Сначала удаляем дочерние сущности, чтобы не нарушить Foreign Key
             for (OrderItem item : orderItemsRepository.getByOrderId(id)) {
                 orderItemsRepository.delete(item.getId());
@@ -65,16 +86,15 @@ public class OrdersServiceImpl implements OrdersService {
     @NotNull
     public Order updateOrder(@NotNull UUID id, @Nullable OrderStatus status, @Nullable String notes) {
         EntityValidation.requireNonNull(id, "Идентификатор");
-        Order order = ordersRepository.getById(id)
-                .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным идентификатором не найден"));
-        EntityValidation.optionalText(notes, "Примечание");
-        if (status != null) {
-            order.setStatus(status);
-        }
-        if (notes != null) {
-            order.setNotes(notes);
-        }
-        return ordersRepository.update(order);
+        return transactions.execute(() -> {
+            Order order = ordersRepository.getByIdForUpdate(id)
+                    .orElseThrow(() -> new OrderNotFoundException("Заказ с указанным идентификатором не найден"));
+            EntityValidation.optionalText(notes, "Примечание");
+            if (status != null && status != order.getStatus()) transitionStock(order, status);
+            if (status != null) order.setStatus(status);
+            if (notes != null) order.setNotes(notes);
+            return ordersRepository.update(order);
+        });
     }
 
     @Override
@@ -133,12 +153,14 @@ public class OrdersServiceImpl implements OrdersService {
         for (Line line : lines) {
             EntityValidation.requireNonNull(line, "Позиция заказа");
         }
-        List<Line> snapshot = List.copyOf(lines);
+        List<Line> snapshot = normalized(lines);
         if (snapshot.isEmpty()) {
             throw new IllegalArgumentException("Добавьте хотя бы один товар.");
         }
         EntityValidation.optionalText(notes, "Примечание");
         return transactions.execute(() -> {
+            usersRepository.getById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден."));
+            stock.requireAvailable(quantities(snapshot), null);
             Order order = createOrder(userId, OrderStatus.CREATED, notes);
             for (Line line : snapshot) {
                 addItem(order, line);
@@ -158,7 +180,7 @@ public class OrdersServiceImpl implements OrdersService {
         for (Line line : lines) {
             EntityValidation.requireNonNull(line, "Позиция заказа");
         }
-        List<Line> snapshot = List.copyOf(lines);
+        List<Line> snapshot = normalized(lines);
         if (snapshot.isEmpty()) {
             throw new IllegalArgumentException("В заказе должна остаться хотя бы одна позиция.");
         }
@@ -166,9 +188,11 @@ public class OrdersServiceImpl implements OrdersService {
 
         transactions.execute(() -> {
             Order order = editable(userId, orderId);
+            stock.requireAvailable(quantities(snapshot), orderId);
             Map<UUID, OrderItem> current = new LinkedHashMap<>();
             for (OrderItem item : orderItemsRepository.getByOrderId(orderId)) {
-                current.put(item.getProduct().getId(), item);
+                if (current.putIfAbsent(item.getProduct().getId(), item) != null)
+                    orderItemsRepository.delete(item.getId());
             }
             for (Line line : snapshot) {
                 OrderItem existing = current.remove(line.productId());
@@ -209,7 +233,13 @@ public class OrdersServiceImpl implements OrdersService {
         EntityValidation.requireNonNull(userId, "Идентификатор пользователя");
         EntityValidation.requireNonNull(orderId, "Идентификатор заказа");
         EntityValidation.requireNonNull(line, "Позиция заказа");
-        transactions.execute(() -> addItem(editable(userId, orderId), line));
+        transactions.execute(() -> {
+            Order order = editable(userId, orderId);
+            Map<UUID, Long> requested = stock.quantities(orderId);
+            requested.merge(line.productId(), (long) line.quantity(), Long::sum);
+            stock.requireAvailable(requested, orderId);
+            addItem(order, line);
+        });
     }
 
     @Override
@@ -230,6 +260,10 @@ public class OrdersServiceImpl implements OrdersService {
                 }
                 orderItemsRepository.delete(itemId);
             } else {
+                EntityValidation.requireOrderQuantity(quantity);
+                Map<UUID, Long> requested = stock.quantities(orderId);
+                requested.merge(item.getProduct().getId(), (long) quantity - item.getQuantity(), Long::sum);
+                stock.requireAvailable(requested, orderId);
                 item.setQuantity(quantity);
                 orderItemsRepository.update(item);
             }
@@ -252,9 +286,22 @@ public class OrdersServiceImpl implements OrdersService {
             if (order.getStatus() == status) {
                 return;
             }
+            transitionStock(order, status);
             auditLogsRepository.add(new AuditLog(order, manager, order.getStatus(), status));
             order.setStatus(status);
             ordersRepository.update(order);
         });
     }
+
+    private void transitionStock(Order order, OrderStatus status) {
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            throw new IllegalArgumentException("Доставленный заказ нельзя перевести в другой статус.");
+        }
+        if (status == OrderStatus.DELIVERED) {
+            stock.deliver(order.getId());
+        } else if (OrderStock.reservesStock(status) && !OrderStock.reservesStock(order.getStatus())) {
+            stock.requireAvailable(stock.quantities(order.getId()), order.getId());
+        }
+    }
+
 }

@@ -3,7 +3,8 @@ package com.team.corporate.controllers.utils;
 import com.team.corporate.entities.OrderStatus;
 
 public final class OrderStatusDisplay {
-    private OrderStatusDisplay() {}
+    private OrderStatusDisplay() {
+    }
 
     public static String name(OrderStatus status) {
         return switch (status) {
@@ -16,10 +17,10 @@ public final class OrderStatusDisplay {
 
     public static String badgeStyle(OrderStatus status) {
         return switch (status) {
-            case CREATED -> "order-created";
-            case APPROVED -> "order-approved";
-            case DELIVERED -> "order-delivered";
-            case CANCELLED -> "order-cancelled";
+            case CREATED -> "status-created";
+            case APPROVED -> "status-approved";
+            case DELIVERED -> "status-delivered";
+            case CANCELLED -> "status-cancelled";
         };
     }
 }

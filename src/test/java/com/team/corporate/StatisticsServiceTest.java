@@ -31,12 +31,12 @@ class StatisticsServiceTest extends BaseServiceTest {
     @BeforeEach
     void setUpStatistics() {
         statistics = new StatisticsServiceImpl(usersRepository, productsRepository, categoriesRepository,
-                warehousesRepository, ordersRepository, inventoriesRepository, transactions);
+                warehousesRepository, ordersRepository, orderItemsRepository, inventoriesRepository, transactions);
     }
 
     @Test
     void emptyDatabaseHasZeroStatistics() {
-        assertEquals(new SystemStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0), statistics.getStatistics());
+        assertEquals(new SystemStatistics(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BigDecimal.ZERO), statistics.getStatistics());
         assertEquals(0, statistics.getStatistics().activeOrders());
     }
 
@@ -52,7 +52,7 @@ class StatisticsServiceTest extends BaseServiceTest {
         var otherWarehouse = warehousesService.createWarehouse("Резервный", null);
         inventoriesService.placeProductInWarehouse(product.getId(), warehouse.getId(), Integer.MAX_VALUE);
         inventoriesService.placeProductInWarehouse(product.getId(), otherWarehouse.getId(), 10);
-        inventoriesService.placeProductInWarehouse(otherProduct.getId(), warehouse.getId(), 0);
+        inventoriesService.placeProductInWarehouse(otherProduct.getId(), warehouse.getId(), 3);
         var created = ordersService.createOrder(buyer.getId(), OrderStatus.CREATED, null);
         ordersService.createOrder(manager.getId(), OrderStatus.CREATED, null);
         ordersService.createOrder(buyer.getId(), OrderStatus.APPROVED, null);
@@ -64,7 +64,7 @@ class StatisticsServiceTest extends BaseServiceTest {
         var summary = statistics.getStatistics();
 
         assertEquals(new SystemStatistics(2, 2, 2, 2, 5, 2, 1, 1, 1,
-                (long) Integer.MAX_VALUE + 10), summary);
+                (long) Integer.MAX_VALUE + 13, new BigDecimal("23.00")), summary);
         assertEquals(3, summary.activeOrders());
         assertEquals(summary.totalOrders(), summary.activeOrders() + summary.deliveredOrders() + summary.cancelledOrders());
     }

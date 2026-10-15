@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-
-<StackPane xmlns="http://javafx.com/javafx/25"
-           xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="com.team.corporate.fx.controller.LoginController"
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           xmlns="http://javafx.com/javafx/25"
+           fx:controller="com.team.corporate.controllers.pages.LoginController"
            stylesheets="@/css/styles.css"
            styleClass="login-root"
            alignment="CENTER">
@@ -41,7 +36,7 @@
                 <Label text="Имя пользователя" styleClass="login-form-label"/>
                 <Label text="*" styleClass="login-form-required"/>
             </HBox>
-            <TextField fx:id="usernameField" styleClass="login-input"
+            <TextField fx:id="usernameField" onAction="#onLoginClick" styleClass="login-input"
                        promptText="Введите имя пользователя"/>
             <Label fx:id="errorLabel"
                    text="Пользователь не найден"
@@ -50,7 +45,7 @@
         </VBox>
 
         <!-- Кнопка входа -->
-        <Button fx:id="loginBtn" text="Войти в систему"
+        <Button fx:id="loginBtn" onAction="#onLoginClick" text="Войти в систему"
                 styleClass="btn, btn-primary"
                 maxWidth="Infinity"/>
 

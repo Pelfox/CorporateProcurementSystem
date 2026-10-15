@@ -1,6 +1,8 @@
 package com.team.corporate;
 
-import com.team.corporate.entities.*;
+import com.team.corporate.entities.OrderStatus;
+import com.team.corporate.entities.Product;
+import com.team.corporate.entities.UserRole;
 import com.team.corporate.services.CsvExportService;
 import com.team.corporate.services.impls.CsvExportServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -155,7 +157,11 @@ class CsvExportServiceTest extends BaseServiceTest {
         var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
         Path previous = exporter.exportAll(manager.getId(), directory);
         String original = Files.readString(previous.resolve("orders.csv"));
-        ordersService.createOrder(manager.getId(), OrderStatus.CREATED, "bad\u0000note");
+        var order = ordersService.createOrder(manager.getId(), OrderStatus.CREATED, "Legacy note");
+        // Simulate corrupt legacy data, bypassing the validation used by current forms and services.
+        sessionFactory.inTransaction(session -> session.createMutationQuery(
+                        "update Order set notes = :notes where id = :id")
+                .setParameter("notes", "bad\u0000note").setParameter("id", order.getId()).executeUpdate());
 
         var error = assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), directory));
         assertTrue(error.getMessage().contains("orders.csv"));

@@ -85,13 +85,34 @@ public class UsersServiceTest extends BaseServiceTest {
     @DisplayName("Удаление пользователя: должен исчезнуть из базы")
     void deleteUser_shouldRemoveUser() {
         // given
+        User manager = usersService.createUser("manager", UserRole.MANAGER);
         User user = usersService.createUser("delete_me", UserRole.USER);
 
         // when
-        usersService.deleteUser(user.getId());
+        usersService.deleteUser(manager.getId(), user.getId());
 
         // then
         assertTrue(usersService.getUser(user.getId()).isEmpty(), "Пользователь должен быть удален");
+    }
+
+    @Test
+    void deleteUser_shouldRejectSelfDeletion() {
+        User manager = usersService.createUser("manager", UserRole.MANAGER);
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> usersService.deleteUser(manager.getId(), manager.getId()));
+
+        assertEquals("Нельзя удалить свою учётную запись.", error.getMessage());
+        assertTrue(usersService.getUser(manager.getId()).isPresent());
+    }
+
+    @Test
+    void deleteUser_shouldRejectOrdinaryUser() {
+        User actor = usersService.createUser("user", UserRole.USER);
+        User other = usersService.createUser("other", UserRole.USER);
+
+        assertThrows(IllegalArgumentException.class, () -> usersService.deleteUser(actor.getId(), other.getId()));
+        assertTrue(usersService.getUser(other.getId()).isPresent());
     }
 
     @Test

@@ -60,11 +60,12 @@ public class HibernateOrdersRepository implements OrdersRepository {
     @Override
     @NotNull
     public Optional<Order> getByIdForUpdate(@NotNull UUID id) {
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
-                session.createSelectionQuery(SELECT + " WHERE o.id = :id", Order.class)
-                        .setParameter("id", id)
-                        .setLockMode(LockModeType.PESSIMISTIC_WRITE)
-                        .uniqueResultOptional());
+        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+            session.flush();
+            Order order = session.find(Order.class, id);
+            if (order != null) session.refresh(order, LockModeType.PESSIMISTIC_WRITE);
+            return Optional.ofNullable(order);
+        });
     }
 
     @Override

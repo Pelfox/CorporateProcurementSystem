@@ -1,58 +1,85 @@
 package com.team.corporate.controllers.pages;
 
+import com.team.corporate.controllers.dialog.DataReceiver;
 import com.team.corporate.controllers.dialog.DialogService;
 import com.team.corporate.controllers.dialog.ViewType;
 import com.team.corporate.controllers.requests.UserEditorRequest;
+import com.team.corporate.controllers.session.UserSession;
 import com.team.corporate.controllers.utils.DateTimeFormat;
+import com.team.corporate.controllers.utils.TextLengthInput;
+import com.team.corporate.controllers.utils.UiErrors;
 import com.team.corporate.entities.User;
 import com.team.corporate.entities.UserRole;
 import com.team.corporate.services.UsersService;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.util.StringConverter;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class UsersController {
-
-    @FXML private TextField searchField;
-    @FXML private ComboBox<RoleFilter> roleComboBox;
-    @FXML private Button addButton;
-    @FXML private Button editButton;
-    @FXML private Button deleteButton;
-
-    @FXML private TableView<User> usersTable;
-    @FXML private TableColumn<User, String> numberColumn;
-    @FXML private TableColumn<User, String> usernameColumn;
-    @FXML private TableColumn<User, UserRole> roleColumn;
-    @FXML private TableColumn<User, LocalDateTime> createdColumn;
+public class UsersController extends PageController implements DataReceiver<UserSession> {
 
     private final UsersService usersService;
     private final DialogService dialogService;
-
     private final ObservableList<User> users = FXCollections.observableArrayList();
+    private final ObjectProperty<UserSession> session = new SimpleObjectProperty<>();
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ToggleGroup roleTabs;
+    @FXML
+    private ToggleButton allTab, userTab, managerTab;
+    @FXML
+    private Button addBtn;
+    @FXML
+    private Button editBtn;
+    @FXML
+    private Button deleteBtn;
+    @FXML
+    private TableView<User> usersTable;
+    @FXML
+    private TableColumn<User, String> numCol;
+    @FXML
+    private TableColumn<User, String> nameCol;
+    @FXML
+    private TableColumn<User, UserRole> roleCol;
+    @FXML
+    private TableColumn<User, LocalDateTime> dateCol;
 
     public UsersController(UsersService usersService, DialogService dialogService) {
         this.usersService = usersService;
         this.dialogService = dialogService;
     }
 
+    private static String shortId(UUID id) {
+        return id.toString().substring(0, 8);
+    }
+
+    @Override
+    public void receiveData(UserSession session) {
+        this.session.set(Objects.requireNonNull(session));
+    }
+
     @FXML
     public void initialize() {
+        TextLengthInput.configure(searchField);
         configureTable();
+        usersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         configureFilters();
         configureButtons();
         loadData();
 
-        createdColumn.setSortType(TableColumn.SortType.DESCENDING);
-        usersTable.getSortOrder().add(createdColumn);
+        dateCol.setSortType(TableColumn.SortType.DESCENDING);
+        usersTable.getSortOrder().add(dateCol);
     }
 
     private void loadData() {
@@ -60,15 +87,15 @@ public class UsersController {
     }
 
     private void configureTable() {
-        numberColumn.setCellValueFactory(cell ->
+        numCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(shortId(cell.getValue().getId())));
 
-        usernameColumn.setCellValueFactory(cell ->
+        nameCol.setCellValueFactory(cell ->
                 new ReadOnlyStringWrapper(cell.getValue().getUsername()));
 
-        roleColumn.setCellValueFactory(cell ->
+        roleCol.setCellValueFactory(cell ->
                 new ReadOnlyObjectWrapper<>(cell.getValue().getUserRole()));
-        roleColumn.setCellFactory(column -> new TableCell<>() {
+        roleCol.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(UserRole role, boolean empty) {
                 super.updateItem(role, empty);
@@ -76,9 +103,9 @@ public class UsersController {
             }
         });
 
-        createdColumn.setCellValueFactory(cell ->
+        dateCol.setCellValueFactory(cell ->
                 new ReadOnlyObjectWrapper<>(DateTimeFormat.toLocalDateTime(cell.getValue().getCreatedAt())));
-        createdColumn.setCellFactory(column -> new TableCell<>() {
+        dateCol.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(LocalDateTime value, boolean empty) {
                 super.updateItem(value, empty);
@@ -88,29 +115,41 @@ public class UsersController {
     }
 
     private void configureFilters() {
-        roleComboBox.setItems(FXCollections.observableArrayList(RoleFilter.all()));
-        roleComboBox.setConverter(new StringConverter<>() {
-            @Override public String toString(RoleFilter filter) { return filter == null ? "" : filter.label(); }
-            @Override public RoleFilter fromString(String string) { return null; }
-        });
+        allTab.setUserData(RoleFilter.ALL);
+        userTab.setUserData(new RoleFilter("USER", UserRole.USER));
+        managerTab.setUserData(new RoleFilter("MANAGER", UserRole.MANAGER));
 
         FilteredList<User> filtered = new FilteredList<>(users, p -> true);
         Runnable reapply = () -> filtered.setPredicate(this::matchesFilters);
         searchField.textProperty().addListener((obs, old, value) -> reapply.run());
-        roleComboBox.valueProperty().addListener((obs, old, value) -> reapply.run());
+        roleTabs.selectedToggleProperty().addListener((obs, old, value) -> reapply.run());
 
         SortedList<User> sorted = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(usersTable.comparatorProperty());
         usersTable.setItems(sorted);
 
-        roleComboBox.setValue(RoleFilter.ALL);
+        roleTabs.selectToggle(allTab);
     }
 
     private void configureButtons() {
-        editButton.disableProperty().bind(
+        editBtn.disableProperty().bind(
                 usersTable.getSelectionModel().selectedItemProperty().isNull());
-        deleteButton.disableProperty().bind(
-                usersTable.getSelectionModel().selectedItemProperty().isNull());
+        deleteBtn.disableProperty().bind(Bindings.createBooleanBinding(this::cannotDeleteSelected,
+                usersTable.getSelectionModel().selectedItemProperty(), session));
+        Tooltip deleteHint = new Tooltip();
+        deleteHint.textProperty().bind(Bindings.createStringBinding(() -> {
+            User selected = usersTable.getSelectionModel().getSelectedItem();
+            return selected != null && session.get() != null && selected.getId().equals(session.get().userId())
+                    ? "Нельзя удалить свою учётную запись." : "Удалить выбранного пользователя.";
+        }, usersTable.getSelectionModel().selectedItemProperty(), session));
+        deleteBtn.setTooltip(deleteHint);
+    }
+
+    private boolean cannotDeleteSelected() {
+        User selected = usersTable.getSelectionModel().getSelectedItem();
+        UserSession current = session.get();
+        return selected == null || current == null || current.role() != UserRole.MANAGER
+                || selected.getId().equals(current.userId());
     }
 
     private boolean matchesFilters(User user) {
@@ -124,45 +163,62 @@ public class UsersController {
             }
         }
 
-        RoleFilter filter = roleComboBox.getValue();
+        RoleFilter filter = roleTabs.getSelectedToggle() == null ? RoleFilter.ALL
+                : (RoleFilter) roleTabs.getSelectedToggle().getUserData();
         return filter == null || filter.role() == null || user.getUserRole() == filter.role();
     }
 
     @FXML
     private void onAddClick() {
-        Optional<UUID> saved = dialogService.showModal(
-                ViewType.CREATE_USER,
-                addButton.getScene().getWindow(),
-                UserEditorRequest.forCreate());
-        if (saved.isPresent()) {
-            loadData();
+        if (session.get() == null || session.get().role() != UserRole.MANAGER) return;
+        try {
+            Optional<UUID> saved = dialogService.showModal(
+                    ViewType.CREATE_USER,
+                    addBtn.getScene().getWindow(),
+                    UserEditorRequest.forCreate());
+            if (saved.isPresent()) {
+                loadData();
+            }
+
+        } catch (RuntimeException e) {
+            UiErrors.show(usersTable.getScene() == null ? null : usersTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
     }
 
     @FXML
     private void onEditClick() {
-        User selected = usersTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            return;
-        }
-        Optional<UUID> saved = dialogService.showModal(
-                ViewType.EDIT_USER,
-                editButton.getScene().getWindow(),
-                UserEditorRequest.forEdit(selected));
-        if (saved.isPresent()) {
-            loadData();
+        if (session.get() == null || session.get().role() != UserRole.MANAGER) return;
+        try {
+            User selected = usersTable.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                return;
+            }
+            Optional<UUID> saved = dialogService.showModal(
+                    ViewType.EDIT_USER,
+                    editBtn.getScene().getWindow(),
+                    UserEditorRequest.forEdit(selected));
+            if (saved.isPresent()) {
+                loadData();
+            }
+
+        } catch (RuntimeException e) {
+            UiErrors.show(usersTable.getScene() == null ? null : usersTable.getScene().getWindow(),
+                    "Не удалось выполнить действие", e);
         }
     }
 
     @FXML
     private void onDeleteClick() {
         User selected = usersTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
+        if (cannotDeleteSelected()) {
             return;
         }
 
+        if (!dialogService.confirmDelete(usersTable.getScene().getWindow(), selected.getUsername())) return;
+
         try {
-            usersService.deleteUser(selected.getId());
+            usersService.deleteUser(session.get().userId(), selected.getId());
             loadData();
         } catch (RuntimeException e) {
             showAlert(e.getMessage() == null ? "Не удалось удалить пользователя." : e.getMessage());
@@ -188,9 +244,5 @@ public class UsersController {
             }
             return filters;
         }
-    }
-
-    private static String shortId(UUID id) {
-        return id.toString().substring(0, 8);
     }
 }

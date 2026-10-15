@@ -4,17 +4,11 @@
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.chart.PieChart?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
-<ScrollPane xmlns="http://javafx.com/javafx/25"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.team.corporate.fx.controller.StatisticsController"
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.StatisticsController"
             fitToWidth="true"
             styleClass="page-scroll">
 
@@ -22,7 +16,7 @@
 
         <!-- Кнопка Назад -->
         <HBox styleClass="page-header">
-            <Button text="←" styleClass="back-btn"/>
+            <Button fx:id="backBtn" onAction="#onBackClick" text="←" styleClass="back-btn"/>
             <Label text="Статистика" styleClass="page-title"/>
         </HBox>
 

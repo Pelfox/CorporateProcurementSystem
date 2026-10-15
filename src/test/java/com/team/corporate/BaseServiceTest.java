@@ -31,6 +31,7 @@ public abstract class BaseServiceTest {
     protected ProductsService productsService;
     protected CategoriesService categoriesService;
     protected OrdersService ordersService;
+    protected OrderStock stock;
     protected OrderItemsService orderItemsService;
     protected InventoriesService inventoriesService;
     protected WarehousesService warehousesService;
@@ -61,14 +62,16 @@ public abstract class BaseServiceTest {
         warehousesRepository = new HibernateWarehousesRepository(sessionFactory);
         auditLogsRepository = new HibernateAuditLogsRepository(sessionFactory);
 
+        stock = new OrderStock(productsRepository, inventoriesRepository, orderItemsRepository, transactions);
+
         usersService = new UsersServiceImpl(usersRepository);
         productsService = new ProductsServiceImpl(
                 productsRepository, categoriesRepository, orderItemsRepository, inventoriesRepository, transactions);
         categoriesService = new CategoriesServiceImpl(categoriesRepository, productsRepository, transactions);
         ordersService = new OrdersServiceImpl(
-                ordersRepository, usersRepository, productsRepository, orderItemsRepository, auditLogsRepository, transactions);
-        orderItemsService = new OrderItemsServiceImpl(ordersRepository, productsRepository, orderItemsRepository);
-        inventoriesService = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository);
+                ordersRepository, usersRepository, productsRepository, orderItemsRepository, auditLogsRepository, transactions, stock);
+        orderItemsService = new OrderItemsServiceImpl(ordersRepository, productsRepository, orderItemsRepository, transactions, stock);
+        inventoriesService = new InventoriesServiceImpl(productsRepository, warehousesRepository, inventoriesRepository, stock, transactions);
         warehousesService = new WarehousesServiceImpl(warehousesRepository);
         auditLogsService = new AuditLogsServiceImpl(usersRepository, ordersRepository, auditLogsRepository);
 

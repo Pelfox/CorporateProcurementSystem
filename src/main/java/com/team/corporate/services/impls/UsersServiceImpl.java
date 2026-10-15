@@ -38,8 +38,17 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public void deleteUser(@NotNull UUID id) {
+    public void deleteUser(@NotNull UUID actingUserId, @NotNull UUID id) {
+        EntityValidation.requireNonNull(actingUserId, "Текущий пользователь");
         EntityValidation.requireNonNull(id, "Идентификатор");
+        if (actingUserId.equals(id)) {
+            throw new IllegalArgumentException("Нельзя удалить свою учётную запись.");
+        }
+        User actingUser = usersRepository.getById(actingUserId)
+                .orElseThrow(() -> new UserNotFoundException("Текущий пользователь не найден."));
+        if (actingUser.getUserRole() != UserRole.MANAGER) {
+            throw new IllegalArgumentException("Удалять пользователей может только менеджер.");
+        }
         usersRepository.delete(id);
     }
 

@@ -22,7 +22,10 @@ public class OrdersServiceTest extends BaseServiceTest {
 
     private Product createProduct(String name, String sku, BigDecimal price) {
         Category category = categoriesService.createCategory("Категория для " + name);
-        return productsService.createProduct(name, sku, category.getId(), price);
+        Product product = productsService.createProduct(name, sku, category.getId(), price);
+        var warehouse = warehousesService.createWarehouse("Склад " + name, null);
+        inventoriesService.placeProductInWarehouse(product.getId(), warehouse.getId(), 1_000);
+        return product;
     }
 
     // method create
