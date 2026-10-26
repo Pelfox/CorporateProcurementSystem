@@ -1,0 +1,28 @@
+package com.team.corporate.core.config;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class FileConfigurationProvider implements ConfigurationProvider {
+    private static final String CONFIGURATION_FILE_NAME = "application.properties";
+
+    @Override
+    @NotNull
+    public ApplicationConfiguration getConfiguration() {
+        try (InputStream input = FileConfigurationProvider.class.getClassLoader().getResourceAsStream(CONFIGURATION_FILE_NAME)) {
+            if (input == null) {
+                throw new RuntimeException("Файл настроек приложения не найден.");
+            }
+
+            Properties properties = new Properties();
+            properties.load(input);
+
+            return ApplicationConfiguration.fromProperties(properties);
+        } catch (IOException e) {
+            throw new IllegalStateException("Не удалось прочитать файл настроек приложения.", e);
+        }
+    }
+}
