@@ -1,24 +1,22 @@
 plugins {
     application
+    `java-library`
     id("java")
-    id("com.gradleup.shadow")
-    id("org.openjfx.javafxplugin") version "0.1.0"
-}
-
-repositories {
-    mavenCentral()
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.javafxplugin)
 }
 
 dependencies {
     implementation(project(":cps-core"))
-    implementation("ch.qos.logback:logback-classic:1.6.3")
-    testImplementation("org.testfx:testfx-core:4.0.18")
-    testImplementation("org.testfx:testfx-junit5:4.0.18")
-    testImplementation("org.testfx:openjfx-monocle:21.0.2")
-    testImplementation("org.hamcrest:hamcrest:3.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("com.h2database:h2:2.3.232")
+    api(libs.hibernate.core)
+    implementation(libs.logback)
+    testImplementation(libs.testfx.core)
+    testImplementation(libs.testfx.junit5)
+    testImplementation(libs.openjfx.monocle)
+    testImplementation(libs.hamcrest)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.h2database)
 }
 
 javafx {

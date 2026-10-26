@@ -1,0 +1,41 @@
+[versions]
+shadow = "9.6.1"
+javafxplugin = "0.1.0"
+logback = "1.6.3"
+hibernate-core = "7.4.13.Final"
+testfx-core = "4.0.18"
+testfx-junit5 = "4.0.18"
+openjfx-monocle = "21.0.2"
+hamcrest = "3.0"
+h2database = "2.3.232"
+junit-jupiter = "5.13.4"
+jakarta-persistence-api = "3.2.0"
+postgresql = "42.7.14"
+hikaricp = "7.1.0"
+jetbrains-annotations = "26.1.0"
+jline = "3.30.6"
+spring-boot = "4.1.2"
+spring-dependency-management = "1.1.7"
+
+[libraries]
+hibernate-core = { module = "org.hibernate.orm:hibernate-core", version.ref = "hibernate-core" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+testfx-core = { module = "org.testfx:testfx-core", version.ref = "testfx-core" }
+testfx-junit5 = { module = "org.testfx:testfx-junit5", version.ref = "testfx-junit5" }
+openjfx-monocle = { module = "org.testfx:openjfx-monocle", version.ref = "openjfx-monocle" }
+hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
+h2database = { module = "com.h2database:h2", version.ref = "h2database" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+jakarta-persistence-api = { module = "jakarta.persistence:jakarta.persistence-api", version.ref = "jakarta-persistence-api" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref= "hikaricp" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+jline = { module = "org.jline:jline", version.ref = "jline" }
+spring-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+javafxplugin = { id = "org.openjfx.javafxplugin", version.ref = "javafxplugin" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }

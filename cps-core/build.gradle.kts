@@ -1,20 +1,16 @@
 plugins {
-    id("java")
     `java-library`
-}
-
-repositories {
-    mavenCentral()
+    id("java")
 }
 
 dependencies {
-    api("org.hibernate.orm:hibernate-core:7.4.13.Final")
-    implementation("jakarta.persistence:jakarta.persistence-api:3.2.0")
-    implementation("org.postgresql:postgresql:42.7.14")
-    implementation("com.zaxxer:HikariCP:7.1.0")
+    api(libs.hibernate.core)
+    implementation(libs.jakarta.persistence.api)
+    implementation(libs.postgresql)
+    implementation(libs.hikaricp)
 
-    compileOnly("org.jetbrains:annotations:26.1.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("com.h2database:h2:2.3.232")
+    compileOnly(libs.jetbrains.annotations)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testImplementation(libs.h2database)
 }

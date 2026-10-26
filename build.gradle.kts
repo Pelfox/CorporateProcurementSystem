@@ -1,7 +1,10 @@
 import org.gradle.api.plugins.JavaPluginExtension
 
 plugins {
-    id("com.gradleup.shadow") version "9.6.1" apply false
+    alias(libs.plugins.shadow) apply false
+    alias(libs.plugins.javafxplugin) apply false
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management) apply false
 }
 
 subprojects {
