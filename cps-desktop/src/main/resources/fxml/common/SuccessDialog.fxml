@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           xmlns="http://javafx.com/javafx/25"
+           fx:controller="com.team.corporate.controllers.modals.SuccessController"
+           styleClass="dialog-stage"
+           alignment="CENTER">
+
+    <VBox fx:id="dialogRoot"
+          styleClass="dialog-root">
+
+        <Label fx:id="successEmoji" styleClass="dialog-emoji" maxWidth="Infinity"/>
+
+        <Label text="Успешно"
+               styleClass="dialog-title-plain, success"
+               maxWidth="Infinity" alignment="CENTER"
+               textAlignment="CENTER"/>
+
+        <Label fx:id="successText"
+               text="Операция выполнена успешно."
+               styleClass="dialog-info-box, success"
+               maxWidth="Infinity"
+               wrapText="true"/>
+
+        <HBox styleClass="dialog-actions, centered">
+            <Button fx:id="okBtn" onAction="#onCloseClick" text="OK"
+                    styleClass="btn, btn-primary"/>
+        </HBox>
+
+    </VBox>
+</StackPane>

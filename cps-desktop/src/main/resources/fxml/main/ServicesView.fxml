@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.ServicesController"
+            fitToWidth="true"
+            stylesheets="@/css/cards.css"
+            styleClass="page-scroll">
+
+    <VBox styleClass="page-content" spacing="24">
+
+        <Label fx:id="pageTitleLabel" text="Сервисы" styleClass="page-title"/>
+
+        <VBox styleClass="services-block">
+
+            <GridPane fx:id="servicesGrid" hgap="20" vgap="20">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.333"/>
+                    <ColumnConstraints percentWidth="33.333"/>
+                    <ColumnConstraints percentWidth="33.333"/>
+                </columnConstraints>
+
+                <!-- Каталог товаров -->
+                <StackPane fx:id="catalogCard" onMouseClicked="#onCatalogClick" onKeyPressed="#onCardKeyPressed"
+                           styleClass="service-card, card-purple"
+                           GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <VBox StackPane.alignment="TOP_LEFT" styleClass="service-card-copy" maxWidth="Infinity">
+                        <Label fx:id="catalogTitleLabel" text="Каталог товаров"
+                               styleClass="service-card-title" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                        <Label fx:id="catalogSubtitleLabel" text="Управление товарами и ценами"
+                               styleClass="service-card-subtitle" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                    </VBox>
+                    <Label text="📦" styleClass="service-card-emoji"
+                           StackPane.alignment="BOTTOM_RIGHT" mouseTransparent="true"/>
+                </StackPane>
+
+                <!-- Заказы -->
+                <StackPane fx:id="ordersCard" onMouseClicked="#onOrdersClick" onKeyPressed="#onCardKeyPressed"
+                           styleClass="service-card, card-orange"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <VBox StackPane.alignment="TOP_LEFT" styleClass="service-card-copy" maxWidth="Infinity">
+                        <Label fx:id="ordersTitleLabel" text="Заказы"
+                               styleClass="service-card-title" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                        <Label fx:id="ordersSubtitleLabel" text="Создание и отслеживание заказов"
+                               styleClass="service-card-subtitle" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                    </VBox>
+                    <Label text="📋" styleClass="service-card-emoji"
+                           StackPane.alignment="BOTTOM_RIGHT" mouseTransparent="true"/>
+                </StackPane>
+
+                <!-- Категории -->
+                <StackPane fx:id="categoriesCard" onMouseClicked="#onCategoriesClick" onKeyPressed="#onCardKeyPressed"
+                           styleClass="service-card, card-teal"
+                           GridPane.rowIndex="0" GridPane.columnIndex="2">
+                    <VBox StackPane.alignment="TOP_LEFT" styleClass="service-card-copy" maxWidth="Infinity">
+                        <Label fx:id="categoriesTitleLabel" text="Категории"
+                               styleClass="service-card-title" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                        <Label fx:id="categoriesSubtitleLabel" text="Категории товаров"
+                               styleClass="service-card-subtitle" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                    </VBox>
+                    <Label text="🏷" styleClass="service-card-emoji"
+                           StackPane.alignment="BOTTOM_RIGHT" mouseTransparent="true"/>
+                </StackPane>
+
+                <!-- Склады и остатки -->
+                <StackPane fx:id="warehousesCard" onMouseClicked="#onWarehousesClick" onKeyPressed="#onCardKeyPressed"
+                           styleClass="service-card, card-green"
+                           GridPane.rowIndex="1" GridPane.columnIndex="0">
+                    <VBox StackPane.alignment="TOP_LEFT" styleClass="service-card-copy" maxWidth="Infinity">
+                        <Label fx:id="warehousesTitleLabel" text="Склады и остатки"
+                               styleClass="service-card-title" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                        <Label fx:id="warehousesSubtitleLabel" text="Управление складскими запасами"
+                               styleClass="service-card-subtitle" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                    </VBox>
+                    <Label text="🏭" styleClass="service-card-emoji"
+                           StackPane.alignment="BOTTOM_RIGHT" mouseTransparent="true"/>
+                </StackPane>
+
+                <!-- Статистика -->
+                <StackPane fx:id="statisticsCard" onMouseClicked="#onStatisticsClick" onKeyPressed="#onCardKeyPressed"
+                           styleClass="service-card, card-indigo"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1">
+                    <VBox StackPane.alignment="TOP_LEFT" styleClass="service-card-copy" maxWidth="Infinity">
+                        <Label fx:id="statisticsTitleLabel" text="Статистика"
+                               styleClass="service-card-title" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                        <Label fx:id="statisticsSubtitleLabel" text="Аналитика и показатели системы"
+                               styleClass="service-card-subtitle" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                    </VBox>
+                    <Label text="📊" styleClass="service-card-emoji"
+                           StackPane.alignment="BOTTOM_RIGHT" mouseTransparent="true"/>
+                </StackPane>
+
+                <!-- Экспорт данных -->
+                <StackPane fx:id="exportCard" onMouseClicked="#onExportClick" onKeyPressed="#onCardKeyPressed"
+                           styleClass="service-card, card-cyan"
+                           GridPane.rowIndex="1" GridPane.columnIndex="2">
+                    <VBox StackPane.alignment="TOP_LEFT" styleClass="service-card-copy" maxWidth="Infinity">
+                        <Label fx:id="exportTitleLabel" text="Экспорт данных"
+                               styleClass="service-card-title" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                        <Label fx:id="exportSubtitleLabel" text="Выгрузка в CSV"
+                               styleClass="service-card-subtitle" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                    </VBox>
+                    <Label text="💾" styleClass="service-card-emoji"
+                           StackPane.alignment="BOTTOM_RIGHT" mouseTransparent="true"/>
+                </StackPane>
+
+                <!-- Пользователи -->
+                <StackPane fx:id="usersCard" onMouseClicked="#onUsersClick" onKeyPressed="#onCardKeyPressed"
+                           styleClass="service-card, card-red"
+                           GridPane.rowIndex="2" GridPane.columnIndex="0">
+                    <VBox StackPane.alignment="TOP_LEFT" styleClass="service-card-copy" maxWidth="Infinity">
+                        <Label fx:id="usersTitleLabel" text="Пользователи"
+                               styleClass="service-card-title" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                        <Label fx:id="usersSubtitleLabel" text="Управление пользователями"
+                               styleClass="service-card-subtitle" wrapText="true" maxWidth="Infinity"
+                               minHeight="-Infinity"/>
+                    </VBox>
+                    <Label text="👤" styleClass="service-card-emoji"
+                           StackPane.alignment="BOTTOM_RIGHT" mouseTransparent="true"/>
+                </StackPane>
+
+            </GridPane>
+        </VBox>
+    </VBox>
+</ScrollPane>

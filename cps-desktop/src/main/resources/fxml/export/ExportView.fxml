@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.ExportController"
+            fitToWidth="true"
+            styleClass="page-scroll">
+
+    <VBox styleClass="page-content">
+
+        <!-- Кнопка Назад -->
+        <HBox styleClass="page-header">
+            <Button fx:id="backBtn" onAction="#onBackClick" text="←" styleClass="back-btn"/>
+            <Label text="Экспорт данных" styleClass="page-title"/>
+        </HBox>
+
+        <!-- Карточка экспорта -->
+        <VBox fx:id="exportAllCard" onMouseClicked="#onExportClick" onKeyPressed="#onExportKeyPressed"
+              focusTraversable="true" accessibleRole="BUTTON" styleClass="export-card"
+              maxWidth="Infinity">
+            <Label fx:id="exportEmoji" styleClass="export-emoji"/>
+            <Label text="Полный экспорт всех данных" styleClass="export-title"/>
+            <Label text="Выгрузить все таблицы системы в CSV"
+                   styleClass="export-desc"/>
+        </VBox>
+
+        <!-- Будет экспортировано -->
+        <VBox styleClass="content-block">
+
+            <Label text="Будет экспортировано" styleClass="info-title"/>
+
+            <GridPane styleClass="info-list" hgap="24" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="50" hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="50" hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="Пользователи (users.csv)" styleClass="info-item-text"/>
+                </HBox>
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="Категории (categories.csv)" styleClass="info-item-text"/>
+                </HBox>
+
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="1" GridPane.columnIndex="0">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="Товары (products.csv)" styleClass="info-item-text"/>
+                </HBox>
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="1" GridPane.columnIndex="1">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="Склады (warehouses.csv)" styleClass="info-item-text"/>
+                </HBox>
+
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="2" GridPane.columnIndex="0">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="Остатки (inventories.csv)" styleClass="info-item-text"/>
+                </HBox>
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="2" GridPane.columnIndex="1">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="Заказы (orders.csv)" styleClass="info-item-text"/>
+                </HBox>
+
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="3" GridPane.columnIndex="0">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="Позиции заказов (order_items.csv)" styleClass="info-item-text"/>
+                </HBox>
+                <HBox styleClass="info-list-item"
+                      GridPane.rowIndex="3" GridPane.columnIndex="1">
+                    <Label text="✓" styleClass="info-checkmark"/>
+                    <Label text="История изменений (audit_logs.csv)" styleClass="info-item-text"/>
+                </HBox>
+            </GridPane>
+
+            <Label fx:id="infoNote"
+                   text="Файлы будут сохранены в выбранную вами папку в формате CSV."
+                   styleClass="info-note"
+                   maxWidth="Infinity">
+                <VBox.margin>
+                    <javafx.geometry.Insets top="16" right="0" bottom="0" left="0"/>
+                </VBox.margin>
+            </Label>
+
+        </VBox>
+
+    </VBox>
+</ScrollPane>

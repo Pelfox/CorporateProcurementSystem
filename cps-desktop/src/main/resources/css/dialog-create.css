@@ -1,0 +1,140 @@
+/* Широкая форма */
+.dialog-root.form-wide {
+    -fx-pref-width: 640;
+    -fx-max-width: 640;
+    -fx-padding: 32;
+}
+
+.dialog-add-row {
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.dialog-qty-field {
+    -fx-background-color: white;
+    -fx-border-color: -border-color;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 12 10 12;
+    -fx-font-size: 14px;
+    -fx-text-fill: -text-secondary;
+    -fx-prompt-text-fill: #9ca3af;
+    -fx-pref-width: 90;
+    -fx-min-width: 90;
+    -fx-max-width: 90;
+}
+
+.dialog-qty-field:focused {
+    -fx-border-color: -primary;
+}
+
+.dialog-qty-field.field-error {
+    -fx-border-color: #ef4444;
+}
+
+.btn-add-icon {
+    -fx-background-color: linear-gradient(to bottom right, #22c55e, #4eed88);
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-min-width: 44;
+    -fx-pref-width: 44;
+    -fx-max-width: 44;
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+    -fx-max-height: 44;
+    -fx-alignment: CENTER;
+}
+
+.btn-add-icon:hover {
+    -fx-background-color: linear-gradient(to bottom right, #1a7f42, #1eab52);
+}
+
+/* Маленькая кнопка удаления позиции (крестик) */
+.btn-remove-icon {
+    -fx-background-color: linear-gradient(to bottom right, #ec3030, #f55959);
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-min-width: 28;
+    -fx-pref-width: 28;
+    -fx-max-width: 28;
+    -fx-min-height: 28;
+    -fx-pref-height: 28;
+    -fx-max-height: 28;
+    -fx-alignment: CENTER;
+}
+
+.btn-remove-icon:hover {
+    -fx-background-color: linear-gradient(to bottom right, #b22828, #dd3c3c);
+}
+
+/* Компактная таблица */
+.dialog-items-table {
+    -fx-background-color: white;
+    -fx-border-color: -border-color;
+    -fx-border-width: 1;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+    -fx-pref-height: 180;
+    -fx-min-height: 180;
+    -fx-max-height: 180;
+}
+
+.dialog-items-table .column-header-background {
+    -fx-background-color: -bg-soft;
+    -fx-background-radius: 10 10 0 0;
+}
+
+.dialog-items-table .column-header,
+.dialog-items-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -border-color transparent;
+    -fx-size: 38;
+}
+
+.dialog-items-table .column-header .label {
+    -fx-text-fill: -text-muted;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 12 0 12;
+}
+
+.dialog-items-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -border-soft transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 40;
+}
+
+.dialog-items-table .table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.dialog-items-table .table-cell {
+    -fx-text-fill: -text-secondary;
+    -fx-font-size: 13px;
+    -fx-padding: 0 12 0 12;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: transparent;
+}
+
+/* Итог */
+.dialog-total-row {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-padding: 4 0 4 0;
+}
+
+.dialog-total-label {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #059669;
+}

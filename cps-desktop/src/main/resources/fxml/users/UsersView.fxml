@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.UsersController"
+            fitToWidth="true"
+            styleClass="page-scroll">
+
+    <fx:define>
+        <ToggleGroup fx:id="roleTabs"/>
+    </fx:define>
+
+    <VBox styleClass="page-content">
+
+        <!-- Кнопка Назад -->
+        <HBox styleClass="page-header">
+            <Button fx:id="backBtn" onAction="#onBackClick" text="←" styleClass="back-btn"/>
+            <Label text="Пользователи" styleClass="page-title"/>
+        </HBox>
+
+        <!-- Табы ролей -->
+        <HBox styleClass="tabs">
+            <ToggleButton fx:id="allTab" text="Все"
+                          styleClass="tab"
+                          toggleGroup="$roleTabs" selected="true"/>
+            <ToggleButton fx:id="userTab" text="USER"
+                          styleClass="tab"
+                          toggleGroup="$roleTabs"/>
+            <ToggleButton fx:id="managerTab" text="MANAGER"
+                          styleClass="tab"
+                          toggleGroup="$roleTabs"/>
+        </HBox>
+
+        <!-- Поиск + кнопки действий -->
+        <VBox styleClass="content-block">
+
+            <HBox styleClass="search-actions-row">
+                <TextField fx:id="searchField" styleClass="search-input"
+                           promptText="Поиск по имени пользователя..."
+                           HBox.hgrow="ALWAYS"/>
+
+                <HBox styleClass="action-row">
+                    <Button fx:id="addBtn" onAction="#onAddClick" text="Добавить"
+                            styleClass="btn, btn-add"/>
+                    <Button fx:id="editBtn" onAction="#onEditClick" text="Редактировать"
+                            styleClass="btn, btn-edit"/>
+                    <Button fx:id="deleteBtn" onAction="#onDeleteClick" text="Удалить"
+                            styleClass="btn, btn-delete"/>
+                </HBox>
+            </HBox>
+
+        </VBox>
+
+        <!-- Таблица пользователей -->
+        <VBox styleClass="content-block">
+            <TableView fx:id="usersTable" styleClass="data-table">
+                <placeholder>
+                    <Label text="Пользователи не найдены" styleClass="table-placeholder"/>
+                </placeholder>
+                <columns>
+                    <TableColumn fx:id="numCol" text="№" prefWidth="80"/>
+                    <TableColumn fx:id="nameCol" text="Имя пользователя" prefWidth="300"/>
+                    <TableColumn fx:id="roleCol" text="Роль" prefWidth="180"/>
+                    <TableColumn fx:id="dateCol" text="Дата создания" prefWidth="200"/>
+                </columns>
+            </TableView>
+        </VBox>
+
+    </VBox>
+</ScrollPane>

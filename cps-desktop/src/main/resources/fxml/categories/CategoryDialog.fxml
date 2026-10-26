@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           xmlns="http://javafx.com/javafx/25"
+           fx:controller="com.team.corporate.controllers.modals.CategoryEditorController"
+           styleClass="dialog-stage"
+           alignment="CENTER">
+
+    <VBox styleClass="dialog-root, form" maxHeight="-Infinity">
+
+        <!-- Заголовок с крестиком -->
+        <HBox styleClass="dialog-header" alignment="CENTER_LEFT">
+            <Label fx:id="titleLabel" text="Категория" styleClass="dialog-title"
+                   maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="closeBtn" onAction="#onCancelClick" text="✕" styleClass="dialog-close"/>
+        </HBox>
+
+        <!-- Название -->
+        <VBox styleClass="form-group">
+            <Label text="Название категории *" styleClass="form-label"/>
+            <TextField fx:id="nameField" styleClass="form-input"
+                       promptText="Название категории — не более 255 символов"/>
+            <Label fx:id="nameLengthLabel" styleClass="form-label"/>
+            <Label fx:id="nameError"
+                   text="Название категории не может быть пустым"
+                   styleClass="form-error"
+                   visible="false" managed="false"/>
+        </VBox>
+
+        <!-- Кнопки -->
+        <HBox styleClass="dialog-actions">
+            <Button fx:id="cancelBtn" onAction="#onCancelClick" text="Отмена" styleClass="btn, btn-cancel"/>
+            <Button fx:id="saveBtn" onAction="#onSaveClick" text="Сохранить" styleClass="btn, btn-primary"/>
+        </HBox>
+
+    </VBox>
+</StackPane>

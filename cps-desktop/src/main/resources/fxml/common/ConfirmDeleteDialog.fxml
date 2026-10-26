@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           xmlns="http://javafx.com/javafx/25"
+           fx:controller="com.team.corporate.controllers.modals.ConfirmDeleteController"
+           styleClass="dialog-stage"
+           alignment="CENTER">
+
+    <VBox fx:id="dialogRoot"
+          styleClass="dialog-root">
+
+        <Label fx:id="confirmEmoji" styleClass="dialog-emoji" maxWidth="Infinity"/>
+
+        <Label text="Подтверждение удаления"
+               styleClass="dialog-title-plain"
+               maxWidth="Infinity" alignment="CENTER"
+               textAlignment="CENTER"/>
+
+        <Label fx:id="confirmText"
+               text="Вы уверены, что хотите удалить?"
+               styleClass="dialog-message"
+               maxWidth="Infinity"/>
+
+        <Label fx:id="confirmWarning"
+               text="Это действие нельзя отменить."
+               styleClass="dialog-message-muted"
+               maxWidth="Infinity"/>
+
+        <HBox styleClass="dialog-actions, centered">
+            <Button fx:id="cancelBtn" onAction="#onCancelClick" text="Отмена"
+                    styleClass="btn, btn-cancel"/>
+            <Button fx:id="deleteBtn" onAction="#onDeleteClick" text="Удалить"
+                    styleClass="btn, btn-delete"/>
+        </HBox>
+
+    </VBox>
+</StackPane>

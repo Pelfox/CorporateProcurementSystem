@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+           xmlns="http://javafx.com/javafx/25"
+           fx:controller="com.team.corporate.controllers.modals.ProductEditorController"
+           styleClass="dialog-stage"
+           alignment="CENTER">
+
+    <VBox styleClass="dialog-root, form" maxHeight="-Infinity">
+
+        <!-- Заголовок с крестиком -->
+        <HBox styleClass="dialog-header" alignment="CENTER_LEFT">
+            <Label fx:id="titleLabel" text="Товар" styleClass="dialog-title"
+                   maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="closeBtn" onAction="#onCancelClick" text="✕" styleClass="dialog-close"/>
+        </HBox>
+
+        <!-- Название -->
+        <VBox styleClass="form-group">
+            <Label text="Название *" styleClass="form-label"/>
+            <TextField fx:id="nameField" styleClass="form-input"
+                       promptText="Введите название товара"/>
+            <Label fx:id="nameError"
+                   text="Название товара не может быть пустым"
+                   styleClass="form-error"
+                   visible="false" managed="false"/>
+        </VBox>
+
+        <!-- Артикул -->
+        <VBox styleClass="form-group">
+            <Label text="Артикул *" styleClass="form-label"/>
+            <TextField fx:id="skuField" styleClass="form-input"
+                       promptText="Введите артикул"/>
+            <Label fx:id="skuError"
+                   text="Артикул слишком короткий (мин. 3 символа)"
+                   styleClass="form-error"
+                   visible="false" managed="false"/>
+        </VBox>
+
+        <!-- Категория -->
+        <VBox styleClass="form-group">
+            <Label text="Категория *" styleClass="form-label"/>
+            <ComboBox fx:id="categoryCombo" styleClass="form-select"
+                      promptText="— Выберите категорию —"
+                      maxWidth="Infinity"/>
+            <Label fx:id="categoryError"
+                   text="Выберите категорию из списка"
+                   styleClass="form-error"
+                   visible="false" managed="false"/>
+        </VBox>
+
+        <!-- Цена -->
+        <VBox styleClass="form-group">
+            <Label text="Цена (₽) *" styleClass="form-label"/>
+            <TextField fx:id="priceField" styleClass="form-input"
+                       promptText="0.00"/>
+            <Label fx:id="priceError"
+                   text="Цена должна быть больше 0 и не превышать 99 999 999,99"
+                   styleClass="form-error"
+                   visible="false" managed="false"/>
+        </VBox>
+
+        <!-- Кнопки -->
+        <HBox styleClass="dialog-actions">
+            <Button fx:id="cancelBtn" onAction="#onCancelClick" text="Отмена" styleClass="btn, btn-cancel"/>
+            <Button fx:id="saveBtn" onAction="#onSaveClick" text="Сохранить" styleClass="btn, btn-primary"/>
+        </HBox>
+
+    </VBox>
+</StackPane>

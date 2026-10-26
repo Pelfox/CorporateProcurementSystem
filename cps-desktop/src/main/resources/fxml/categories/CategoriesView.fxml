@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- <?import javafx.scene.layout.StackPane?> -->
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.CategoriesController"
+            fitToWidth="true"
+            styleClass="page-scroll">
+
+    <VBox styleClass="page-content">
+
+        <!-- Кнопка Назад -->
+        <HBox styleClass="page-header">
+            <Button fx:id="backBtn" onAction="#onBackClick" text="←" styleClass="back-btn"/>
+            <Label text="Категории" styleClass="page-title"/>
+        </HBox>
+
+        <!-- Поиск + кнопки -->
+        <VBox styleClass="content-block">
+
+            <HBox styleClass="search-row">
+                <TextField fx:id="searchField" styleClass="search-input"
+                           promptText="Поиск по названию категории..."
+                           HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <HBox styleClass="action-row">
+                <Button fx:id="addBtn" onAction="#onAddClick" text="Добавить"
+                        styleClass="btn, btn-add"/>
+                <Button fx:id="editBtn" onAction="#onEditClick" text="Редактировать"
+                        styleClass="btn, btn-edit"/>
+                <Button fx:id="deleteBtn" onAction="#onDeleteClick" text="Удалить"
+                        styleClass="btn, btn-delete"/>
+            </HBox>
+
+        </VBox>
+
+        <!-- Сетка категорий -->
+        <VBox styleClass="content-block, categories-block">
+
+            <GridPane fx:id="categoriesGrid" hgap="16" vgap="16">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="25"/>
+                    <ColumnConstraints percentWidth="25"/>
+                    <ColumnConstraints percentWidth="25"/>
+                    <ColumnConstraints percentWidth="25"/>
+                </columnConstraints>
+                <!-- Карточка категории тест-->
+                <!--                <StackPane styleClass="category-card, cat-purple"-->
+                <!--                           GridPane.rowIndex="0" GridPane.columnIndex="0">-->
+                <!--                    <Label text="Офисная техника" styleClass="category-card-title"/>-->
+                <!--                </StackPane>-->
+                <!--                <StackPane styleClass="category-card, cat-orange"-->
+                <!--                           GridPane.rowIndex="0" GridPane.columnIndex="1">-->
+                <!--                    <Label text="Канцелярские товары" styleClass="category-card-title"/>-->
+                <!--                </StackPane>-->
+            </GridPane>
+
+            <Label fx:id="emptyPlaceholder" text="Категории не найдены"
+                   styleClass="table-placeholder"/>
+
+        </VBox>
+
+    </VBox>
+</ScrollPane>

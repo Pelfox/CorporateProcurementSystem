@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/25"
+            fx:controller="com.team.corporate.controllers.pages.StatisticsController"
+            fitToWidth="true"
+            styleClass="page-scroll">
+
+    <VBox styleClass="page-content">
+
+        <!-- Кнопка Назад -->
+        <HBox styleClass="page-header">
+            <Button fx:id="backBtn" onAction="#onBackClick" text="←" styleClass="back-btn"/>
+            <Label text="Статистика" styleClass="page-title"/>
+        </HBox>
+
+        <VBox styleClass="content-block">
+
+            <!-- Показатели -->
+            <GridPane styleClass="stats-cards" hgap="16" vgap="16">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="25" hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <VBox fx:id="usersCard" styleClass="stat-card, blue"
+                      GridPane.rowIndex="0" GridPane.columnIndex="0">
+                    <Label fx:id="usersCountLabel" text="0" styleClass="stat-value"/>
+                    <Label text="Пользователей" styleClass="stat-label"/>
+                </VBox>
+
+                <VBox fx:id="productsCard" styleClass="stat-card, green"
+                      GridPane.rowIndex="0" GridPane.columnIndex="1">
+                    <Label fx:id="productsCountLabel" text="0" styleClass="stat-value"/>
+                    <Label text="Товаров" styleClass="stat-label"/>
+                </VBox>
+
+                <VBox fx:id="categoriesCard" styleClass="stat-card, orange"
+                      GridPane.rowIndex="0" GridPane.columnIndex="2">
+                    <Label fx:id="categoriesCountLabel" text="0" styleClass="stat-value"/>
+                    <Label text="Категорий" styleClass="stat-label"/>
+                </VBox>
+
+                <VBox fx:id="warehousesCard" styleClass="stat-card, purple"
+                      GridPane.rowIndex="0" GridPane.columnIndex="3">
+                    <Label fx:id="warehousesCountLabel" text="0" styleClass="stat-value"/>
+                    <Label text="Складов" styleClass="stat-label"/>
+                </VBox>
+
+                <VBox fx:id="ordersCard" styleClass="stat-card, red"
+                      GridPane.rowIndex="1" GridPane.columnIndex="0">
+                    <Label fx:id="ordersCountLabel" text="0" styleClass="stat-value"/>
+                    <Label text="Заказов" styleClass="stat-label"/>
+                </VBox>
+
+                <VBox fx:id="activeOrdersCard" styleClass="stat-card, teal"
+                      GridPane.rowIndex="1" GridPane.columnIndex="1">
+                    <Label fx:id="activeOrdersLabel" text="0" styleClass="stat-value"/>
+                    <Label text="Активных заказов" styleClass="stat-label"/>
+                </VBox>
+
+                <VBox fx:id="totalSumCard" styleClass="stat-card, blue"
+                      GridPane.rowIndex="1" GridPane.columnIndex="2">
+                    <Label fx:id="totalSumLabel" text="0 ₽"
+                           styleClass="stat-value, large"/>
+                    <Label text="Общая стоимость" styleClass="stat-label"/>
+                </VBox>
+
+                <!-- 4-я ячейка второго ряда остаётся пустой -->
+            </GridPane>
+
+            <!-- Два графика в ряд -->
+            <HBox styleClass="charts-grid">
+
+                <!-- Круговая диаграмма: заказы по статусам -->
+                <VBox styleClass="chart-box" HBox.hgrow="ALWAYS"
+                      maxWidth="Infinity">
+                    <Label text="Распределение заказов по статусам"
+                           styleClass="chart-title"/>
+                    <PieChart fx:id="statusPieChart" styleClass="stat-pie-chart"
+                              legendSide="BOTTOM" labelsVisible="false"
+                              VBox.vgrow="ALWAYS"/>
+                </VBox>
+
+                <!-- Столбчатая диаграмма: остатки по складам -->
+                <VBox styleClass="chart-box" HBox.hgrow="ALWAYS"
+                      maxWidth="Infinity">
+                    <Label text="Остатки по складам"
+                           styleClass="chart-title"/>
+                    <BarChart fx:id="stockBarChart" styleClass="stat-bar-chart"
+                              legendVisible="false"
+                              VBox.vgrow="ALWAYS">
+                        <xAxis>
+                            <CategoryAxis fx:id="warehouseAxis"/>
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis fx:id="quantityAxis"/>
+                        </yAxis>
+                    </BarChart>
+                </VBox>
+
+            </HBox>
+        </VBox>
+
+    </VBox>
+</ScrollPane>
