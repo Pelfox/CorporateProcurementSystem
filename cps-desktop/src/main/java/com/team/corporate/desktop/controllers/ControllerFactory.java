@@ -2,10 +2,6 @@ package com.team.corporate.desktop.controllers;
 
 import com.team.corporate.core.config.ApplicationServices;
 import com.team.corporate.desktop.controllers.dialog.DialogService;
-import com.team.corporate.controllers.modals.*;
-import com.team.corporate.controllers.pages.*;
-import com.team.corporate.core.controllers.modals.*;
-import com.team.corporate.core.controllers.pages.*;
 import com.team.corporate.desktop.controllers.modals.*;
 import com.team.corporate.desktop.controllers.pages.*;
 import javafx.util.Callback;

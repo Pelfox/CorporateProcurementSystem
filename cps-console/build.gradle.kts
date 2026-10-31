@@ -1,3 +1,7 @@
+application {
+    mainClass.set("com.team.corporate.console.ConsoleMain")
+}
+
 plugins {
     application
     `java-library`

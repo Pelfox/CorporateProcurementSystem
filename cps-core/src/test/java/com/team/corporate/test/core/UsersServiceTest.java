@@ -1,7 +1,7 @@
 package com.team.corporate.test.core;
 
-import com.team.corporate.entities.User;
-import com.team.corporate.entities.UserRole;
+import com.team.corporate.core.entities.User;
+import com.team.corporate.core.entities.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

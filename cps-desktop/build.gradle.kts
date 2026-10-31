@@ -1,3 +1,7 @@
+application {
+    mainClass.set("com.team.corporate.desktop.DesktopMain")
+}
+
 plugins {
     application
     `java-library`

@@ -7,7 +7,7 @@
 <?import javafx.scene.shape.Circle?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/25"
-            fx:controller="com.team.corporate.controllers.pages.MainController"
+            fx:controller="com.team.corporate.desktop.controllers.pages.MainController"
             stylesheets="@../css/styles.css"
             styleClass="root">
 

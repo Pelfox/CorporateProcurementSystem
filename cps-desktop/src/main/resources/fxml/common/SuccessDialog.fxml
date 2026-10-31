@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <StackPane xmlns:fx="http://javafx.com/fxml/1"
            xmlns="http://javafx.com/javafx/25"
-           fx:controller="com.team.corporate.controllers.modals.SuccessController"
+           fx:controller="com.team.corporate.desktop.controllers.modals.SuccessController"
            styleClass="dialog-stage"
            alignment="CENTER">
 
