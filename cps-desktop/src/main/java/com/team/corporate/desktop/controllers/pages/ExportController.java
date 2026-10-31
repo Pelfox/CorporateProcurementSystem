@@ -2,6 +2,7 @@ package com.team.corporate.desktop.controllers.pages;
 
 import com.team.corporate.desktop.controllers.dialog.DataReceiver;
 import com.team.corporate.desktop.controllers.session.UserSession;
+import com.team.corporate.core.entities.UserRole;
 import com.team.corporate.core.services.CsvExportService;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -37,7 +38,7 @@ public class ExportController extends PageController implements DataReceiver<Use
 
     @FXML
     private void onExportClick() {
-        if (session == null || session.role() != com.team.corporate.entities.UserRole.MANAGER) return;
+        if (session == null || session.role() != UserRole.MANAGER) return;
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Папка для экспорта CSV");
         File folder = chooser.showDialog(exportAllCard.getScene().getWindow());

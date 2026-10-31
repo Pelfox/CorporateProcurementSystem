@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <ScrollPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx/25"
-            fx:controller="com.team.corporate.controllers.pages.UsersController"
+            fx:controller="com.team.corporate.desktop.controllers.pages.UsersController"
             fitToWidth="true"
             styleClass="page-scroll">
 

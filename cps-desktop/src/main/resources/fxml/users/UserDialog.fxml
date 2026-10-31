@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.team.corporate.entities.UserRole?>
+<?import com.team.corporate.core.entities.UserRole?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <StackPane xmlns:fx="http://javafx.com/fxml/1"
            xmlns="http://javafx.com/javafx/25"
-           fx:controller="com.team.corporate.controllers.modals.UserEditorController"
+           fx:controller="com.team.corporate.desktop.controllers.modals.UserEditorController"
            styleClass="dialog-stage"
            alignment="CENTER">
 

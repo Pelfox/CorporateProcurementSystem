@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <StackPane xmlns:fx="http://javafx.com/fxml/1"
            xmlns="http://javafx.com/javafx/25"
-           fx:controller="com.team.corporate.controllers.modals.CategoryEditorController"
+           fx:controller="com.team.corporate.desktop.controllers.modals.CategoryEditorController"
            styleClass="dialog-stage"
            alignment="CENTER">
 
