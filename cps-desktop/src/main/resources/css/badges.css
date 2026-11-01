@@ -1,0 +1,45 @@
+/* Бейджи статусов заказов */
+.status {
+    -fx-padding: 4 14 4 14;
+    -fx-background-radius: 20;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.status-created {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1e40af;
+}
+
+.status-approved {
+    -fx-background-color: #d1fae5;
+    -fx-text-fill: #065f46;
+}
+
+.status-delivered {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #475569;
+}
+
+.status-cancelled {
+    -fx-background-color: #fee2e2;
+    -fx-text-fill: #991b1b;
+}
+
+/* Роли */
+.role-badge {
+    -fx-padding: 4 12 4 12;
+    -fx-background-radius: 20;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.role-badge.user {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1e40af;
+}
+
+.role-badge.manager {
+    -fx-background-color: #fef3c7;
+    -fx-text-fill: #92400e;
+}

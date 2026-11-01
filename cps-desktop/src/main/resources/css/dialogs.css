@@ -1,0 +1,276 @@
+/* Общая обёртка диалога */
+.dialog-root {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-padding: 50 50 30 50;
+    -fx-spacing: 0;
+    -fx-pref-width: 380;
+    -fx-max-width: 380;
+    -fx-pref-height: 280;
+    -fx-max-height: 280;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 60, 0, 0, 20);
+}
+
+.dialog-root.wide {
+    -fx-pref-width: 640;
+    -fx-max-width: 640;
+}
+
+.dialog-stage {
+    -fx-background-color: transparent;
+    -fx-padding: 24;
+    -fx-alignment: CENTER;
+}
+
+.dialog-header {
+    -fx-padding: 0 0 24 0;
+    -fx-spacing: 12;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.dialog-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-main;
+}
+
+.dialog-close {
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-pref-width: 32;
+    -fx-pref-height: 32;
+    -fx-max-width: 32;
+    -fx-max-height: 32;
+
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 50%;
+    -fx-border-color: transparent;
+    -fx-font-size: 14px;
+    -fx-text-fill: #555;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-alignment: CENTER;
+}
+
+.dialog-close:hover {
+    -fx-background-color: #e2e8f0;
+}
+
+/* Заголовок без крестика */
+.dialog-header-plain {
+    -fx-padding: 0 0 8 0;
+    -fx-alignment: CENTER;
+}
+
+.dialog-title-plain {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-main;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+    -fx-padding: 0 0 16 0;
+}
+
+.dialog-title-plain.error {
+    -fx-text-fill: #ef4444;
+}
+
+.dialog-title-plain.success {
+    -fx-text-fill: #10b981;
+}
+
+/* Эмодзи */
+.dialog-emoji {
+    -fx-font-size: 56px;
+    -fx-opacity: 1.0;
+    -fx-translate-x: 0;
+    -fx-translate-y: 0;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+    -fx-padding: 0 0 16 0;
+}
+
+.dialog-message {
+    -fx-font-size: 14px;
+    -fx-text-fill: #475569;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
+    -fx-line-spacing: 4;
+    -fx-padding: 0 0 12 0;
+}
+
+.dialog-message-strong {
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-main;
+}
+
+.dialog-message-muted {
+    -fx-font-size: 12px;
+    -fx-text-fill: #888;
+    -fx-text-alignment: CENTER;
+    -fx-alignment: CENTER;
+    -fx-wrap-text: true;
+    -fx-max-width: Infinity;
+}
+
+/* Блок информации */
+.dialog-info-box {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 16;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+    -fx-padding: 16 16 16 16;
+}
+
+.dialog-info-box.error {
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #fecaca;
+    -fx-border-width: 1;
+    -fx-text-fill: #991b1b;
+}
+
+.dialog-info-box.success {
+    -fx-background-color: #ecfdf5;
+    -fx-border-color: #a7f3d0;
+    -fx-border-width: 1;
+    -fx-text-fill: #065f46;
+}
+
+/* Кнопки снизу */
+.dialog-actions {
+    -fx-padding: 16 0 0 0;
+    -fx-spacing: 12;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.dialog-actions.centered {
+    -fx-alignment: CENTER;
+}
+
+/* Форма */
+.form-group {
+    -fx-padding: 0 0 20 0;
+    -fx-spacing: 8;
+}
+
+.form-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+}
+
+.form-input {
+    -fx-background-color: white;
+    -fx-border-color: -border-color;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 12 16 12 16;
+    -fx-font-size: 14px;
+    -fx-text-fill: -text-secondary;
+    -fx-prompt-text-fill: #9ca3af;
+}
+
+.form-input:focused {
+    -fx-border-color: -primary;
+}
+
+.form-input.field-error {
+    -fx-border-color: #ef4444;
+}
+
+.form-textarea {
+    -fx-background-color: white;
+    -fx-border-color: -border-color;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 0;
+    -fx-font-size: 14px;
+    -fx-text-fill: -text-secondary;
+    -fx-prompt-text-fill: #9ca3af;
+    -fx-wrap-text: true;
+}
+
+.form-textarea .content {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 12 16 12 16;
+}
+
+.form-textarea .scroll-pane,
+.form-textarea .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.form-textarea:focused {
+    -fx-border-color: -primary;
+}
+
+.form-select {
+    -fx-background-color: white;
+    -fx-border-color: -border-color;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 4 8 4 8;
+    -fx-font-size: 14px;
+    -fx-pref-width: 10000;
+    -fx-max-width: Infinity;
+}
+
+.form-select .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 8 8 8 8;
+    -fx-text-fill: -text-secondary;
+}
+
+.form-select .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.form-select .arrow {
+    -fx-background-color: -text-muted;
+}
+
+.form-select:focused {
+    -fx-border-color: -primary;
+}
+
+.form-select.field-error {
+    -fx-border-color: #ef4444;
+}
+
+.form-error {
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 12px;
+}
+
+/* Формовый диалог (высота по содержимому) */
+.dialog-root.form {
+    -fx-pref-width: 480;
+    -fx-max-width: 480;
+
+    -fx-padding: 32;
+}
+
+.dialog-status-box {
+    -fx-background-color: -bg-soft;
+    -fx-background-radius: 10;
+    -fx-padding: 14 16 14 16;
+    -fx-spacing: 6;
+}
+
+.dialog-status-caption {
+    -fx-font-size: 12px;
+    -fx-text-fill: -text-muted;
+}
+
+.dialog-status-row {
+    -fx-spacing: 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.dialog-status-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -text-secondary;
+}

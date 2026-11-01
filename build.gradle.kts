@@ -1,65 +1,27 @@
+import org.gradle.api.plugins.JavaPluginExtension
+
 plugins {
-    application
-    id("java")
-    id("com.gradleup.shadow") version "9.6.1"
-    id("org.openjfx.javafxplugin") version "0.1.0"
+    alias(libs.plugins.shadow) apply false
+    alias(libs.plugins.javafxplugin) apply false
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management) apply false
 }
 
-group = "com.team"
-version = "1.0-SNAPSHOT"
+subprojects {
+    val module = this
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(25))
+    group = "com.team.corporate"
+    version = "1.0.0-SNAPSHOT"
+
+    repositories {
+        mavenCentral()
+    }
+
+    module.pluginManager.withPlugin("java-base") {
+        module.extensions.configure<JavaPluginExtension> {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(25))
+            }
+        }
     }
 }
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation("org.jetbrains:annotations:26.1.0")
-    implementation("ch.qos.logback:logback-classic:1.6.3")
-
-    implementation("org.jline:jline:3.30.6")
-    implementation("org.hibernate.orm:hibernate-core:7.4.8.Final")
-    implementation("jakarta.persistence:jakarta.persistence-api:3.2.0")
-    implementation("org.postgresql:postgresql:42.7.13")
-    implementation("com.zaxxer:HikariCP:7.1.0")
-
-    testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("com.h2database:h2:2.3.232")
-
-    implementation(files("libs/JavaFXEmojiTextFlow_twemoji-1.0.jar"))
-    implementation("org.sharegov:mjson:1.4.1")
-}
-
-javafx {
-    version = "25"
-    modules = listOf(
-        "javafx.controls",
-        "javafx.fxml"
-    )
-}
-
-application {
-    mainClass = "com.team.corporate.MainApp"
-    applicationDefaultJvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
-}
-
-tasks.register<JavaExec>("runConsole") {
-    group = "application"
-    description = "Запуск консольного приложения (КР №1)"
-    mainClass.set("com.team.corporate.ConsoleMain")
-    classpath = sourceSets["main"].runtimeClasspath
-    standardInput = System.`in`
-    jvmArgs("--enable-native-access=ALL-UNNAMED")
-}
-
-tasks.withType<Jar>().configureEach {
-    manifest.attributes["Enable-Native-Access"] = "ALL-UNNAMED"
-}
-
-tasks.test { useJUnitPlatform() }

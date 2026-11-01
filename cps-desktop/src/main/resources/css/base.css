@@ -1,0 +1,42 @@
+.root {
+    -bg-main: #f0f2f5;
+    -bg-card: #ffffff;
+    -bg-hover: #f8fafc;
+    -bg-soft: #f9fafb;
+
+    -text-main: #1a1a2e;
+    -text-muted: #6b7280;
+    -text-secondary: #374151;
+
+    -border-color: #e5e7eb;
+    -border-soft: #f1f5f9;
+
+    -primary: #2563eb;
+    -primary-hover: #1d4ed8;
+
+    -gap-block: 20;
+
+    -fx-background-color: -bg-main;
+    -fx-font-family: "SF Pro Text";
+    -fx-font-size: 14px;
+}
+
+.page-content {
+    -fx-background-color: -bg-main;
+    -fx-padding: 24;
+    -fx-spacing: 20;
+}
+
+.page-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-main;
+}
+
+/* Leave room for the visual overhang of bold glyphs. */
+.page-title,
+.dialog-title,
+.service-card-title,
+.service-card-subtitle {
+    -fx-label-padding: 1 3 2 0;
+}

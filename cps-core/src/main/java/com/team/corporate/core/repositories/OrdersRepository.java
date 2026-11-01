@@ -1,0 +1,27 @@
+package com.team.corporate.core.repositories;
+
+import com.team.corporate.core.entities.Order;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface OrdersRepository {
+    @NotNull
+    Order add(@NotNull Order order);
+
+    @NotNull
+    List<Order> getAll();
+
+    @NotNull
+    Optional<Order> getById(@NotNull UUID id);
+
+    @NotNull
+    Order update(@NotNull Order order);
+
+    @NotNull
+    Optional<Order> getByIdForUpdate(@NotNull UUID id);
+
+    void delete(@NotNull UUID id);
+}
