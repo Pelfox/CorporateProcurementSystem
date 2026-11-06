@@ -33,6 +33,8 @@ hikaricp = { module = "com.zaxxer:HikariCP", version.ref= "hikaricp" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 jline = { module = "org.jline:jline", version.ref = "jline" }
 spring-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
+spring-security-starter = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-security-test = { module = "org.springframework.security:spring-security-test" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

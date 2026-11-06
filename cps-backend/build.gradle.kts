@@ -6,5 +6,10 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":cps-core"))
     implementation(libs.spring.webmvc)
+    implementation(libs.spring.security.starter)
+
+    compileOnly(libs.jetbrains.annotations)
+    testImplementation(libs.spring.security.test)
 }
