@@ -2,6 +2,9 @@ package com.team.corporate.backend.handlers;
 
 import com.team.corporate.backend.dto.AuditLogDto;
 import com.team.corporate.backend.dto.OrderDto;
+import com.team.corporate.backend.filter.PageQuery;
+import com.team.corporate.backend.filter.PageResponse;
+import com.team.corporate.backend.filter.Paginator;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.entities.Order;
@@ -46,6 +49,14 @@ public class OrdersHandler {
         return list(query, query.userId());
     }
 
+    @GetMapping("/page")
+    public PageResponse<OrderDto> page(
+            @Valid @ModelAttribute OrderDto.Query query,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(list(query), pagination);
+    }
+
     @GetMapping("/{id}")
     public OrderDto get(@PathVariable UUID id) {
         return details(id);
@@ -63,6 +74,22 @@ public class OrdersHandler {
             return audit.getAllByOrder(id).stream().map(AuditLogDto::from)
                     .sorted(Comparator.comparing(AuditLogDto::changedAt).thenComparing(AuditLogDto::id)).toList();
         });
+    }
+
+    @GetMapping("/{id}/items/page")
+    public PageResponse<OrderDto.Item> itemsPage(
+            @PathVariable UUID id,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(items(id), pagination);
+    }
+
+    @GetMapping("/{id}/audit/page")
+    public PageResponse<AuditLogDto> auditPage(
+            @PathVariable UUID id,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(audit(id), pagination);
     }
 
     @PostMapping
