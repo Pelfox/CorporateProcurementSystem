@@ -2,6 +2,9 @@ package com.team.corporate.backend.handlers;
 
 import com.team.corporate.backend.dto.CategoryDto;
 import com.team.corporate.backend.dto.SearchQuery;
+import com.team.corporate.backend.filter.PageQuery;
+import com.team.corporate.backend.filter.PageResponse;
+import com.team.corporate.backend.filter.Paginator;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.CategoriesService;
@@ -48,6 +51,14 @@ public class CategoriesHandler {
                     .sorted(Comparator.comparing(CategoryDto::name, String.CASE_INSENSITIVE_ORDER)
                             .thenComparing(CategoryDto::id)).toList();
         });
+    }
+
+    @GetMapping("/page")
+    public PageResponse<CategoryDto> page(
+            @Valid @ModelAttribute SearchQuery query,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(list(query), pagination);
     }
 
     @GetMapping("/{id}")

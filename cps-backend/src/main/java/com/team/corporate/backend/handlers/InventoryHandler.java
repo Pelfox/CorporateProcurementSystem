@@ -1,6 +1,9 @@
 package com.team.corporate.backend.handlers;
 
 import com.team.corporate.backend.dto.InventoryDto;
+import com.team.corporate.backend.filter.PageQuery;
+import com.team.corporate.backend.filter.PageResponse;
+import com.team.corporate.backend.filter.Paginator;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.entities.Inventory;
@@ -57,6 +60,15 @@ public class InventoryHandler {
         });
     }
 
+    @GetMapping("/inventory/page")
+    public PageResponse<InventoryDto> page(
+            @RequestParam(required = false) UUID productId,
+            @RequestParam(required = false) UUID warehouseId,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(list(productId, warehouseId), pagination);
+    }
+
     @GetMapping("/inventory/{id}")
     public InventoryDto get(@PathVariable UUID id) {
         return api.execute(() -> InventoryDto.from(inventories.getInventory(id)
@@ -66,6 +78,14 @@ public class InventoryHandler {
     @GetMapping("/warehouses/{warehouseId}/inventory")
     public List<InventoryDto> warehouseInventory(@PathVariable UUID warehouseId) {
         return list(null, warehouseId);
+    }
+
+    @GetMapping("/warehouses/{warehouseId}/inventory/page")
+    public PageResponse<InventoryDto> warehouseInventoryPage(
+            @PathVariable UUID warehouseId,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(warehouseInventory(warehouseId), pagination);
     }
 
     @PutMapping("/warehouses/{warehouseId}/inventory/{productId}")
@@ -99,5 +119,13 @@ public class InventoryHandler {
                             product.getId(), available.getOrDefault(product.getId(), 0L)))
                     .sorted(Comparator.comparing(InventoryDto.Availability::productId)).toList();
         });
+    }
+
+    @GetMapping("/inventory/availability/page")
+    public PageResponse<InventoryDto.Availability> availabilityPage(
+            @RequestParam(required = false) UUID editingOrderId,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(availability(editingOrderId), pagination);
     }
 }

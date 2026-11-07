@@ -1,6 +1,9 @@
 package com.team.corporate.backend.handlers;
 
 import com.team.corporate.backend.dto.UserDto;
+import com.team.corporate.backend.filter.PageQuery;
+import com.team.corporate.backend.filter.PageResponse;
+import com.team.corporate.backend.filter.Paginator;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.UsersService;
@@ -40,6 +43,14 @@ public class UsersHandler {
                 .filter(user -> contains(user.username(), q) || contains(user.id().toString(), q))
                 .filter(user -> query.role() == null || user.role() == query.role())
                 .sorted(comparator.thenComparing(UserDto::id)).toList());
+    }
+
+    @GetMapping("/page")
+    public PageResponse<UserDto> page(
+            @Valid @ModelAttribute UserDto.Query query,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(list(query), pagination);
     }
 
     @GetMapping("/{id}")
