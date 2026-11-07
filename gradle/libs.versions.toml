@@ -33,6 +33,11 @@ hikaricp = { module = "com.zaxxer:HikariCP", version.ref= "hikaricp" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 jline = { module = "org.jline:jline", version.ref = "jline" }
 spring-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
+spring-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-flyway = { module = "org.springframework.boot:spring-boot-starter-flyway" }
+spring-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+spring-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
+flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
