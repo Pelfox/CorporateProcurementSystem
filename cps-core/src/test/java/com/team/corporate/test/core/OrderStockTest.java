@@ -19,8 +19,8 @@ class OrderStockTest extends BaseServiceTest {
 
     @BeforeEach
     void prepare() {
-        buyer = usersService.createUser("buyer", UserRole.USER);
-        manager = usersService.createUser("manager", UserRole.MANAGER);
+        buyer = createTestUser("buyer", UserRole.USER);
+        manager = createTestUser("manager", UserRole.MANAGER);
         var category = categoriesService.createCategory("Товары");
         product = productsService.createProduct("Товар", "SKU-001", category.getId(), BigDecimal.TEN);
     }

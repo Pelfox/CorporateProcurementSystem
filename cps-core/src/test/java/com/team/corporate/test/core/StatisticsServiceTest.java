@@ -29,8 +29,8 @@ class StatisticsServiceTest extends BaseServiceTest {
 
     @Test
     void countsAllUsersAndStatusesAndSumsStockAcrossWarehouses() {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
-        var buyer = usersService.createUser("Покупатель", UserRole.USER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
+        var buyer = createTestUser("Покупатель", UserRole.USER);
         var category = categoriesService.createCategory("Канцелярия");
         categoriesService.createCategory("Пустая категория");
         var product = productsService.createProduct("Бумага", "PAPER", category.getId(), new BigDecimal("100.00"));
@@ -58,7 +58,7 @@ class StatisticsServiceTest extends BaseServiceTest {
 
     @Test
     void recalculatesAfterStatusChangesAndDeletion() {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         var order = ordersService.createOrder(manager.getId(), OrderStatus.CREATED, null);
         assertEquals(1, statistics.getStatistics().activeOrders());
 

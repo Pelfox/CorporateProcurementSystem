@@ -1,6 +1,8 @@
 package com.team.corporate.test.core;
 
 import com.team.corporate.core.config.FileConfigurationProvider;
+import com.team.corporate.core.entities.User;
+import com.team.corporate.core.entities.UserRole;
 import com.team.corporate.core.repositories.*;
 import com.team.corporate.core.repositories.impls.*;
 import com.team.corporate.core.services.*;
@@ -10,6 +12,8 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+
+import java.time.Instant;
 
 public abstract class BaseServiceTest {
 
@@ -36,6 +40,12 @@ public abstract class BaseServiceTest {
     protected InventoriesService inventoriesService;
     protected WarehousesService warehousesService;
     protected AuditLogsService auditLogsService;
+
+    private static final String TEST_PASSWORD_HASH =
+            "$2b$12$0eaPaGYn/83Y3/KcVSPSFOtaK2q4cCgsC0tMkZ83cY.1iGOiA3ePC";
+
+    protected static final Instant TEST_PASSWORD_EXPIRES_AT =
+            Instant.parse("2035-01-01T00:00:00Z");
 
     @BeforeAll
     static void initSessionFactory() {
@@ -89,5 +99,14 @@ public abstract class BaseServiceTest {
             session.createMutationQuery("DELETE FROM User").executeUpdate();
             session.createMutationQuery("DELETE FROM Warehouse").executeUpdate();
         });
+    }
+
+    protected User createTestUser(String username, UserRole role) {
+        return usersService.createUser(
+                username,
+                TEST_PASSWORD_HASH,
+                TEST_PASSWORD_EXPIRES_AT,
+                role
+        );
     }
 }

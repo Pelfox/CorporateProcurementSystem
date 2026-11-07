@@ -4,6 +4,7 @@ import com.team.corporate.core.entities.*;
 import com.team.corporate.core.services.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,11 +41,11 @@ public class DataInitializer {
         Category furniture = categoriesService.createCategory("Мебель");
 
         // Пользователи
-        User user1 = usersService.createUser("ivan_sid", UserRole.USER);
-        User user2 = usersService.createUser("nikita_och", UserRole.USER);
-        User manager1 = usersService.createUser("matvey_rat", UserRole.MANAGER);
-        User user3 = usersService.createUser("alexey_dem", UserRole.USER);
-        User manager2 = usersService.createUser("dmitry_sla", UserRole.MANAGER);
+        User user1 = usersService.createUser("ivan_sid", "$2b$12$0eaPaGYn/83Y3/KcVSPSFOtaK2q4cCgsC0tMkZ83cY.1iGOiA3ePC", Instant.parse("2035-01-01T00:00:00Z"), UserRole.USER);
+        User user2 = usersService.createUser("nikita_och", "$2b$12$0eaPaGYn/83Y3/KcVSPSFOtaK2q4cCgsC0tMkZ83cY.1iGOiA3ePC", Instant.parse("2035-01-01T00:00:00Z"), UserRole.USER);
+        User manager1 = usersService.createUser("matvey_rat", "$2b$12$0eaPaGYn/83Y3/KcVSPSFOtaK2q4cCgsC0tMkZ83cY.1iGOiA3ePC", Instant.parse("2035-01-01T00:00:00Z"), UserRole.MANAGER);
+        User user3 = usersService.createUser("alexey_dem", "$2b$12$0eaPaGYn/83Y3/KcVSPSFOtaK2q4cCgsC0tMkZ83cY.1iGOiA3ePC", Instant.parse("2035-01-01T00:00:00Z"), UserRole.USER);
+        User manager2 = usersService.createUser("dmitry_sla", "$2b$12$0eaPaGYn/83Y3/KcVSPSFOtaK2q4cCgsC0tMkZ83cY.1iGOiA3ePC", Instant.parse("2035-01-01T00:00:00Z"), UserRole.MANAGER);
 
         // Товары
         Product p1 = productsService.createProduct("Ноутбук Dell Latitude", "LAPTOP-001", office.getId(), new BigDecimal("75000.00"));

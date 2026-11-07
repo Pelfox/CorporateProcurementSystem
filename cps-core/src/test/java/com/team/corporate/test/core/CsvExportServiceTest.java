@@ -34,8 +34,8 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void exportsEveryEntityWithRelationshipsAndStoredValues() throws Exception {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
-        var buyer = usersService.createUser("Покупатель", UserRole.USER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
+        var buyer = createTestUser("Покупатель", UserRole.USER);
         var category = categoriesService.createCategory("Канцелярия");
         var product = productsService.createProduct("Бумага, \"А4\"", "PAPER", category.getId(), new BigDecimal("120.50"));
         var warehouse = warehousesService.createWarehouse("Главный склад", null);
@@ -82,7 +82,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void exportsEmptyTablesAndCreatesMissingParentDirectories() throws Exception {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         Path result = exporter.exportAll(manager.getId(), directory.resolve("new/nested"));
         for (String name : List.of("categories", "products", "warehouses", "inventories", "orders", "order_items", "audit_logs")) {
             String csv = Files.readString(result.resolve(name + ".csv"));
@@ -94,7 +94,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void exportsProductWithoutCategoryAndOrderWithoutNotes() throws Exception {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         var product = productsRepository.add(new Product("SKU", "Товар", null, new BigDecimal("0.00")));
         var order = ordersService.createOrder(manager.getId(), OrderStatus.CREATED, null);
         Path result = exporter.exportAll(manager.getId(), directory);
@@ -104,7 +104,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void rejectsRegularAndUnknownUsersBeforeCreatingFiles() {
-        var user = usersService.createUser("Покупатель", UserRole.USER);
+        var user = createTestUser("Покупатель", UserRole.USER);
         Path target = directory.resolve("unauthorized");
         assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(user.getId(), target));
         assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(UUID.randomUUID(), target));
@@ -113,7 +113,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void repeatedExportsPreservePreviousFiles() throws Exception {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         Path first = exporter.exportAll(manager.getId(), directory);
         String original = Files.readString(first.resolve("categories.csv"));
         categoriesService.createCategory("Новая категория");
@@ -125,7 +125,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void reportsFileSystemFailureWithoutOverwritingFile() throws Exception {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         Path target = directory.resolve("file");
         Files.writeString(target, "original");
         assertThrows(IOException.class, () -> exporter.exportAll(manager.getId(), target));
@@ -134,7 +134,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void rejectsEmptyAndControlCharacterPaths() {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         for (Path path : List.of(Path.of(""), Path.of("   "), directory.resolve("bad\nfolder"))) {
             assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), path));
         }
@@ -144,7 +144,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void protectsFormulaValuesWithoutChangingDatabase() throws Exception {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         var category = categoriesService.createCategory("=1+1");
         Path result = exporter.exportAll(manager.getId(), directory);
         assertTrue(Files.readString(result.resolve("categories.csv")).contains(
@@ -154,7 +154,7 @@ class CsvExportServiceTest extends BaseServiceTest {
 
     @Test
     void validationFailureRemovesPartialExportAndPreservesEarlierExports() throws Exception {
-        var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
+        var manager = createTestUser("Менеджер", UserRole.MANAGER);
         Path previous = exporter.exportAll(manager.getId(), directory);
         String original = Files.readString(previous.resolve("orders.csv"));
         var order = ordersService.createOrder(manager.getId(), OrderStatus.CREATED, "Legacy note");

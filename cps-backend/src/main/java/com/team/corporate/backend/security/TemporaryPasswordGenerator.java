@@ -22,7 +22,7 @@ public final class TemporaryPasswordGenerator {
         return generate(DEFAULT_LENGTH);
     }
 
-    public static String generate(int length) {
+    public String generate(int length) {
         if (length < MIN_LENGTH || length > MAX_LENGTH) {
             throw new IllegalArgumentException(
                     "Длина пароля должна быть от "
