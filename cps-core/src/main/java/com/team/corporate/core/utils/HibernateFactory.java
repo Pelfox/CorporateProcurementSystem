@@ -24,7 +24,8 @@ public class HibernateFactory {
         configuration.addAnnotatedClasses(
                 AuditLog.class, Category.class, Inventory.class,
                 Order.class, OrderItem.class, Product.class,
-                User.class, Warehouse.class
+                User.class, Warehouse.class,
+                OrderTag.class
         );
 
         Properties properties = new Properties();
