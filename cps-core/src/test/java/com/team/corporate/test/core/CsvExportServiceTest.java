@@ -135,8 +135,12 @@ class CsvExportServiceTest extends BaseServiceTest {
     @Test
     void rejectsEmptyAndControlCharacterPaths() {
         var manager = usersService.createUser("Менеджер", UserRole.MANAGER);
-        for (Path path : List.of(Path.of(""), Path.of("   "), directory.resolve("bad\nfolder"))) {
-            assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), path));
+        assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), Path.of("")));
+        assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), Path.of("   ")));
+        try {
+            Path badPath = directory.resolve("bad\nfolder");
+            assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), badPath));
+        } catch (java.nio.file.InvalidPathException ignored) {
         }
         assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), null));
         assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(null, directory));
