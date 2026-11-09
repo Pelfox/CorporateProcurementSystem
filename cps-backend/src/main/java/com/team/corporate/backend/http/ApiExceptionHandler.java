@@ -7,11 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+//import org.springframework.security.access.AccessDeniedException;
+//import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -71,6 +74,25 @@ public class ApiExceptionHandler {
         return response(HttpStatus.CONFLICT, message, request, List.of());
     }
 
+    // конфликт версий -> 409
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    ResponseEntity<ApiErrorDto> versionConflict(OptimisticLockingFailureException error, HttpServletRequest request) {
+        return response(HttpStatus.CONFLICT,
+                "Запись была изменена другим пользователем. Обновите страницу и повторите действие.",
+                request, List.of());
+    }
+
+    // хук для Spring Security
+//    @ExceptionHandler(AuthenticationException.class)
+//    ResponseEntity<ApiErrorDto> unauthorized(AuthenticationException error, HttpServletRequest request) {
+//        return response(HttpStatus.UNAUTHORIZED, "Требуется аутентификация.", request, List.of());
+//    }
+//
+//    @ExceptionHandler(AccessDeniedException.class)
+//    ResponseEntity<ApiErrorDto> forbidden(AccessDeniedException error, HttpServletRequest request) {
+//        return response(HttpStatus.FORBIDDEN, "Недостаточно прав для выполнения операции.", request, List.of());
+//    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorDto> other(Exception error, HttpServletRequest request) {
         if (error instanceof ErrorResponse frameworkError) {
@@ -81,13 +103,23 @@ public class ApiExceptionHandler {
             headers.setContentType(MediaType.APPLICATION_JSON);
             return new ResponseEntity<>(response.getBody(), headers, status);
         }
-        LOG.error("HTTP request failed: {} {}", request.getMethod(), request.getRequestURI(), error);
+        LOG.error("HTTP request failed: {} {} (correlationId={})",
+                request.getMethod(), request.getRequestURI(), correlationId(request), error);
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось выполнить операцию.", request, List.of());
     }
 
     private ResponseEntity<ApiErrorDto> response(HttpStatus status, String message,
                                                  HttpServletRequest request, List<FieldViolation> violations) {
-        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(new ApiErrorDto(Instant.now(), status.value(),
-                status.getReasonPhrase(), message, request.getRequestURI(), violations));
+        String correlationId = correlationId(request);
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON)
+                .body(new ApiErrorDto(Instant.now(), status.value(),
+                        status.getReasonPhrase(), message, request.getRequestURI(),
+                        correlationId, violations));
+    }
+
+    private static String correlationId(HttpServletRequest request) {
+        if (request == null) return null;
+        Object value = request.getAttribute(CorrelationIdFilter.REQUEST_ATTRIBUTE);
+        return value == null ? null : value.toString();
     }
 }

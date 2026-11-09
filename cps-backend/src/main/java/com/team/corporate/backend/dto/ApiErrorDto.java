@@ -9,8 +9,8 @@ public record ApiErrorDto(
         String error,
         String message,
         String path,
+        String correlationId,
         List<FieldViolation> violations
 ) {
-    public record FieldViolation(String field, String message) {
-    }
+    public record FieldViolation(String field, String message) {}
 }
