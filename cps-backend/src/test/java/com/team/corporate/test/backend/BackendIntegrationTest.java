@@ -33,8 +33,10 @@ abstract class BackendIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         // Core HibernateTransactions commits independently of Spring test transactions.
-        for (String table : List.of("audit_logs", "order_items", "orders", "inventory", "products",
-                "warehouses", "categories", "users")) jdbc.update("DELETE FROM " + table);
+        // Порядок важен: order_tags и tags чистим ПЕРЕД orders (внешний ключ).
+        for (String table : List.of("audit_logs", "order_items", "order_tags", "tags",
+                "orders", "inventory", "products", "warehouses", "categories", "users"))
+            jdbc.update("DELETE FROM " + table);
     }
 
     protected ResultActions json(MockHttpServletRequestBuilder request, Object body) throws Exception {

@@ -4,6 +4,7 @@ import com.team.corporate.backend.validation.TextValue;
 import com.team.corporate.core.entities.Order;
 import com.team.corporate.core.entities.OrderItem;
 import com.team.corporate.core.entities.OrderStatus;
+import com.team.corporate.core.entities.OrderTag;
 import com.team.corporate.core.services.OrdersService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -27,10 +28,16 @@ public record OrderDto(
         int lineCount,
         long totalQuantity,
         BigDecimal total,
-        List<Item> items
+        List<Item> items,
+        String externalCode,
+        boolean archived,
+        Instant archivedAt,
+        Long version,
+        List<String> tags
 ) {
-    public static OrderDto from(@NotNull Order order, List<OrderItem> lines) {
+    public static OrderDto from(@NotNull Order order, List<OrderItem> lines, List<OrderTag> tags) {
         var items = lines.stream().sorted(Comparator.comparing(OrderItem::getId)).map(Item::from).toList();
+        var tagNames = tags == null ? List.<String>of() : tags.stream().map(OrderTag::getName).sorted().toList();
         return new OrderDto(
                 order.getId(),
                 order.getUser().getId(),
@@ -42,43 +49,40 @@ public record OrderDto(
                 items.size(),
                 items.stream().mapToLong(Item::quantity).sum(),
                 items.stream().map(Item::total).reduce(BigDecimal.ZERO, BigDecimal::add),
-                items
+                items,
+                order.getExternalCode(),
+                order.isArchived(),
+                order.getArchivedAt(),
+                order.getVersion(),
+                tagNames
         );
     }
 
+    public static OrderDto from(@NotNull Order order, List<OrderItem> lines) {
+        return from(order, lines, null);
+    }
+
     public enum Sort {
-        CREATED_ASC,
-        CREATED_DESC,
-        TOTAL_ASC,
-        TOTAL_DESC
+        CREATED_ASC, CREATED_DESC, TOTAL_ASC, TOTAL_DESC
     }
 
     public record Item(
-            UUID id,
-            UUID productId,
-            String productName,
-            String sku,
-            int quantity,
-            BigDecimal purchasePrice,
-            BigDecimal total
+            UUID id, UUID productId, String productName, String sku,
+            int quantity, BigDecimal purchasePrice, BigDecimal total
     ) {
-        static Item from(OrderItem item) {
-            return new Item(
-                    item.getId(),
-                    item.getProduct().getId(),
-                    item.getProduct().getName(),
-                    item.getProduct().getSku(),
-                    item.getQuantity(),
-                    item.getPurchasePrice(),
-                    item.getPurchasePrice().multiply(BigDecimal.valueOf(item.getQuantity()))
-            );
+        public static Item from(OrderItem item) {
+            return new Item(item.getId(), item.getProduct().getId(), item.getProduct().getName(),
+                    item.getProduct().getSku(), item.getQuantity(), item.getPurchasePrice(),
+                    item.getPurchasePrice().multiply(BigDecimal.valueOf(item.getQuantity())));
         }
     }
 
     public record Request(
             @NotNull UUID userId,
             @NotEmpty List<@NotNull @Valid LineRequest> items,
-            @TextValue String notes
+            @TextValue String notes,
+            @TextValue String externalCode,
+            Long version
     ) {
         public List<OrdersService.Line> lines() {
             return items.stream().map(LineRequest::line).toList();
@@ -86,54 +90,29 @@ public record OrderDto(
     }
 
     public record LineRequest(@NotNull UUID productId, @NotNull @Min(1) @Max(100000) Integer quantity) {
-        public OrdersService.Line line() {
-            return new OrdersService.Line(productId, quantity);
-        }
+        public OrdersService.Line line() { return new OrdersService.Line(productId, quantity); }
     }
 
-    public record AddItemRequest(
-            @NotNull UUID userId,
-            @NotNull UUID productId,
-            @NotNull @Min(1) @Max(100000) Integer quantity
-    ) {
-        public OrdersService.Line line() {
-            return new OrdersService.Line(productId, quantity);
-        }
+    public record AddItemRequest(@NotNull UUID userId, @NotNull UUID productId,
+                                 @NotNull @Min(1) @Max(100000) Integer quantity) {
+        public OrdersService.Line line() { return new OrdersService.Line(productId, quantity); }
     }
 
-    public record QuantityRequest(@NotNull UUID userId, @NotNull @Min(1) @Max(100000) Integer quantity) {
-    }
-
-    public record NotesRequest(@NotNull UUID userId, @TextValue String notes) {
-    }
-
-    public record StatusRequest(@NotNull UUID managerId, @NotNull OrderStatus status) {
-    }
+    public record QuantityRequest(@NotNull UUID userId, @NotNull @Min(1) @Max(100000) Integer quantity) {}
+    public record NotesRequest(@NotNull UUID userId, @TextValue String notes) {}
+    public record StatusRequest(@NotNull UUID managerId, @NotNull OrderStatus status) {}
 
     public record Query(
-            @TextValue String q,
-            UUID userId,
-            OrderStatus status,
+            @TextValue String q, UUID userId, OrderStatus status,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-            @DecimalMin("0") BigDecimal minTotal,
-            @DecimalMin("0") BigDecimal maxTotal,
-            Sort sort
+            @DecimalMin("0") BigDecimal minTotal, @DecimalMin("0") BigDecimal maxTotal,
+            Sort sort, Boolean archived, String tag
     ) {
-        public Query {
-            if (sort == null) {
-                sort = Sort.CREATED_DESC;
-            }
-        }
-
+        public Query { if (sort == null) sort = Sort.CREATED_DESC; }
         @AssertTrue(message = "dateFrom не может быть позже dateTo")
-        public boolean isDateRangeValid() {
-            return dateFrom == null || dateTo == null || !dateFrom.isAfter(dateTo);
-        }
-
+        public boolean isDateRangeValid() { return dateFrom == null || dateTo == null || !dateFrom.isAfter(dateTo); }
         @AssertTrue(message = "minTotal не может превышать maxTotal")
-        public boolean isTotalRangeValid() {
-            return minTotal == null || maxTotal == null || minTotal.compareTo(maxTotal) <= 0;
-        }
+        public boolean isTotalRangeValid() { return minTotal == null || maxTotal == null || minTotal.compareTo(maxTotal) <= 0; }
     }
 }

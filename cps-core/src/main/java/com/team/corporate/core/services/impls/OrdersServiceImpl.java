@@ -1,6 +1,7 @@
 package com.team.corporate.core.services.impls;
 
 import com.team.corporate.core.entities.*;
+import com.team.corporate.core.exceptions.OrderItemNotFoundException;
 import com.team.corporate.core.exceptions.OrderNotFoundException;
 import com.team.corporate.core.exceptions.UserNotFoundException;
 import com.team.corporate.core.repositories.*;
@@ -250,9 +251,9 @@ public class OrdersServiceImpl implements OrdersService {
         transactions.execute(() -> {
             editable(userId, orderId);
             OrderItem item = orderItemsRepository.getById(itemId)
-                    .orElseThrow(() -> new IllegalArgumentException("Позиция не найдена."));
+                    .orElseThrow(() -> new OrderItemNotFoundException("Позиция заказа не найдена."));
             if (!item.getOrder().getId().equals(orderId)) {
-                throw new IllegalArgumentException("Позиция не принадлежит заказу.");
+                throw new OrderItemNotFoundException("Позиция не принадлежит заказу.");
             }
             if (quantity == 0) {
                 if (orderItemsRepository.getByOrderId(orderId).size() <= 1) {
@@ -287,7 +288,8 @@ public class OrdersServiceImpl implements OrdersService {
                 return;
             }
             transitionStock(order, status);
-            auditLogsRepository.add(new AuditLog(order, manager, order.getStatus(), status));
+            auditLogsRepository.add(new AuditLog(order, manager, order.getStatus(), status,
+                    com.team.corporate.core.utils.CorrelationIdHolder.get()));
             order.setStatus(status);
             ordersRepository.update(order);
         });
