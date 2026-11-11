@@ -5,6 +5,9 @@ import com.team.corporate.backend.dto.ApiErrorDto.FieldViolation;
 import com.team.corporate.backend.validation.InvalidUsernameException;
 import com.team.corporate.backend.validation.InvalidPasswordException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
+import com.team.corporate.backend.security.RateLimitException;
+import com.team.corporate.backend.security.SecurityAudit;
 import com.team.corporate.core.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -30,8 +33,23 @@ import java.util.List;
 public class ApiExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<ApiErrorDto> denied(AccessDeniedException error, HttpServletRequest request) {
+        SecurityAudit.record("HTTP_ACCESS", SecurityAudit.currentActor(), null, "DENIED");
+        return response(HttpStatus.FORBIDDEN, "Недостаточно прав.", request, List.of());
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    ResponseEntity<ApiErrorDto> rateLimited(RateLimitException error, HttpServletRequest request) {
+        SecurityAudit.record("AUTH_LIMIT", SecurityAudit.currentActor(), null, "REJECTED");
+        var result = response(HttpStatus.TOO_MANY_REQUESTS, error.getMessage(), request, List.of());
+        return ResponseEntity.status(429).header("Retry-After", Long.toString(error.retryAfter()))
+                .header("Cache-Control", "no-store").contentType(MediaType.APPLICATION_JSON).body(result.getBody());
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     ResponseEntity<ApiErrorDto> authentication(AuthenticationException error, HttpServletRequest request) {
+        SecurityAudit.record("AUTHENTICATE", SecurityAudit.currentActor(), null, "REJECTED");
         return response(HttpStatus.UNAUTHORIZED, "Недействительные полномочия или сессия.", request, List.of());
     }
 
@@ -100,7 +118,8 @@ public class ApiExceptionHandler {
             headers.setContentType(MediaType.APPLICATION_JSON);
             return new ResponseEntity<>(response.getBody(), headers, status);
         }
-        LOG.error("HTTP request failed: {} {}", request.getMethod(), request.getRequestURI(), error);
+        // Exception messages/stack traces may contain SQL values or malformed credential JSON.
+        LOG.error("HTTP request failed type={} incident={}", error.getClass().getSimpleName(), java.util.UUID.randomUUID());
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось выполнить операцию.", request, List.of());
     }
 

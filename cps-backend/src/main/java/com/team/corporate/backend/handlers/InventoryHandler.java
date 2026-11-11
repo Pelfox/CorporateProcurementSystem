@@ -3,6 +3,7 @@ package com.team.corporate.backend.handlers;
 import com.team.corporate.backend.dto.InventoryDto;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
+import com.team.corporate.backend.security.BusinessAccess;
 import com.team.corporate.core.entities.Inventory;
 import com.team.corporate.core.services.InventoriesService;
 import com.team.corporate.core.services.ProductsService;
@@ -10,7 +11,14 @@ import com.team.corporate.core.services.impls.OrderStock;
 import jakarta.validation.Valid;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.Comparator;
@@ -24,17 +32,20 @@ public class InventoryHandler {
     private final ProductsService products;
     private final OrderStock stock;
     private final ApiExecutor api;
+    private final BusinessAccess access;
 
     public InventoryHandler(
             @NotNull InventoriesService inventories,
             @NotNull ProductsService products,
             @NotNull OrderStock stock,
-            @NotNull ApiExecutor api
+            @NotNull ApiExecutor api,
+            @NotNull BusinessAccess access
     ) {
         this.inventories = inventories;
         this.products = products;
         this.stock = stock;
         this.api = api;
+        this.access = access;
     }
 
     @GetMapping("/inventory")
@@ -94,6 +105,9 @@ public class InventoryHandler {
     @GetMapping("/inventory/availability")
     public List<InventoryDto.Availability> availability(@RequestParam(required = false) UUID editingOrderId) {
         return api.execute(() -> {
+            if (editingOrderId != null) {
+                access.requireOrder(editingOrderId);
+            }
             var available = stock.getAvailableQuantities(editingOrderId);
             return products.getAll().stream().map(product -> new InventoryDto.Availability(
                             product.getId(), available.getOrDefault(product.getId(), 0L)))

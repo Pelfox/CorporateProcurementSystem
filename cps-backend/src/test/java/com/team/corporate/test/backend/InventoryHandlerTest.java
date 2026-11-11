@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class InventoryHandlerTest extends BackendIntegrationTest {
+class InventoryHandlerTest extends LegacyBusinessIntegrationTest {
     @Test
     void warehouseCrudSearchAndClearingAddress() throws Exception {
         UUID main = warehouse("Main");

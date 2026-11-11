@@ -10,6 +10,7 @@ import com.team.corporate.backend.security.InvalidRefreshTokenException;
 import com.team.corporate.backend.security.JwtTokenService;
 import com.team.corporate.backend.security.RefreshTokenCodec;
 import com.team.corporate.backend.security.SessionValidator;
+import com.team.corporate.backend.security.SecurityAudit;
 import com.team.corporate.backend.services.responses.LoginResponse;
 import com.team.corporate.backend.services.responses.PasswordChangeTokenResponse;
 import com.team.corporate.backend.services.responses.TokenPairResponse;
@@ -87,10 +88,13 @@ public class AuthService {
             }
             var session = sessions.saveAndFlush(new AuthSession(user, now(), expires, SessionType.PASSWORD_CHANGE));
             var issued = jwt.issue(session);
+            SecurityAudit.success("LOGIN_LIMITED", user.getId(), user.getId());
             return new LoginResponse(LoginResponse.Status.PASSWORD_CHANGE_REQUIRED, null,
                     new PasswordChangeTokenResponse(issued.value(), issued.expiresAt()));
         }
-        return new LoginResponse(LoginResponse.Status.AUTHENTICATED, createFullSession(user), null);
+        var pair = createFullSession(user);
+        SecurityAudit.success("LOGIN", user.getId(), user.getId());
+        return new LoginResponse(LoginResponse.Status.AUTHENTICATED, pair, null);
     }
 
     @Transactional
@@ -105,6 +109,7 @@ public class AuthService {
         }
         user.setPermanentPassword(encoder.encode(request.newPassword()));
         revokeAll(user.getId());
+        SecurityAudit.success("PASSWORD_INITIAL", user.getId(), user.getId());
         return createFullSession(user);
     }
 
@@ -124,6 +129,7 @@ public class AuthService {
         }
         user.setPermanentPassword(encoder.encode(request.newPassword()));
         revokeAll(user.getId());
+        SecurityAudit.success("PASSWORD_CHANGE", user.getId(), user.getId());
     }
 
     @Transactional(noRollbackFor = InvalidRefreshTokenException.class)
@@ -139,10 +145,12 @@ public class AuthService {
         }
         if (token.getUsedAt() != null) {
             session.setRevokedAt(now());
+            SecurityAudit.success("REFRESH_REPLAY_REVOKE", user.getId(), user.getId());
             // This rejection must commit the revocation rather than roll it back with the exception.
             throw new InvalidRefreshTokenException();
         }
         token.setUsedAt(now());
+        SecurityAudit.success("REFRESH", user.getId(), user.getId());
         return issuePair(session);
     }
 
@@ -150,11 +158,12 @@ public class AuthService {
     public void logout(String rawToken) {
         String hash = refresh.hash(rawToken);
         var reference = tokens.findReferenceByTokenHash(hash).orElseThrow(InvalidRefreshTokenException::new);
-        lockUser(reference.userId());
+        var user = lockUser(reference.userId());
         var session = lockSession(reference.sessionId());
         if (session.getRevokedAt() == null) {
             session.setRevokedAt(now());
         }
+        SecurityAudit.success("LOGOUT", user.getId(), user.getId());
     }
 
     @Transactional
@@ -164,6 +173,7 @@ public class AuthService {
         var session = lockSession(UUID.fromString(claims.getClaimAsString("sid")));
         requireActive(session, user, SessionType.FULL);
         revokeAll(user.getId());
+        SecurityAudit.success("LOGOUT_ALL", user.getId(), user.getId());
     }
 
     /** Bounded maintenance operation; history survives rotation and remains until absolute expiry plus retention. */

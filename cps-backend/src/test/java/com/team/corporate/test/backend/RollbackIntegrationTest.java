@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class RollbackIntegrationTest extends BackendIntegrationTest {
+class RollbackIntegrationTest extends LegacyBusinessIntegrationTest {
     @MockitoSpyBean private OrderItemsRepository items;
     @MockitoSpyBean private AuditLogsRepository audit;
 

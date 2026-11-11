@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class OrderStatusHandlerTest extends BackendIntegrationTest {
+class OrderStatusHandlerTest extends LegacyBusinessIntegrationTest {
     @ParameterizedTest(name = "{0} -> {1}")
     @CsvSource({
             "CREATED,CREATED", "CREATED,APPROVED", "CREATED,DELIVERED", "CREATED,CANCELLED",

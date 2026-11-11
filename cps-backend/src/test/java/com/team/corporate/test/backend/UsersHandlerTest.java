@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class UsersHandlerTest extends BackendIntegrationTest {
+class UsersHandlerTest extends LegacyBusinessIntegrationTest {
     @Test
     void createsReadsUpdatesAndDeletesUser() throws Exception {
         UUID manager = user("manager", "MANAGER");

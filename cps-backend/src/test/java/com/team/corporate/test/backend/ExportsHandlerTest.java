@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class ExportsHandlerTest extends BackendIntegrationTest {
+class ExportsHandlerTest extends LegacyBusinessIntegrationTest {
     private static final Map<String, String> HEADERS = Map.of(
             "users.csv", "id,username,user_role,created_at",
             "categories.csv", "id,name",

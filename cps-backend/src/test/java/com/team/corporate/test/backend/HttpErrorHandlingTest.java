@@ -42,9 +42,11 @@ class HttpErrorHandlingTest {
     @MockitoBean private SessionValidator sessionValidator;
     @MockitoBean private ApiExecutor api;
     @MockitoBean private CsvExportService exporter;
+    @MockitoBean private com.team.corporate.backend.security.BusinessAccess access;
 
     @BeforeEach
     void executeHandlerActions() {
+        when(access.actor(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(api).execute(any());
     }
 

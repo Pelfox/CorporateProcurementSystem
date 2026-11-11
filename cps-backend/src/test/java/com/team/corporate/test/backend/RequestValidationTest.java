@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class RequestValidationTest extends BackendIntegrationTest {
+class RequestValidationTest extends LegacyBusinessIntegrationTest {
     private static final String ID = "00000000-0000-0000-0000-000000000001";
     private static final String ORDER = "/api/orders/" + ID;
     private static final String ITEM = ORDER + "/items/" + ID;
@@ -145,15 +145,15 @@ class RequestValidationTest extends BackendIntegrationTest {
         for (String value : Arrays.asList(null, "", "bad")) {
             var userDelete = delete("/api/users/" + ID);
             var itemDelete = delete(ITEM);
-            var export = get("/api/exports/csv");
             if (value != null) {
                 userDelete.param("actingUserId", value);
                 itemDelete.param("userId", value);
-                export.param("managerId", value);
             }
             mvc.perform(userDelete).andExpect(status().isBadRequest());
             mvc.perform(itemDelete).andExpect(status().isBadRequest());
-            mvc.perform(export).andExpect(status().isBadRequest());
+            if ("bad".equals(value)) {
+                mvc.perform(get("/api/exports/csv").param("managerId", value)).andExpect(status().isBadRequest());
+            }
         }
     }
 

@@ -24,7 +24,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "spring.datasource.url=jdbc:h2:mem:backend_integration;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
         "spring.datasource.username=sa", "spring.datasource.password=",
         "spring.datasource.driver-class-name=org.h2.Driver",
-        "app.auth.bcrypt-strength=4"
+        "app.auth.bcrypt-strength=4",
+        "spring.test.mockmvc.print=none",
+        "app.auth.rate-limit.login-ip=10000", "app.auth.rate-limit.login-username=10000",
+        "app.auth.rate-limit.refresh-ip=10000", "app.auth.rate-limit.refresh-token=10000",
+        "app.auth.rate-limit.password-ip=10000", "app.auth.rate-limit.password-token=10000"
 })
 // These are persistence/business regression tests. Real filter coverage is separate.
 @AutoConfigureMockMvc(addFilters = false)

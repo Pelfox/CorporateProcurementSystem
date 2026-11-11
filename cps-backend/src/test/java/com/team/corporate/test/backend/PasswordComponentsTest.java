@@ -12,7 +12,9 @@ class PasswordComponentsTest {
     @Test
     void generatedSecretIsBcryptCompatibleAndOnlyMatchesItsOwnHash() {
         var generator = new TemporaryPasswordGenerator();
-        var encoder = new PasswordConfig().passwordEncoder(4);
+        var limits = new com.team.corporate.backend.config.AuthRateLimitProperties(java.time.Duration.ofMinutes(1),
+                120, 10, 120, 30, 60, 10, 10000, 4, java.util.List.of());
+        var encoder = new PasswordConfig().passwordEncoder(4, limits);
         String secret = generator.generate();
         String hash = encoder.encode(secret);
         assertTrue(secret.length() == 16);
