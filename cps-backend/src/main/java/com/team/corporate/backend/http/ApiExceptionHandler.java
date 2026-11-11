@@ -3,6 +3,8 @@ package com.team.corporate.backend.http;
 import com.team.corporate.backend.dto.ApiErrorDto;
 import com.team.corporate.backend.dto.ApiErrorDto.FieldViolation;
 import com.team.corporate.backend.validation.InvalidUsernameException;
+import com.team.corporate.backend.validation.InvalidPasswordException;
+import org.springframework.security.core.AuthenticationException;
 import com.team.corporate.core.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -28,8 +30,13 @@ import java.util.List;
 public class ApiExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
 
-    @ExceptionHandler(InvalidUsernameException.class)
-    ResponseEntity<ApiErrorDto> invalidUsername(InvalidUsernameException error, HttpServletRequest request) {
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<ApiErrorDto> authentication(AuthenticationException error, HttpServletRequest request) {
+        return response(HttpStatus.UNAUTHORIZED, "Недействительные полномочия или сессия.", request, List.of());
+    }
+
+    @ExceptionHandler({InvalidUsernameException.class, InvalidPasswordException.class})
+    ResponseEntity<ApiErrorDto> invalidInput(IllegalArgumentException error, HttpServletRequest request) {
         return response(HttpStatus.BAD_REQUEST, error.getMessage(), request, List.of());
     }
 

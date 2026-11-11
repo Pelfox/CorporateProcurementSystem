@@ -18,11 +18,11 @@ public final class PasswordPolicy {
     public void validateNewPassword(String password) {
         if (!isBcryptCompatible(password)
                 || password.codePointCount(0, password.length()) < MIN_LENGTH) {
-            throw new IllegalArgumentException("Пароль должен содержать минимум 15 символов и не более 72 UTF-8 байт, без управляющих символов.");
+            throw new InvalidPasswordException("Пароль должен содержать минимум 15 символов и не более 72 UTF-8 байт, без управляющих символов.");
         }
         if (password.codePoints().distinct().limit(2).count() < 2
                 || compromisedPasswords.check(password).isCompromised()) {
-            throw new IllegalArgumentException("Выберите пароль, отсутствующий в списке распространённых слабых паролей.");
+            throw new InvalidPasswordException("Выберите пароль, отсутствующий в списке распространённых слабых паролей.");
         }
     }
 

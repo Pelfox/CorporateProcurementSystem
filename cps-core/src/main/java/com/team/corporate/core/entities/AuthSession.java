@@ -1,8 +1,17 @@
 package com.team.corporate.core.entities;
 
 import com.team.corporate.core.utils.EntityValidation;
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +34,6 @@ public class AuthSession {
     @Column(name = "session_type", nullable = false, length = 32)
     private SessionType sessionType;
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -43,7 +51,12 @@ public class AuthSession {
     }
 
     public AuthSession(User user, Instant expiresAt, SessionType sessionType) {
+        this(user, Instant.now(), expiresAt, sessionType);
+    }
+
+    public AuthSession(User user, Instant createdAt, Instant expiresAt, SessionType sessionType) {
         this.user = EntityValidation.requireNonNull(user, "Пользователь");
+        this.createdAt = EntityValidation.requireNonNull(createdAt, "Дата создания сессии");
         this.expiresAt = EntityValidation.requireNonNull(expiresAt, "Срок сессии");
         this.sessionType = EntityValidation.requireNonNull(sessionType, "Тип сессии");
     }

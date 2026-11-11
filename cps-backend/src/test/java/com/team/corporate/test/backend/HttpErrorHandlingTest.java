@@ -7,6 +7,7 @@ import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.CsvExportService;
 import com.team.corporate.core.services.UsersService;
 import com.team.corporate.backend.services.UserManagementService;
+import com.team.corporate.backend.security.SessionValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,11 +34,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = {UsersHandler.class, ExportsHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
-@ContextConfiguration(classes = BackendMain.class)
+@ContextConfiguration(classes = BackendMain.class, initializers = JwtTestKeys.class)
 class HttpErrorHandlingTest {
     @Autowired private MockMvc mvc;
     @MockitoBean private UsersService users;
     @MockitoBean private UserManagementService management;
+    @MockitoBean private SessionValidator sessionValidator;
     @MockitoBean private ApiExecutor api;
     @MockitoBean private CsvExportService exporter;
 

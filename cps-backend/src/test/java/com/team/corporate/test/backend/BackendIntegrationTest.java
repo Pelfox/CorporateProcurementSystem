@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 // These are persistence/business regression tests. Real filter coverage is separate.
 @AutoConfigureMockMvc(addFilters = false)
+@ContextConfiguration(initializers = JwtTestKeys.class)
 abstract class BackendIntegrationTest {
     @Autowired protected MockMvc mvc;
     @Autowired protected ObjectMapper mapper;

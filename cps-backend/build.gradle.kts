@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.spring.webmvc)
     implementation(libs.spring.data.jpa)
     implementation(libs.spring.security)
+    implementation(libs.spring.resource.server)
     implementation(libs.spring.flyway)
     implementation(libs.spring.validation)
 

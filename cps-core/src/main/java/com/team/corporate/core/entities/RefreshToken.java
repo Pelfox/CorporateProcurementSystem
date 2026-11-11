@@ -1,8 +1,15 @@
 package com.team.corporate.core.entities;
 
 import com.team.corporate.core.utils.EntityValidation;
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +31,6 @@ public class RefreshToken {
     @Column(name = "token_hash", nullable = false, unique = true, length = 64)
     private String tokenHash;
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -38,7 +44,12 @@ public class RefreshToken {
     }
 
     public RefreshToken(AuthSession session, String tokenHash, Instant expiresAt) {
+        this(session, tokenHash, Instant.now(), expiresAt);
+    }
+
+    public RefreshToken(AuthSession session, String tokenHash, Instant createdAt, Instant expiresAt) {
         this.session = EntityValidation.requireNonNull(session, "Сессия");
+        this.createdAt = EntityValidation.requireNonNull(createdAt, "Дата создания токена");
         this.tokenHash = EntityValidation.requireText(tokenHash, "Хэш токена");
         this.expiresAt = EntityValidation.requireNonNull(expiresAt, "Срок токена");
     }
