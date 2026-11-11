@@ -6,11 +6,21 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.jetbrains.annotations)
     implementation(project(":cps-core"))
     implementation(libs.spring.webmvc)
-    implementation(libs.spring.security.starter)
-    implementation(libs.spring.data.jpa.starter)
+    implementation(libs.spring.data.jpa)
+    implementation(libs.spring.flyway)
+    implementation(libs.spring.validation)
 
-    compileOnly(libs.jetbrains.annotations)
-    testImplementation(libs.spring.security.test)
+    runtimeOnly(libs.postgresql)
+    runtimeOnly(libs.flyway.postgresql)
+
+    testImplementation(libs.spring.webmvc.test)
+    testRuntimeOnly(libs.h2database)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

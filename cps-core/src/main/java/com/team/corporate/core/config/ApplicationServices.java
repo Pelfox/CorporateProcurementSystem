@@ -3,7 +3,6 @@ package com.team.corporate.core.config;
 import com.team.corporate.core.repositories.impls.*;
 import com.team.corporate.core.services.*;
 import com.team.corporate.core.services.impls.*;
-import com.team.corporate.core.services.impls.*;
 import com.team.corporate.core.utils.DataInitializer;
 import com.team.corporate.core.utils.HibernateFactory;
 import org.hibernate.SessionFactory;
