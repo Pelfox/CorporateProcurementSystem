@@ -92,14 +92,12 @@ public class UsersServiceImpl implements UsersService {
     public Optional<User> login(@NotNull String username) {
         EntityValidation.requireNonNull(username, "Имя пользователя");
         String normalized = EntityValidation.requireText(username, "Имя пользователя");
-        return usersRepository.getAll().stream()
-                .filter(user -> user.getUsername().equals(normalized))
-                .findFirst();
+        return usersRepository.getByUsername(normalized);
     }
 
     private void requireAvailableUsername(String username, UUID currentId) {
-        if (usersRepository.getAll().stream().anyMatch(existing ->
-                existing.getUsername().equals(username) && !existing.getId().equals(currentId))) {
+        if (usersRepository.getByUsername(username)
+                .filter(existing -> !existing.getId().equals(currentId)).isPresent()) {
             throw new IllegalArgumentException("Пользователь с таким именем уже существует.");
         }
     }

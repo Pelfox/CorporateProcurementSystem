@@ -3,6 +3,7 @@ package com.team.corporate.core.repositories.impls;
 import com.team.corporate.core.entities.Inventory;
 import com.team.corporate.core.repositories.InventoriesRepository;
 import jakarta.persistence.LockModeType;
+import com.team.corporate.core.repositories.SessionOperations;
 import org.hibernate.SessionFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,17 +15,21 @@ import java.util.UUID;
 public class HibernateInventoriesRepository implements InventoriesRepository {
     private static final String SELECT = "SELECT i FROM Inventory i JOIN FETCH i.product p LEFT JOIN FETCH p.category JOIN FETCH i.warehouse";
 
-    private final SessionFactory sessionFactory;
+    private final SessionOperations sessions;
 
     public HibernateInventoriesRepository(@NotNull SessionFactory sessionFactory) {
-        this.sessionFactory = Objects.requireNonNull(sessionFactory, "sessionFactory must not be null");
+        this(new HibernateTransactions(Objects.requireNonNull(sessionFactory, "sessionFactory must not be null")));
+    }
+
+    public HibernateInventoriesRepository(@NotNull SessionOperations sessions) {
+        this.sessions = Objects.requireNonNull(sessions, "sessions must not be null");
     }
 
     @Override
     @NotNull
     public Inventory add(@NotNull Inventory inventory) {
         Objects.requireNonNull(inventory, "inventory must not be null");
-        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+        return sessions.withSession(session -> {
             session.persist(inventory);
             return inventory;
         });
@@ -33,7 +38,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @Override
     @NotNull
     public List<Inventory> getAll() {
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery(SELECT, Inventory.class).getResultList());
     }
 
@@ -41,12 +46,12 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @NotNull
     public Optional<Inventory> getById(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null.");
-        return HibernateTransactions.fromTransaction(sessionFactory, session -> Optional.ofNullable(session.find(Inventory.class, id)));
+        return sessions.withSession(session -> Optional.ofNullable(session.find(Inventory.class, id)));
     }
 
     @Override
     public @NotNull Optional<Inventory> getByIdForUpdate(@NotNull UUID id) {
-        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+        return sessions.withSession(session -> {
             session.flush();
             Inventory inventory = session.find(Inventory.class, id);
             if (inventory != null) session.refresh(inventory, LockModeType.PESSIMISTIC_WRITE);
@@ -60,7 +65,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     public Optional<Inventory> getByProductAndWarehouseIds(@NotNull UUID productId, @NotNull UUID warehouseId) {
         Objects.requireNonNull(productId, "productId must not be null");
         Objects.requireNonNull(warehouseId, "warehouseId must not be null");
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery(SELECT + " WHERE i.product.id = :productId AND i.warehouse.id = :warehouseId", Inventory.class)
                         .setParameter("productId", productId)
                         .setParameter("warehouseId", warehouseId)
@@ -71,7 +76,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @NotNull
     public List<Inventory> getByProductId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery(SELECT + " WHERE i.product.id = :id", Inventory.class)
                         .setParameter("id", id)
                         .getResultList());
@@ -81,7 +86,7 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
     @NotNull
     public List<Inventory> getByWarehouseId(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery(SELECT + " WHERE i.warehouse.id = :id", Inventory.class)
                         .setParameter("id", id)
                         .getResultList());
@@ -94,13 +99,13 @@ public class HibernateInventoriesRepository implements InventoriesRepository {
         if (inventory.getId() == null) {
             throw new IllegalArgumentException("Нельзя обновить запись без идентификатора. Сначала сохраните её.");
         }
-        return HibernateTransactions.fromTransaction(sessionFactory, session -> session.merge(inventory));
+        return sessions.withSession(session -> session.merge(inventory));
     }
 
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id, "id must not be null");
-        HibernateTransactions.inTransaction(sessionFactory, session -> {
+        sessions.inSession(session -> {
             Inventory inventory = session.find(Inventory.class, id);
             if (inventory != null) {
                 session.remove(inventory);

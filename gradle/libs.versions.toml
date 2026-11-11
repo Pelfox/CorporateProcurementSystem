@@ -34,6 +34,8 @@ jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "j
 jline = { module = "org.jline:jline", version.ref = "jline" }
 spring-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
 spring-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-security = { module = "org.springframework.boot:spring-boot-starter-security" }
+spring-security-test = { module = "org.springframework.security:spring-security-test" }
 spring-flyway = { module = "org.springframework.boot:spring-boot-starter-flyway" }
 spring-validation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 spring-webmvc-test = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }

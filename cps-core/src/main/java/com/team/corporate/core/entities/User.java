@@ -20,7 +20,8 @@ public class User {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password_hash", nullable = false)
+    // Legacy users remain disabled until an administrator provisions credentials.
+    @Column(name = "password_hash")
     private String passwordHash;
 
     @Column(name = "must_change_password", nullable = false)
@@ -67,7 +68,7 @@ public class User {
         this.username = EntityValidation.requireText(username, "Имя пользователя");
     }
 
-    @NotNull
+    @Nullable
     public String getPasswordHash() {
         return passwordHash;
     }

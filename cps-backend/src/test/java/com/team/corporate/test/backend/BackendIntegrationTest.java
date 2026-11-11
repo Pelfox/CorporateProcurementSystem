@@ -22,9 +22,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = BackendMain.class, properties = {
         "spring.datasource.url=jdbc:h2:mem:backend_integration;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
         "spring.datasource.username=sa", "spring.datasource.password=",
-        "spring.datasource.driver-class-name=org.h2.Driver"
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "app.auth.bcrypt-strength=4"
 })
-@AutoConfigureMockMvc
+// These are persistence/business regression tests. Real filter coverage is separate.
+@AutoConfigureMockMvc(addFilters = false)
 abstract class BackendIntegrationTest {
     @Autowired protected MockMvc mvc;
     @Autowired protected ObjectMapper mapper;
@@ -32,8 +34,7 @@ abstract class BackendIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
-        // Core HibernateTransactions commits independently of Spring test transactions.
-        for (String table : List.of("audit_logs", "order_items", "orders", "inventory", "products",
+        for (String table : List.of("refresh_tokens", "auth_sessions", "audit_logs", "order_items", "orders", "inventory", "products",
                 "warehouses", "categories", "users")) jdbc.update("DELETE FROM " + table);
     }
 

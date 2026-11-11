@@ -135,8 +135,9 @@ class CsvExportServiceTest extends BaseServiceTest {
     @Test
     void rejectsEmptyAndControlCharacterPaths() {
         var manager = createTestUser("Менеджер", UserRole.MANAGER);
-        for (Path path : List.of(Path.of(""), Path.of("   "), directory.resolve("bad\nfolder"))) {
-            assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), path));
+        for (String path : List.of("", "   ", "bad\nfolder")) {
+            // Windows rejects control characters while creating Path; Unix permits them until validation.
+            assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), Path.of(path)));
         }
         assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(manager.getId(), null));
         assertThrows(IllegalArgumentException.class, () -> exporter.exportAll(null, directory));

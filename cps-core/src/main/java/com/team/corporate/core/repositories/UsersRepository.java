@@ -18,6 +18,9 @@ public interface UsersRepository {
     Optional<User> getById(@NotNull UUID id);
 
     @NotNull
+    Optional<User> getByUsername(@NotNull String username);
+
+    @NotNull
     User update(@NotNull User user);
 
     void delete(@NotNull UUID id);

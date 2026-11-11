@@ -21,6 +21,10 @@ public class AuthSession {
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "session_type", nullable = false, length = 32)
+    private SessionType sessionType;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -35,8 +39,18 @@ public class AuthSession {
     }
 
     public AuthSession(User user, Instant expiresAt) {
+        this(user, expiresAt, SessionType.FULL);
+    }
+
+    public AuthSession(User user, Instant expiresAt, SessionType sessionType) {
         this.user = EntityValidation.requireNonNull(user, "Пользователь");
         this.expiresAt = EntityValidation.requireNonNull(expiresAt, "Срок сессии");
+        this.sessionType = EntityValidation.requireNonNull(sessionType, "Тип сессии");
+    }
+
+    @NotNull
+    public SessionType getSessionType() {
+        return sessionType;
     }
 
     @NotNull
@@ -52,7 +66,7 @@ public class AuthSession {
     public Instant getExpiresAt() { return expiresAt; }
 
     public void setExpiresAt(Instant expiresAt) {
-        this.expiresAt = expiresAt;
+        this.expiresAt = EntityValidation.requireNonNull(expiresAt, "Срок сессии");
     }
 
     @Nullable

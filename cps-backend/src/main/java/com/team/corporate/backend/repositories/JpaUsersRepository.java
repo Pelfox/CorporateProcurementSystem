@@ -39,6 +39,12 @@ public class JpaUsersRepository implements UsersRepository {
 
     @Override
     @NotNull
+    public Optional<User> getByUsername(@NotNull String username) {
+        return repository.findByUsername(username);
+    }
+
+    @Override
+    @NotNull
     public User update(@NotNull User user) {
         return repository.save(user);
     }
