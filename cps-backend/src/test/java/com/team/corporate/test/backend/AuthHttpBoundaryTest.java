@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -98,8 +100,47 @@ class AuthHttpBoundaryTest extends AuthLifecycleTestBase {
                 + token.substring(token.indexOf('.'));
         mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + wrongAlgorithm))
                 .andExpect(status().isUnauthorized());
+        for (String field : List.of("iat", "nbf")) {
+            var claims = new HashMap<String, Object>(original.getClaims());
+            claims.put(field, clock.instant().plusSeconds(1));
+            mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + sign(claims)))
+                    .andExpect(status().isUnauthorized());
+        }
         clock.now = full.accessExpiresAt();
         mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void validUuidClaimsStillMustMatchTheServerSessionAndRolesCannotBeInjected() throws Exception {
+        var alice = activate("claim_alice");
+        var bob = activate("claim_bob");
+        var original = decoder.decode(alice.accessToken());
+        var another = decoder.decode(bob.accessToken());
+        for (var replacement : List.of(Map.entry("sub", another.getSubject()),
+                Map.entry("sid", another.getClaimAsString("sid")), Map.entry("sid", UUID.randomUUID().toString()))) {
+            var claims = new HashMap<String, Object>(original.getClaims());
+            claims.put(replacement.getKey(), replacement.getValue());
+            mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + sign(claims)))
+                    .andExpect(status().isUnauthorized());
+        }
+        var roleClaims = new HashMap<String, Object>(original.getClaims());
+        roleClaims.put("role", "ADMIN");
+        roleClaims.put("authorities", List.of("ROLE_ADMIN", "SESSION_FULL"));
+        String injected = sign(roleClaims);
+        mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + injected))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.role").value("USER"));
+        mvc.perform(get("/api/admin/users").header(HttpHeaders.AUTHORIZATION, "Bearer " + injected))
+                .andExpect(status().isForbidden());
+
+        var claims = new HashMap<String, Object>(original.getClaims());
+        claims.put("purpose", "PASSWORD_CHANGE");
+        json(post("/api/auth/password/initial").header(HttpHeaders.AUTHORIZATION, "Bearer " + sign(claims)),
+                new InitialPasswordRequest(NEXT_PASSWORD)).andExpect(status().isUnauthorized());
+        var limited = limited("claim_limited").passwordChange().token();
+        claims = new HashMap<>(decoder.decode(limited).getClaims());
+        claims.put("purpose", "ACCESS");
+        mvc.perform(get("/api/auth/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + sign(claims)))
                 .andExpect(status().isUnauthorized());
     }
 
