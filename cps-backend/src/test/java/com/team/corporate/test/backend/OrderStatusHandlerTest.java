@@ -63,7 +63,7 @@ class OrderStatusHandlerTest extends BackendIntegrationTest {
         for (var entry : audit) {
             assertThat(entry.path("orderId").asString()).isEqualTo(order.toString());
             assertThat(entry.path("changedBy").asString()).isEqualTo(manager.toString());
-            assertThat(entry.path("changedByUsername").asString()).isEqualTo("Manager");
+            assertThat(entry.path("changedByUsername").asString()).isEqualTo("manager");
             Instant time = Instant.parse(entry.path("changedAt").asString());
             assertThat(time).isBetween(previous, Instant.now());
             previous = time;

@@ -15,6 +15,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,6 +44,15 @@ class HttpErrorHandlingTest {
     @BeforeEach
     void executeHandlerActions() {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(api).execute(any());
+    }
+
+    @Test
+    void concurrentUniqueConstraintFailureReturnsConflictWithoutDatabaseDetails() throws Exception {
+        when(users.getAll()).thenThrow(new DataIntegrityViolationException("internal SQL detail"));
+        var response = mvc.perform(get("/api/users")).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Операция конфликтует с существующими данными."))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(response).doesNotContain("internal", "SQL", "detail");
     }
 
     @Test

@@ -9,6 +9,8 @@ import com.team.corporate.core.entities.AuthSession;
 import com.team.corporate.core.entities.RefreshToken;
 import com.team.corporate.core.entities.SessionType;
 import com.team.corporate.core.entities.UserRole;
+import com.team.corporate.core.entities.User;
+import com.team.corporate.core.repositories.UsersRepository;
 import com.team.corporate.core.repositories.Transactions;
 import com.team.corporate.core.services.CategoriesService;
 import jakarta.persistence.EntityManager;
@@ -57,6 +59,7 @@ class AuthenticationPostgresTest {
     @Autowired private CategoriesService categories;
     @Autowired private PlatformTransactionManager transactionManager;
     @Autowired private JdbcTemplate jdbc;
+    @Autowired private UsersRepository userAdapter;
 
     @Test
     @Transactional
@@ -158,5 +161,36 @@ class AuthenticationPostgresTest {
     void repeatedMigrationDoesNotChangeAnAlreadyMigratedDatabase() {
         flyway.validate();
         assertEquals(0, flyway.migrate().migrationsExecuted);
+    }
+
+    @Test
+    void concurrentCaseVariantsAreRejectedByTheDatabaseUniqueConstraint() throws Exception {
+        var start = new CountDownLatch(1);
+        String preparedHash = encoder.encode("A separate test phrase 72!");
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var attempts = java.util.stream.Stream.of("  RACE.User ", "race.user").map(username -> executor.submit(() -> {
+                if (!start.await(10, TimeUnit.SECONDS)) {
+                    throw new IllegalStateException("Concurrent creation test timed out");
+                }
+                try {
+                    transactions.execute(() -> userAdapter.add(new User(username, preparedHash,
+                            Instant.now().plusSeconds(3600), UserRole.USER)));
+                    return true;
+                } catch (DataIntegrityViolationException duplicate) {
+                    return false;
+                }
+            })).toList();
+            start.countDown();
+            int successes = 0;
+            for (var attempt : attempts) {
+                if (attempt.get(10, TimeUnit.SECONDS)) {
+                    successes++;
+                }
+            }
+            assertEquals(1, successes);
+            assertEquals(1L, jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE username = 'race.user'", Long.class));
+        } finally {
+            users.findByUsername("race.user").ifPresent(users::delete);
+        }
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-/** Shares the Spring-managed EntityManager with Spring Data repositories. */
 @Component
 public class SpringJpaTransactions implements Transactions, SessionOperations {
     private final EntityManager entityManager;

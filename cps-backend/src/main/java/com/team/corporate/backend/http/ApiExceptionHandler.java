@@ -2,6 +2,7 @@ package com.team.corporate.backend.http;
 
 import com.team.corporate.backend.dto.ApiErrorDto;
 import com.team.corporate.backend.dto.ApiErrorDto.FieldViolation;
+import com.team.corporate.backend.validation.InvalidUsernameException;
 import com.team.corporate.core.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -26,6 +27,11 @@ import java.util.List;
 @RestControllerAdvice
 public class ApiExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+    @ExceptionHandler(InvalidUsernameException.class)
+    ResponseEntity<ApiErrorDto> invalidUsername(InvalidUsernameException error, HttpServletRequest request) {
+        return response(HttpStatus.BAD_REQUEST, error.getMessage(), request, List.of());
+    }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, TypeMismatchException.class})
     ResponseEntity<ApiErrorDto> malformed(Exception error, HttpServletRequest request) {

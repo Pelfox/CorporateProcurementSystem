@@ -89,7 +89,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     @NotNull
-    public Optional<User> login(@NotNull String username) {
+    public Optional<User> findByUsername(@NotNull String username) {
         EntityValidation.requireNonNull(username, "Имя пользователя");
         String normalized = EntityValidation.requireText(username, "Имя пользователя");
         return usersRepository.getByUsername(normalized);

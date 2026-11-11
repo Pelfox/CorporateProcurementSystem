@@ -15,9 +15,9 @@ class UsersHandlerTest extends BackendIntegrationTest {
                 .andExpect(jsonPath("$.username").value("alice")).andExpect(jsonPath("$.createdAt").isNotEmpty()));
         UUID id = id(created);
         assertThat(read("/api/users/" + id).path("role").asString()).isEqualTo("USER");
-        json(put("/api/users/" + id), fields("username", "Alice Updated", "role", "MANAGER"))
+        json(put("/api/users/" + id), fields("username", "Alice.Updated", "role", "MANAGER"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id.toString()));
-        assertThat(jdbc.queryForObject("SELECT username FROM users WHERE id = ?", String.class, id)).isEqualTo("Alice Updated");
+        assertThat(jdbc.queryForObject("SELECT username FROM users WHERE id = ?", String.class, id)).isEqualTo("alice.updated");
         mvc.perform(delete("/api/users/" + id).param("actingUserId", manager.toString())).andExpect(status().isNoContent());
         mvc.perform(get("/api/users/" + id)).andExpect(status().isNotFound());
         assertThat(count("users")).isEqualTo(1);
@@ -32,21 +32,22 @@ class UsersHandlerTest extends BackendIntegrationTest {
                 .andExpect(jsonPath("$[0].id").value(alice.toString()));
         mvc.perform(get("/api/users").param("q", alice.toString().substring(0, 8)))
                 .andExpect(jsonPath("$.length()").value(1));
-        mvc.perform(get("/api/users").param("sort", "NAME_DESC")).andExpect(jsonPath("$[0].username").value("Bob"));
-        mvc.perform(get("/api/users").param("sort", "NAME_ASC")).andExpect(jsonPath("$[0].username").value("Alice"));
+        mvc.perform(get("/api/users").param("sort", "NAME_DESC")).andExpect(jsonPath("$[0].username").value("bob"));
+        mvc.perform(get("/api/users").param("sort", "NAME_ASC")).andExpect(jsonPath("$[0].username").value("alice"));
         jdbc.update("UPDATE users SET created_at = TIMESTAMP WITH TIME ZONE '2020-01-01 00:00:00+00' WHERE id = ?", alice);
         mvc.perform(get("/api/users").param("sort", "CREATED_ASC")).andExpect(jsonPath("$[0].id").value(alice.toString()));
-        mvc.perform(get("/api/users")).andExpect(jsonPath("$[0].username").value("Bob"));
+        mvc.perform(get("/api/users")).andExpect(jsonPath("$[0].username").value("bob"));
     }
 
     @Test
-    void usernameLookupIsCaseSensitiveTrimsInputAndDoesNotCreateSession() throws Exception {
+    void usernameLookupIgnoresCaseTrimsInputAndDoesNotCreateSession() throws Exception {
         UUID alice = user("Alice", "USER");
         var result = mvc.perform(get("/api/users/by-username").param("username", " Alice "))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(alice.toString()))
                 .andExpect(header().doesNotExist("Set-Cookie")).andReturn();
         assertThat(result.getRequest().getSession(false)).isNull();
-        mvc.perform(get("/api/users/by-username").param("username", "alice")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/users/by-username").param("username", "alice"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(alice.toString()));
     }
 
     @Test
@@ -59,6 +60,17 @@ class UsersHandlerTest extends BackendIntegrationTest {
         var stored = read("/api/users/" + bob);
         assertThat(stored.path("username").asString()).isEqualTo("bob");
         assertThat(stored.path("role").asString()).isEqualTo("USER");
+        json(post("/api/users"), fields("username", " ALICE ", "role", "USER")).andExpect(status().isConflict());
+    }
+
+    @Test
+    void rejectsUnsupportedUsernamesAndClientProvidedCredentials() throws Exception {
+        for (String invalid : new String[]{"Иван", "has space", "x".repeat(65), "bad/name"}) {
+            json(post("/api/users"), fields("username", invalid, "role", "USER")).andExpect(status().isBadRequest());
+        }
+        json(post("/api/users"), fields("username", "valid", "role", "USER", "passwordHash", "untrusted"))
+                .andExpect(status().isBadRequest());
+        assertThat(count("users")).isZero();
     }
 
     @Test

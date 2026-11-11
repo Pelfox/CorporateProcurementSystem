@@ -193,7 +193,7 @@ class RequestValidationTest extends BackendIntegrationTest {
         var product = product("Товар\nс описанием", "SKU\t1", category, "99999999.99");
         var warehouse = warehouse("Warehouse");
         stock(warehouse, product, 100000, 201);
-        var buyer = user("x".repeat(255), "USER");
+        var buyer = user("x".repeat(64), "USER");
         var order = order(buyer, null, line(product, 100000));
         assertThat(order.path("totalQuantity").asInt()).isEqualTo(100000);
         assertThat(order.path("notes").isNull()).isTrue();

@@ -1,7 +1,14 @@
 package com.team.corporate.core.entities;
 
 import com.team.corporate.core.utils.EntityValidation;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +32,7 @@ public class User {
     private String passwordHash;
 
     @Column(name = "must_change_password", nullable = false)
-    private Boolean mustChangePassword;
+    private boolean mustChangePassword;
 
     @Column(name = "temporary_password_expires_at")
     private Instant temporaryPasswordExpiresAt;
@@ -35,7 +42,7 @@ public class User {
     private UserRole userRole;
 
     @Column(name = "enabled", nullable = false)
-    private Boolean enabled;
+    private boolean enabled;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -73,17 +80,23 @@ public class User {
         return passwordHash;
     }
 
-    public void setPasswordHash(@NotNull String passwordHash) {
-        this.passwordHash = EntityValidation.requireText(passwordHash, "Хэш пароля пользователя");
+    public void setPermanentPassword(@NotNull String passwordHash) {
+        String validatedHash = EntityValidation.requireText(passwordHash, "Хэш пароля пользователя");
+        this.passwordHash = validatedHash;
+        this.mustChangePassword = false;
+        this.temporaryPasswordExpiresAt = null;
     }
 
-    @NotNull
-    public Boolean isMustChangePassword() {
+    public void setTemporaryPassword(@NotNull String passwordHash, @NotNull Instant expiresAt) {
+        String validatedHash = EntityValidation.requireText(passwordHash, "Хэш пароля пользователя");
+        Instant validatedExpiry = EntityValidation.requireNonNull(expiresAt, "Срок временного пароля");
+        this.passwordHash = validatedHash;
+        this.temporaryPasswordExpiresAt = validatedExpiry;
+        this.mustChangePassword = true;
+    }
+
+    public boolean isMustChangePassword() {
         return mustChangePassword;
-    }
-
-    public void setMustChangePassword(@NotNull Boolean mustChangePassword) {
-        this.mustChangePassword = EntityValidation.requireNonNull(mustChangePassword, "Пароль требует смены");
     }
 
     @Nullable
@@ -100,13 +113,15 @@ public class User {
         this.userRole = EntityValidation.requireNonNull(userRole, "Роль");
     }
 
-    @NotNull
-    public Boolean isEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(@NotNull Boolean enabled) {
-        this.enabled = EntityValidation.requireNonNull(enabled, "Статус учётной записи");
+    public void setEnabled(boolean enabled) {
+        if (enabled && (passwordHash == null || (mustChangePassword && temporaryPasswordExpiresAt == null))) {
+            throw new IllegalStateException("Перед включением учётной записи задайте пароль и срок временного пароля.");
+        }
+        this.enabled = enabled;
     }
 
     @Nullable

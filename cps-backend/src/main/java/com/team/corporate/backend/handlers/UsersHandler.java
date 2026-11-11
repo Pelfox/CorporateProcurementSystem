@@ -5,6 +5,7 @@ import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.UsersService;
 import com.team.corporate.backend.services.UserManagementService;
+import com.team.corporate.backend.validation.UsernamePolicy;
 import jakarta.validation.Valid;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -53,7 +54,7 @@ public class UsersHandler {
 
     @GetMapping("/by-username")
     public UserDto byUsername(@Valid @ModelAttribute UserDto.LookupQuery query) {
-        return api.execute(() -> UserDto.from(users.login(query.username())
+        return api.execute(() -> UserDto.from(users.findByUsername(UsernamePolicy.normalize(query.username()))
                 .orElseThrow(() -> ApiException.notFound("Пользователь"))));
     }
 
@@ -66,7 +67,7 @@ public class UsersHandler {
 
     @PutMapping("/{id}")
     public UserDto update(@PathVariable UUID id, @Valid @RequestBody UserDto.Request body) {
-        api.run(() -> users.updateUser(id, body.username(), body.role()));
+        api.run(() -> users.updateUser(id, UsernamePolicy.normalize(body.username()), body.role()));
         return find(id);
     }
 

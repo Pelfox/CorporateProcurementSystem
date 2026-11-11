@@ -14,7 +14,6 @@ import java.util.UUID;
 public interface AuthSessionRepository extends JpaRepository<AuthSession, UUID> {
     List<AuthSession> findAllByUserId(UUID userId);
 
-    // The caller must hold a write transaction through the complete refresh/logout operation.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from AuthSession s where s.id = :id")
     Optional<AuthSession> findByIdForUpdate(@Param("id") UUID id);

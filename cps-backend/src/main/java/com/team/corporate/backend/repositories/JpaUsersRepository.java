@@ -3,6 +3,7 @@ package com.team.corporate.backend.repositories;
 import com.team.corporate.backend.repositories.adapters.UserJpaRepository;
 import com.team.corporate.core.entities.User;
 import com.team.corporate.core.repositories.UsersRepository;
+import com.team.corporate.backend.validation.UsernamePolicy;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +23,8 @@ public class JpaUsersRepository implements UsersRepository {
     @Override
     @NotNull
     public User add(@NotNull User user) {
-        return repository.save(user);
+        user.setUsername(UsernamePolicy.normalize(user.getUsername()));
+        return repository.saveAndFlush(user);
     }
 
     @Override
@@ -40,13 +42,14 @@ public class JpaUsersRepository implements UsersRepository {
     @Override
     @NotNull
     public Optional<User> getByUsername(@NotNull String username) {
-        return repository.findByUsername(username);
+        return repository.findByUsername(UsernamePolicy.normalize(username));
     }
 
     @Override
     @NotNull
     public User update(@NotNull User user) {
-        return repository.save(user);
+        user.setUsername(UsernamePolicy.normalize(user.getUsername()));
+        return repository.saveAndFlush(user);
     }
 
     @Override

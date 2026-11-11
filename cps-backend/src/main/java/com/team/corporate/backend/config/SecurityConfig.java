@@ -9,7 +9,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import java.nio.charset.StandardCharsets;
 
-/** Until authenticated endpoints are implemented, do not expose the team's CRUD API. */
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
     @Bean

@@ -52,8 +52,8 @@ class ExportsHandlerTest extends BackendIntegrationTest {
 
     @Test
     void archivePreservesRelationshipsPricesUnicodeAndCsvEscaping() throws Exception {
-        var manager = user("Менеджер", "MANAGER");
-        var buyer = user("Иван", "USER");
+        var manager = user("manager", "MANAGER");
+        var buyer = user("ivan", "USER");
         var category = category("Канц, \"бумага\"");
         var product = product("=SUM(1,2)", "SKU", category, "12.30");
         var warehouse = id(tree(json(post("/api/warehouses"), fields("name", "Склад", "location", "Дом 1\nЭтаж 2"))
@@ -73,7 +73,7 @@ class ExportsHandlerTest extends BackendIntegrationTest {
         assertThat(rows(files.get("order_items.csv")).get(1)).containsExactly(itemId(order, product).toString(), id(order).toString(), product.toString(), "2", "12.30");
         var audit = rows(files.get("audit_logs.csv")).get(1);
         assertThat(audit.subList(1, 5)).containsExactly(id(order).toString(), manager.toString(), "CREATED", "APPROVED");
-        assertThat(rows(files.get("users.csv"))).anySatisfy(row -> assertThat(row.subList(0, 3)).containsExactly(buyer.toString(), "Иван", "USER"));
+        assertThat(rows(files.get("users.csv"))).anySatisfy(row -> assertThat(row.subList(0, 3)).containsExactly(buyer.toString(), "ivan", "USER"));
     }
 
     @Test

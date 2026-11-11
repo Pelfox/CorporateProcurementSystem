@@ -30,13 +30,14 @@ class LegacyMigrationPostgresTest {
             UUID user = UUID.randomUUID();
             UUID order = UUID.randomUUID();
             jdbc.update("INSERT INTO " + schema + ".users (id, username, user_role, created_at) VALUES (?, ?, 'USER', CURRENT_TIMESTAMP)",
-                    user, "legacy_user");
+                    user, " Legacy.User ");
             jdbc.update("INSERT INTO " + schema + ".orders (id, user_id, order_status, created_at, updated_at) "
                     + "VALUES (?, ?, 'CREATED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", order, user);
 
             config.target("latest").load().migrate();
             var row = jdbc.queryForMap("SELECT * FROM " + schema + ".users WHERE id = ?", user);
             assertEquals(user, row.get("id"));
+            assertEquals("legacy.user", row.get("username"));
             assertNull(row.get("password_hash"));
             assertFalse((Boolean) row.get("enabled"));
             assertTrue((Boolean) row.get("must_change_password"));
@@ -44,6 +45,29 @@ class LegacyMigrationPostgresTest {
                     () -> jdbc.update("UPDATE " + schema + ".users SET enabled = TRUE WHERE id = ?", user));
             assertEquals(user, jdbc.queryForObject("SELECT user_id FROM " + schema + ".orders WHERE id = ?", UUID.class, order));
             assertEquals(0, config.load().migrate().migrationsExecuted);
+        } finally {
+            jdbc.execute("DROP SCHEMA IF EXISTS " + schema + " CASCADE");
+        }
+    }
+
+    @Test
+    void caseCollisionsAbortMigrationWithoutMergingOrRenamingAccounts() {
+        var source = new DriverManagerDataSource(System.getenv("POSTGRES_TEST_URL"),
+                System.getenv().getOrDefault("POSTGRES_TEST_USER", "cps_test"),
+                System.getenv().getOrDefault("POSTGRES_TEST_PASSWORD", ""));
+        var jdbc = new JdbcTemplate(source);
+        String schema = "collision_" + UUID.randomUUID().toString().replace("-", "");
+        var config = Flyway.configure().dataSource(source).schemas(schema).defaultSchema(schema)
+                .locations("classpath:db/migration");
+        try {
+            config.target("3").load().migrate();
+            for (String name : new String[]{"Alice", "alice"}) {
+                jdbc.update("INSERT INTO " + schema + ".users (id, username, user_role, created_at) VALUES (?, ?, 'USER', CURRENT_TIMESTAMP)",
+                        UUID.randomUUID(), name);
+            }
+            assertThrows(org.flywaydb.core.api.FlywayException.class, () -> config.target("latest").load().migrate());
+            assertEquals(2L, jdbc.queryForObject("SELECT COUNT(*) FROM " + schema + ".users", Long.class));
+            assertEquals(1L, jdbc.queryForObject("SELECT COUNT(*) FROM " + schema + ".users WHERE username = 'Alice'", Long.class));
         } finally {
             jdbc.execute("DROP SCHEMA IF EXISTS " + schema + " CASCADE");
         }

@@ -29,5 +29,12 @@ public interface UsersService {
     List<User> getAll();
 
     @NotNull
-    Optional<User> login(@NotNull String username);
+    Optional<User> findByUsername(@NotNull String username);
+
+    /** Legacy lookup only; it does not authenticate a user. */
+    @Deprecated
+    @NotNull
+    default Optional<User> login(@NotNull String username) {
+        return findByUsername(username);
+    }
 }
