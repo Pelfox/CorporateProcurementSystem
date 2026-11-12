@@ -128,4 +128,9 @@ public class CoreServicesConfiguration {
         return new CsvExportServiceImpl(users, categories, products, warehouses, inventories,
                 orders, items, audit, transactions);
     }
+
+    @Bean
+    CsvImportService csvImportService(EntityManagerFactory factory) {
+        return new CsvImportServiceImpl(factory.unwrap(SessionFactory.class));
+    }
 }

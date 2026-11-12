@@ -15,6 +15,15 @@ public final class CsvWriter {
     private CsvWriter() {
     }
 
+    public static String restoreTextWithinLimit(String text) {
+        // Only an escaped value can exceed the application's text limit by one apostrophe.
+        if (text.length() == EntityValidation.TEXT_MAX_LENGTH + 1
+                && text.charAt(0) == '\'' && isFormula(text.substring(1))) {
+            return text.substring(1);
+        }
+        return text;
+    }
+
     public static void write(Path file, List<String> headers, List<Object[]> rows) throws IOException {
         EntityValidation.requireNonNull(file, "Путь к CSV-файлу");
         EntityValidation.requireNonNull(headers, "Заголовки CSV");

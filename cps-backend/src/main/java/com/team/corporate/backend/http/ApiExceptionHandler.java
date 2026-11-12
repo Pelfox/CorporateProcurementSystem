@@ -36,6 +36,15 @@ public class ApiExceptionHandler {
         return response(error.status(), error.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(CsvImportException.class)
+    ResponseEntity<ApiErrorDto> csvImport(CsvImportException error, HttpServletRequest request) {
+        var status = switch (error.kind()) {
+            case INVALID_CSV -> HttpStatus.BAD_REQUEST;
+            case CONFLICT -> HttpStatus.CONFLICT;
+        };
+        return response(status, error.getMessage(), request, List.of());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiErrorDto> validation(MethodArgumentNotValidException error, HttpServletRequest request) {
         var violations = error.getBindingResult().getFieldErrors().stream()
