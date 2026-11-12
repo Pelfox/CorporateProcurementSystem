@@ -71,13 +71,19 @@ public class UserEditorController implements DataReceiver<UserEditorRequest>, Re
             return;
         }
 
+        if (!request.isEditing()) {
+            showAlert(
+                    "Создание пользователей пока недоступно: "
+                            + "не подключён серверный API."
+            );
+            return;
+        }
+
         String name = TextLengthInput.text(usernameField).strip();
         UserRole role = roleCombo.getValue();
 
         try {
-            User saved = request.isEditing()
-                    ? usersService.updateUser(request.userId(), name, role)
-                    : usersService.createUser(name, role);
+            User saved = usersService.updateUser(request.userId(), name, role);
             savedUserId = saved.getId();
             close();
         } catch (RuntimeException e) {

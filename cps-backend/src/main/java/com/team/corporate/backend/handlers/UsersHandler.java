@@ -1,9 +1,14 @@
 package com.team.corporate.backend.handlers;
 
 import com.team.corporate.backend.dto.UserDto;
+import com.team.corporate.backend.filter.PageQuery;
+import com.team.corporate.backend.filter.PageResponse;
+import com.team.corporate.backend.filter.Paginator;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.UsersService;
+import com.team.corporate.backend.services.UserManagementService;
+import com.team.corporate.backend.validation.UsernamePolicy;
 import jakarta.validation.Valid;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +26,13 @@ import static com.team.corporate.backend.http.QueryExtractor.*;
 public class UsersHandler {
     private final UsersService users;
     private final ApiExecutor api;
+    private final UserManagementService management;
 
-    public UsersHandler(@NotNull UsersService users, @NotNull ApiExecutor api) {
+    public UsersHandler(@NotNull UsersService users, @NotNull ApiExecutor api,
+                        @NotNull UserManagementService management) {
         this.users = users;
         this.api = api;
+        this.management = management;
     }
 
     @GetMapping
@@ -42,6 +50,14 @@ public class UsersHandler {
                 .sorted(comparator.thenComparing(UserDto::id)).toList());
     }
 
+    @GetMapping("/page")
+    public PageResponse<UserDto> page(
+            @Valid @ModelAttribute UserDto.Query query,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(list(query), pagination);
+    }
+
     @GetMapping("/{id}")
     public UserDto get(@PathVariable UUID id) {
         return find(id);
@@ -49,19 +65,20 @@ public class UsersHandler {
 
     @GetMapping("/by-username")
     public UserDto byUsername(@Valid @ModelAttribute UserDto.LookupQuery query) {
-        return api.execute(() -> UserDto.from(users.login(query.username())
+        return api.execute(() -> UserDto.from(users.findByUsername(UsernamePolicy.normalize(query.username()))
                 .orElseThrow(() -> ApiException.notFound("Пользователь"))));
     }
 
     @PostMapping
     public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto.Request body) {
-        UUID id = api.execute(() -> users.createUser(body.username(), body.role()).getId());
+        // This legacy endpoint stays inaccessible until the administrative API is secured.
+        UUID id = api.execute(() -> management.createUser(body.username(), body.role()).id());
         return ResponseEntity.created(URI.create("/api/users/" + id)).body(find(id));
     }
 
     @PutMapping("/{id}")
     public UserDto update(@PathVariable UUID id, @Valid @RequestBody UserDto.Request body) {
-        api.run(() -> users.updateUser(id, body.username(), body.role()));
+        api.run(() -> users.updateUser(id, UsernamePolicy.normalize(body.username()), body.role()));
         return find(id);
     }
 

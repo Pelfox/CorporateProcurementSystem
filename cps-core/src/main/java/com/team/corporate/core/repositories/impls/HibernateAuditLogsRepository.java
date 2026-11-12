@@ -2,6 +2,7 @@ package com.team.corporate.core.repositories.impls;
 
 import com.team.corporate.core.entities.AuditLog;
 import com.team.corporate.core.repositories.AuditLogsRepository;
+import com.team.corporate.core.repositories.SessionOperations;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -21,17 +22,21 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     private static final Set<String> SORTABLE_FIELDS = Set.of(
             "changedAt", "entityType", "eventType", "changedBy");
 
-    private final SessionFactory sessionFactory;
+    private final SessionOperations sessions;
 
     public HibernateAuditLogsRepository(@NotNull SessionFactory sessionFactory) {
-        this.sessionFactory = Objects.requireNonNull(sessionFactory);
+        this(new HibernateTransactions(Objects.requireNonNull(sessionFactory)));
+    }
+
+    public HibernateAuditLogsRepository(@NotNull SessionOperations sessions) {
+        this.sessions = Objects.requireNonNull(sessions);
     }
 
     @Override
     @NotNull
     public AuditLog add(@NotNull AuditLog auditLog) {
         Objects.requireNonNull(auditLog);
-        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+        return sessions.withSession(session -> {
             session.persist(auditLog);
             return auditLog;
         });
@@ -41,7 +46,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @NotNull
     public Optional<AuditLog> getById(@NotNull UUID id) {
         Objects.requireNonNull(id);
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery("SELECT a FROM AuditLog a LEFT JOIN FETCH a.order o " +
                                 "LEFT JOIN FETCH o.user JOIN FETCH a.changedBy WHERE a.id = :id", AuditLog.class)
                         .setParameter("id", id).uniqueResultOptional());
@@ -50,7 +55,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @Override
     public void delete(@NotNull UUID id) {
         Objects.requireNonNull(id);
-        HibernateTransactions.inTransaction(sessionFactory, session -> {
+        sessions.inSession(session -> {
             AuditLog log = session.find(AuditLog.class, id);
             if (log != null) session.remove(log);
         });
@@ -59,7 +64,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @Override
     @NotNull
     public List<AuditLog> getAll() {
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery("SELECT a FROM AuditLog a LEFT JOIN FETCH a.order o " +
                         "LEFT JOIN FETCH o.user JOIN FETCH a.changedBy", AuditLog.class).getResultList());
     }
@@ -68,7 +73,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @NotNull
     public List<AuditLog> getByOrderId(@NotNull UUID id) {
         Objects.requireNonNull(id);
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery("SELECT a FROM AuditLog a LEFT JOIN FETCH a.order o " +
                                 "LEFT JOIN FETCH o.user JOIN FETCH a.changedBy WHERE a.order.id = :id OR a.entityUuid = :id",
                         AuditLog.class).setParameter("id", id).getResultList());
@@ -78,7 +83,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @NotNull
     public List<AuditLog> getByUserId(@NotNull UUID id) {
         Objects.requireNonNull(id);
-        return HibernateTransactions.fromTransaction(sessionFactory, session ->
+        return sessions.withSession(session ->
                 session.createSelectionQuery("SELECT a FROM AuditLog a LEFT JOIN FETCH a.order o " +
                                 "LEFT JOIN FETCH o.user JOIN FETCH a.changedBy WHERE a.changedBy.id = :id",
                         AuditLog.class).setParameter("id", id).getResultList());
@@ -93,7 +98,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
         int safeOffset = Math.max(0, offset);
         int safeLimit = Math.max(1, Math.min(limit, 200));
 
-        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+        return sessions.withSession(session -> {
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<AuditLog> cq = cb.createQuery(AuditLog.class);
             Root<AuditLog> root = cq.from(AuditLog.class);
@@ -111,7 +116,7 @@ public class HibernateAuditLogsRepository implements AuditLogsRepository {
     @Override
     public long count(@NotNull AuditFilter filter) {
         Objects.requireNonNull(filter);
-        return HibernateTransactions.fromTransaction(sessionFactory, session -> {
+        return sessions.withSession(session -> {
             CriteriaBuilder cb = session.getCriteriaBuilder();
             CriteriaQuery<Long> cq = cb.createQuery(Long.class);
             Root<AuditLog> root = cq.from(AuditLog.class);

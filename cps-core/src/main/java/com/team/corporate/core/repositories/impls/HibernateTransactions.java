@@ -1,6 +1,7 @@
 package com.team.corporate.core.repositories.impls;
 
 import com.team.corporate.core.repositories.Transactions;
+import com.team.corporate.core.repositories.SessionOperations;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +13,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class HibernateTransactions implements Transactions {
+public final class HibernateTransactions implements Transactions, SessionOperations {
     private static final ThreadLocal<Map<SessionFactory, Session>> SESSIONS = new ThreadLocal<>();
     private final SessionFactory factory;
 
@@ -85,5 +86,10 @@ public final class HibernateTransactions implements Transactions {
     @Override
     public <T> T execute(@NotNull Supplier<T> action) {
         return fromTransaction(factory, session -> action.get());
+    }
+
+    @Override
+    public <T> T withSession(Function<Session, T> action) {
+        return fromTransaction(factory, action);
     }
 }

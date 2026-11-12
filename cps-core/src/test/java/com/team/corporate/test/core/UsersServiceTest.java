@@ -17,7 +17,7 @@ public class UsersServiceTest extends BaseServiceTest {
     @DisplayName("Создание пользователя: должен сохраниться и получить ID")
     void createUser_shouldSaveUserWithId() {
         // when
-        User user = usersService.createUser("test_user", UserRole.USER);
+        User user = createTestUser("test_user", UserRole.USER);
 
         // then
         assertNotNull(user.getId(), "ID пользователя не должен быть null");
@@ -29,7 +29,7 @@ public class UsersServiceTest extends BaseServiceTest {
     @DisplayName("Поиск по ID: должен вернуть пользователя, если он существует")
     void getUser_shouldReturnUser_whenExists() {
         // given
-        User created = usersService.createUser("find_me", UserRole.MANAGER);
+        User created = createTestUser("find_me", UserRole.MANAGER);
 
         // when
         Optional<User> found = usersService.getUser(created.getId());
@@ -53,9 +53,9 @@ public class UsersServiceTest extends BaseServiceTest {
     @DisplayName("Фильтрация по роли: должен вернуть только пользователей с нужной ролью")
     void getAllByRole_shouldFilterUsers() {
         // given
-        usersService.createUser("user1", UserRole.USER);
-        usersService.createUser("manager1", UserRole.MANAGER);
-        usersService.createUser("user2", UserRole.USER);
+        createTestUser("user1", UserRole.USER);
+        createTestUser("manager1", UserRole.MANAGER);
+        createTestUser("user2", UserRole.USER);
 
         // when
         List<User> users = usersService.getAllByRole(UserRole.USER);
@@ -70,7 +70,7 @@ public class UsersServiceTest extends BaseServiceTest {
     @DisplayName("Обновление пользователя: должен изменить имя и роль")
     void updateUser_shouldModifyFields() {
         // given
-        User user = usersService.createUser("old_name", UserRole.USER);
+        User user = createTestUser("old_name", UserRole.USER);
 
         // when
         usersService.updateUser(user.getId(), "new_name", UserRole.MANAGER);
@@ -85,8 +85,8 @@ public class UsersServiceTest extends BaseServiceTest {
     @DisplayName("Удаление пользователя: должен исчезнуть из базы")
     void deleteUser_shouldRemoveUser() {
         // given
-        User manager = usersService.createUser("manager", UserRole.MANAGER);
-        User user = usersService.createUser("delete_me", UserRole.USER);
+        User manager = createTestUser("manager", UserRole.MANAGER);
+        User user = createTestUser("delete_me", UserRole.USER);
 
         // when
         usersService.deleteUser(manager.getId(), user.getId());
@@ -97,7 +97,7 @@ public class UsersServiceTest extends BaseServiceTest {
 
     @Test
     void deleteUser_shouldRejectSelfDeletion() {
-        User manager = usersService.createUser("manager", UserRole.MANAGER);
+        User manager = createTestUser("manager", UserRole.MANAGER);
 
         IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
                 () -> usersService.deleteUser(manager.getId(), manager.getId()));
@@ -108,8 +108,8 @@ public class UsersServiceTest extends BaseServiceTest {
 
     @Test
     void deleteUser_shouldRejectOrdinaryUser() {
-        User actor = usersService.createUser("user", UserRole.USER);
-        User other = usersService.createUser("other", UserRole.USER);
+        User actor = createTestUser("user", UserRole.USER);
+        User other = createTestUser("other", UserRole.USER);
 
         assertThrows(IllegalArgumentException.class, () -> usersService.deleteUser(actor.getId(), other.getId()));
         assertTrue(usersService.getUser(other.getId()).isPresent());
@@ -119,7 +119,7 @@ public class UsersServiceTest extends BaseServiceTest {
     @DisplayName("Логин: должен найти пользователя по имени")
     void login_shouldReturnUser_whenUsernameMatches() {
         // given
-        usersService.createUser("login_user", UserRole.USER);
+        createTestUser("login_user", UserRole.USER);
 
         // when
         Optional<User> loggedIn = usersService.login("login_user");

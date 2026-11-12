@@ -19,7 +19,7 @@ class InputBoundaryTest extends BaseServiceTest {
     @NullAndEmptySource
     @ValueSource(strings = {" ", "\t\r\n", "\u2003"})
     void requiredNamesRejectBlankInput(String value) {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> usersService.createUser(value, UserRole.USER));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createTestUser(value, UserRole.USER));
         Assertions.assertThrows(IllegalArgumentException.class, () -> categoriesService.createCategory(value));
         Assertions.assertThrows(IllegalArgumentException.class, () -> warehousesService.createWarehouse(value, null));
     }
@@ -28,7 +28,7 @@ class InputBoundaryTest extends BaseServiceTest {
     @ValueSource(strings = {"bad\u0000text", "bad\u0001text", "bad\u001btext", "bad\u007ftext"})
     void textRejectsControlCharactersBeforeDatabaseWrite(String value) {
         Assertions.assertThrows(IllegalArgumentException.class, () -> EntityValidation.optionalText(value, "Поле"));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> usersService.createUser(value, UserRole.USER));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> createTestUser(value, UserRole.USER));
         Assertions.assertThrows(IllegalArgumentException.class, () -> warehousesService.createWarehouse("Склад", value));
     }
 
@@ -59,7 +59,7 @@ class InputBoundaryTest extends BaseServiceTest {
 
     @Test
     void orderQuantityAndNoteLimitsCannotBeBypassedThroughServices() {
-        var buyer = usersService.createUser("Покупатель", UserRole.USER);
+        var buyer = createTestUser("Покупатель", UserRole.USER);
         var category = categoriesService.createCategory("Категория");
         var product = productsService.createProduct("Товар", "BOUNDARY-001", category.getId(), BigDecimal.ONE);
         var warehouse = warehousesService.createWarehouse("Склад", null);

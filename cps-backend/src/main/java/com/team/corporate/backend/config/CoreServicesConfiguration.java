@@ -1,59 +1,85 @@
 package com.team.corporate.backend.config;
 
-import com.team.corporate.core.repositories.*;
-import com.team.corporate.core.repositories.impls.*;
-import com.team.corporate.core.services.*;
-import com.team.corporate.core.services.impls.*;
+import com.team.corporate.core.repositories.AuditLogsRepository;
+import com.team.corporate.core.repositories.CategoriesRepository;
+import com.team.corporate.core.repositories.InventoriesRepository;
+import com.team.corporate.core.repositories.OrderItemsRepository;
+import com.team.corporate.core.repositories.OrdersRepository;
+import com.team.corporate.core.repositories.ProductsRepository;
+import com.team.corporate.core.repositories.SessionOperations;
+import com.team.corporate.core.repositories.Transactions;
+import com.team.corporate.core.repositories.UsersRepository;
+import com.team.corporate.core.repositories.WarehousesRepository;
+import com.team.corporate.core.repositories.impls.HibernateAuditLogsRepository;
+import com.team.corporate.core.repositories.impls.HibernateCategoriesRepository;
+import com.team.corporate.core.repositories.impls.HibernateInventoriesRepository;
+import com.team.corporate.core.repositories.impls.HibernateOrderItemsRepository;
+import com.team.corporate.core.repositories.impls.HibernateOrdersRepository;
+import com.team.corporate.core.repositories.impls.HibernateProductsRepository;
+import com.team.corporate.core.repositories.impls.HibernateWarehousesRepository;
+import com.team.corporate.core.services.AuditLogsService;
+import com.team.corporate.core.services.CategoriesService;
+import com.team.corporate.core.services.CsvExportService;
+import com.team.corporate.core.services.CsvImportService;
+import com.team.corporate.core.services.impls.CsvImportServiceImpl;
 import jakarta.persistence.EntityManagerFactory;
 import org.hibernate.SessionFactory;
+import com.team.corporate.core.services.InventoriesService;
+import com.team.corporate.core.services.OrderItemsService;
+import com.team.corporate.core.services.OrdersService;
+import com.team.corporate.core.services.ProductsService;
+import com.team.corporate.core.services.StatisticsService;
+import com.team.corporate.core.services.UsersService;
+import com.team.corporate.core.services.WarehousesService;
+import com.team.corporate.core.services.impls.AuditLogsServiceImpl;
+import com.team.corporate.core.services.impls.CategoriesServiceImpl;
+import com.team.corporate.core.services.impls.CsvExportServiceImpl;
+import com.team.corporate.core.services.impls.InventoriesServiceImpl;
+import com.team.corporate.core.services.impls.OrderItemsServiceImpl;
+import com.team.corporate.core.services.impls.OrdersServiceImpl;
+import com.team.corporate.core.services.impls.OrderStock;
+import com.team.corporate.core.services.impls.ProductsServiceImpl;
+import com.team.corporate.core.services.impls.StatisticsServiceImpl;
+import com.team.corporate.core.services.impls.UsersServiceImpl;
+import com.team.corporate.core.services.impls.WarehousesServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
 public class CoreServicesConfiguration {
     @Bean
-    Transactions transactions(EntityManagerFactory factory) {
-        return new HibernateTransactions(factory.unwrap(SessionFactory.class));
+    ProductsRepository productsRepository(SessionOperations sessions) {
+        return new HibernateProductsRepository(sessions);
     }
 
     @Bean
-    UsersRepository usersRepository(EntityManagerFactory factory) {
-        return new HibernateUsersRepository(factory.unwrap(SessionFactory.class));
+    CategoriesRepository categoriesRepository(SessionOperations sessions) {
+        return new HibernateCategoriesRepository(sessions);
     }
 
     @Bean
-    ProductsRepository productsRepository(EntityManagerFactory factory) {
-        return new HibernateProductsRepository(factory.unwrap(SessionFactory.class));
+    WarehousesRepository warehousesRepository(SessionOperations sessions) {
+        return new HibernateWarehousesRepository(sessions);
     }
 
     @Bean
-    CategoriesRepository categoriesRepository(EntityManagerFactory factory) {
-        return new HibernateCategoriesRepository(factory.unwrap(SessionFactory.class));
+    InventoriesRepository inventoriesRepository(SessionOperations sessions) {
+        return new HibernateInventoriesRepository(sessions);
     }
 
     @Bean
-    WarehousesRepository warehousesRepository(EntityManagerFactory factory) {
-        return new HibernateWarehousesRepository(factory.unwrap(SessionFactory.class));
+    OrdersRepository ordersRepository(SessionOperations sessions) {
+        return new HibernateOrdersRepository(sessions);
     }
 
     @Bean
-    InventoriesRepository inventoriesRepository(EntityManagerFactory factory) {
-        return new HibernateInventoriesRepository(factory.unwrap(SessionFactory.class));
+    OrderItemsRepository orderItemsRepository(SessionOperations sessions) {
+        return new HibernateOrderItemsRepository(sessions);
     }
 
     @Bean
-    OrdersRepository ordersRepository(EntityManagerFactory factory) {
-        return new HibernateOrdersRepository(factory.unwrap(SessionFactory.class));
-    }
-
-    @Bean
-    OrderItemsRepository orderItemsRepository(EntityManagerFactory factory) {
-        return new HibernateOrderItemsRepository(factory.unwrap(SessionFactory.class));
-    }
-
-    @Bean
-    AuditLogsRepository auditLogsRepository(EntityManagerFactory factory) {
-        return new HibernateAuditLogsRepository(factory.unwrap(SessionFactory.class));
+    AuditLogsRepository auditLogsRepository(SessionOperations sessions) {
+        return new HibernateAuditLogsRepository(sessions);
     }
 
     @Bean
@@ -127,5 +153,10 @@ public class CoreServicesConfiguration {
                                       Transactions transactions) {
         return new CsvExportServiceImpl(users, categories, products, warehouses, inventories,
                 orders, items, audit, transactions);
+    }
+
+    @Bean
+    CsvImportService csvImportService(EntityManagerFactory factory) {
+        return new CsvImportServiceImpl(factory.unwrap(SessionFactory.class));
     }
 }

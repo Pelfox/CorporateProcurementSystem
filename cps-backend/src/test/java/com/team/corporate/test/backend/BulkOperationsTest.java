@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class BulkOperationsTest extends BackendIntegrationTest {
+class BulkOperationsTest extends LegacyBusinessIntegrationTest {
 
     @Test
     void bulkArchiveArchivesMultipleOrders() throws Exception {
@@ -45,6 +45,7 @@ class BulkOperationsTest extends BackendIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalSucceeded").value(1))
                 .andExpect(jsonPath("$.totalFailed").value(1));
+        assertThat(read("/api/orders/" + existing).path("archived").asBoolean()).isTrue();
     }
 
     @Test

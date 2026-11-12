@@ -7,8 +7,7 @@ import com.team.corporate.core.repositories.impls.HibernateTagsRepository;
 import com.team.corporate.core.services.*;
 import com.team.corporate.core.services.impls.BulkOperationsServiceImpl;
 import com.team.corporate.core.services.impls.TagsServiceImpl;
-import jakarta.persistence.EntityManagerFactory;
-import org.hibernate.SessionFactory;
+import com.team.corporate.core.repositories.SessionOperations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,8 +15,8 @@ import org.springframework.context.annotation.Configuration;
 public class BulkOperationsConfiguration {
 
     @Bean
-    TagsRepository tagsRepository(EntityManagerFactory factory) {
-        return new HibernateTagsRepository(factory.unwrap(SessionFactory.class));
+    TagsRepository tagsRepository(SessionOperations sessions) {
+        return new HibernateTagsRepository(sessions);
     }
 
     @Bean

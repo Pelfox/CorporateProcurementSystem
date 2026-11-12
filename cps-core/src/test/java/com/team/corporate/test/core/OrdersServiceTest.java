@@ -17,7 +17,7 @@ public class OrdersServiceTest extends BaseServiceTest {
 
     // подготовка данных
     private User createUser(String name, UserRole role) {
-        return usersService.createUser(name, role);
+        return createTestUser(name, role);
     }
 
     private Product createProduct(String name, String sku, BigDecimal price) {

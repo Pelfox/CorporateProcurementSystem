@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class StatisticsHandlerTest extends BackendIntegrationTest {
+class StatisticsHandlerTest extends LegacyBusinessIntegrationTest {
     @Test
     void emptyDatabaseReturnsZeroSummaryAndEmptyWarehouseList() throws Exception {
         var stats = read("/api/statistics");

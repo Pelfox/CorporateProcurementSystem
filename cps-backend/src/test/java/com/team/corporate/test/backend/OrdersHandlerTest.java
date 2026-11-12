@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class OrdersHandlerTest extends BackendIntegrationTest {
+class OrdersHandlerTest extends LegacyBusinessIntegrationTest {
     @Test
     void createsOrderAggregatesRepeatedProductsAndCalculatesTotals() throws Exception {
         UUID buyer = user("buyer", "USER");

@@ -208,7 +208,7 @@ public class BulkOperationsServiceImpl implements BulkOperationsService {
     private User requireManager(@NotNull UUID userId) {
         User user = usersRepository.getById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден."));
-        if (user.getUserRole() != UserRole.MANAGER)
+        if (!user.getUserRole().canManageProcurement())
             throw new IllegalArgumentException("Требуется роль менеджера.");
         return user;
     }

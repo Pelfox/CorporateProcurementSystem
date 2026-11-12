@@ -1,6 +1,7 @@
 package com.team.corporate.backend.handlers;
 
 import com.team.corporate.core.services.CsvExportService;
+import com.team.corporate.backend.security.BusinessAccess;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -23,16 +24,19 @@ import java.util.zip.ZipOutputStream;
 @RequestMapping("/api/exports")
 public class ExportsHandler {
     private final CsvExportService exporter;
+    private final BusinessAccess access;
 
-    public ExportsHandler(@NotNull CsvExportService exporter) {
+    public ExportsHandler(@NotNull CsvExportService exporter, BusinessAccess access) {
         this.exporter = exporter;
+        this.access = access;
     }
 
     @GetMapping(value = "/csv", produces = "application/zip")
-    public ResponseEntity<byte[]> csv(@RequestParam UUID managerId) throws IOException {
+    public ResponseEntity<byte[]> csv(@RequestParam(required = false) UUID managerId) throws IOException {
+        UUID actorId = access.actor(managerId);
         var temporary = Files.createTempDirectory("cps-http-export-");
         try {
-            var directory = exporter.exportAll(managerId, temporary);
+            var directory = exporter.exportAll(actorId, temporary);
             var output = new ByteArrayOutputStream();
             try (var zip = new ZipOutputStream(output); var files = Files.list(directory)) {
                 for (var file : files.sorted().toList()) {

@@ -2,6 +2,9 @@ package com.team.corporate.backend.handlers;
 
 import com.team.corporate.backend.dto.SearchQuery;
 import com.team.corporate.backend.dto.WarehouseDto;
+import com.team.corporate.backend.filter.PageQuery;
+import com.team.corporate.backend.filter.PageResponse;
+import com.team.corporate.backend.filter.Paginator;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.WarehousesService;
@@ -35,6 +38,14 @@ public class WarehousesHandler {
                 .filter(warehouse -> contains(warehouse.name(), q) || contains(warehouse.location(), q))
                 .sorted(Comparator.comparing(WarehouseDto::name, String.CASE_INSENSITIVE_ORDER)
                         .thenComparing(WarehouseDto::id)).toList());
+    }
+
+    @GetMapping("/page")
+    public PageResponse<WarehouseDto> page(
+            @Valid @ModelAttribute SearchQuery query,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(list(query), pagination);
     }
 
     @GetMapping("/{id}")

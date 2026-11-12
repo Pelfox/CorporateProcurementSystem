@@ -21,7 +21,6 @@ public class AuditHandler {
 
     @GetMapping
     public AuditPageDto list(@Valid @ModelAttribute AuditQueryDto query) {
-        // TODO(участник 2): после Spring Security добавить проверку роли MANAGER/ADMIN
         return api.execute(() -> {
             var serviceQuery = query.toServiceQuery();
             var page = auditLogsService.search(serviceQuery);

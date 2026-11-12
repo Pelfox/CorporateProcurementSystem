@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -22,9 +23,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = BackendMain.class, properties = {
         "spring.datasource.url=jdbc:h2:mem:backend_integration;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1",
         "spring.datasource.username=sa", "spring.datasource.password=",
-        "spring.datasource.driver-class-name=org.h2.Driver"
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "app.auth.bcrypt-strength=4",
+        "spring.test.mockmvc.print=none",
+        "app.auth.rate-limit.login-ip=10000", "app.auth.rate-limit.login-username=10000",
+        "app.auth.rate-limit.refresh-ip=10000", "app.auth.rate-limit.refresh-token=10000",
+        "app.auth.rate-limit.password-ip=10000", "app.auth.rate-limit.password-token=10000"
 })
-@AutoConfigureMockMvc
+// These are persistence/business regression tests. Real filter coverage is separate.
+@AutoConfigureMockMvc(addFilters = false)
+@ContextConfiguration(initializers = JwtTestKeys.class)
 abstract class BackendIntegrationTest {
     @Autowired protected MockMvc mvc;
     @Autowired protected ObjectMapper mapper;
@@ -32,11 +40,10 @@ abstract class BackendIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
-        // Core HibernateTransactions commits independently of Spring test transactions.
-        // Порядок важен: order_tags и tags чистим ПЕРЕД orders (внешний ключ).
-        for (String table : List.of("audit_logs", "order_items", "order_tags", "tags",
-                "orders", "inventory", "products", "warehouses", "categories", "users"))
+        for (String table : List.of("refresh_tokens", "auth_sessions", "audit_logs", "order_items",
+                "order_tags", "tags", "orders", "inventory", "products", "warehouses", "categories", "users")) {
             jdbc.update("DELETE FROM " + table);
+        }
     }
 
     protected ResultActions json(MockHttpServletRequestBuilder request, Object body) throws Exception {
