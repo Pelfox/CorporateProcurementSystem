@@ -1,6 +1,9 @@
 package com.team.corporate.backend.handlers;
 
 import com.team.corporate.backend.dto.ProductDto;
+import com.team.corporate.backend.filter.PageQuery;
+import com.team.corporate.backend.filter.PageResponse;
+import com.team.corporate.backend.filter.Paginator;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.ProductsService;
@@ -48,6 +51,14 @@ public class ProductsHandler {
                     .filter(product -> query.maxPrice() == null || product.price().compareTo(query.maxPrice()) <= 0)
                     .sorted(comparator.thenComparing(ProductDto::id)).toList();
         });
+    }
+
+    @GetMapping("/page")
+    public PageResponse<ProductDto> page(
+            @Valid @ModelAttribute ProductDto.Query query,
+            @Valid @ModelAttribute PageQuery pagination
+    ) {
+        return Paginator.paginate(list(query), pagination);
     }
 
     @GetMapping("/{id}")
