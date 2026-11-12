@@ -9,6 +9,7 @@ import com.team.corporate.core.utils.EntityValidation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,10 +23,12 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     @NotNull
-    public User createUser(@NotNull String username, @NotNull UserRole role) {
+    public User createUser(@NotNull String username, @NotNull String passwordHash, @NotNull Instant temporaryPasswordExpiresAt, @NotNull UserRole role) {
         EntityValidation.requireNonNull(username, "Имя пользователя");
+        EntityValidation.requireNonNull(passwordHash, "Хэш пароля");
+        EntityValidation.requireNonNull(temporaryPasswordExpiresAt, "Дата окончания временного пароля");
         EntityValidation.requireNonNull(role, "Роль");
-        User newUser = new User(username, role);
+        User newUser = new User(username, passwordHash, temporaryPasswordExpiresAt, role);
         requireAvailableUsername(newUser.getUsername(), null);
         return usersRepository.add(newUser);
     }
@@ -86,17 +89,15 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     @NotNull
-    public Optional<User> login(@NotNull String username) {
+    public Optional<User> findByUsername(@NotNull String username) {
         EntityValidation.requireNonNull(username, "Имя пользователя");
         String normalized = EntityValidation.requireText(username, "Имя пользователя");
-        return usersRepository.getAll().stream()
-                .filter(user -> user.getUsername().equals(normalized))
-                .findFirst();
+        return usersRepository.getByUsername(normalized);
     }
 
     private void requireAvailableUsername(String username, UUID currentId) {
-        if (usersRepository.getAll().stream().anyMatch(existing ->
-                existing.getUsername().equals(username) && !existing.getId().equals(currentId))) {
+        if (usersRepository.getByUsername(username)
+                .filter(existing -> !existing.getId().equals(currentId)).isPresent()) {
             throw new IllegalArgumentException("Пользователь с таким именем уже существует.");
         }
     }

@@ -53,7 +53,7 @@ class FormTextValidationTest extends BaseServiceTest {
     @Test
     void usernameAccepts255CharactersOnCreateAndEdit() {
         String username = "И".repeat(255);
-        var user = usersService.createUser(username, UserRole.USER);
+        var user = createTestUser(username, UserRole.USER);
         assertEquals(username, usersService.getUser(user.getId()).orElseThrow().getUsername());
         String edited = "Ю".repeat(255);
         usersService.updateUser(user.getId(), edited, UserRole.MANAGER);
@@ -62,11 +62,11 @@ class FormTextValidationTest extends BaseServiceTest {
 
     @Test
     void usernameRejectsOversizedCreationAndEditing() {
-        var user = usersService.createUser("Пользователь", UserRole.USER);
+        var user = createTestUser("Пользователь", UserRole.USER);
         for (int length : new int[]{256, 10_000}) {
             String oversized = "Я".repeat(length);
             assertThrows(IllegalArgumentException.class,
-                    () -> usersService.createUser(oversized, UserRole.USER));
+                    () -> createTestUser(oversized, UserRole.USER));
             assertThrows(IllegalArgumentException.class,
                     () -> usersService.updateUser(user.getId(), oversized, UserRole.MANAGER));
         }

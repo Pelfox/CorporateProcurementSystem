@@ -278,7 +278,7 @@ public class OrdersServiceImpl implements OrdersService {
         transactions.execute(() -> {
             User manager = usersRepository.getById(managerId)
                     .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
-            if (manager.getUserRole() != UserRole.MANAGER) {
+            if (!manager.getUserRole().canManageProcurement()) {
                 throw new IllegalArgumentException("Доступ только для менеджера.");
             }
             Order order = ordersRepository.getByIdForUpdate(orderId)

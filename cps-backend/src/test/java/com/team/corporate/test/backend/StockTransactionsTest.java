@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class StockTransactionsTest extends BackendIntegrationTest {
+class StockTransactionsTest extends LegacyBusinessIntegrationTest {
     @Test
     void failedCreationDoesNotLeaveOrderItemsOrReservations() throws Exception {
         var buyer = user("Buyer", "USER");

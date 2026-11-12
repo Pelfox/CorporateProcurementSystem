@@ -2,11 +2,18 @@ package com.team.corporate.backend.http;
 
 import com.team.corporate.backend.dto.ApiErrorDto;
 import com.team.corporate.backend.dto.ApiErrorDto.FieldViolation;
+import com.team.corporate.backend.validation.InvalidUsernameException;
+import com.team.corporate.backend.validation.InvalidPasswordException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.access.AccessDeniedException;
+import com.team.corporate.backend.security.RateLimitException;
+import com.team.corporate.backend.security.SecurityAudit;
 import com.team.corporate.core.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +32,31 @@ import java.util.List;
 @RestControllerAdvice
 public class ApiExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<ApiErrorDto> denied(AccessDeniedException error, HttpServletRequest request) {
+        SecurityAudit.record("HTTP_ACCESS", SecurityAudit.currentActor(), null, "DENIED");
+        return response(HttpStatus.FORBIDDEN, "Недостаточно прав.", request, List.of());
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    ResponseEntity<ApiErrorDto> rateLimited(RateLimitException error, HttpServletRequest request) {
+        SecurityAudit.record("AUTH_LIMIT", SecurityAudit.currentActor(), null, "REJECTED");
+        var result = response(HttpStatus.TOO_MANY_REQUESTS, error.getMessage(), request, List.of());
+        return ResponseEntity.status(429).header("Retry-After", Long.toString(error.retryAfter()))
+                .header("Cache-Control", "no-store").contentType(MediaType.APPLICATION_JSON).body(result.getBody());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<ApiErrorDto> authentication(AuthenticationException error, HttpServletRequest request) {
+        SecurityAudit.record("AUTHENTICATE", SecurityAudit.currentActor(), null, "REJECTED");
+        return response(HttpStatus.UNAUTHORIZED, "Недействительные полномочия или сессия.", request, List.of());
+    }
+
+    @ExceptionHandler({InvalidUsernameException.class, InvalidPasswordException.class})
+    ResponseEntity<ApiErrorDto> invalidInput(IllegalArgumentException error, HttpServletRequest request) {
+        return response(HttpStatus.BAD_REQUEST, error.getMessage(), request, List.of());
+    }
 
     @ExceptionHandler({HttpMessageNotReadableException.class, TypeMismatchException.class})
     ResponseEntity<ApiErrorDto> malformed(Exception error, HttpServletRequest request) {
@@ -71,6 +103,11 @@ public class ApiExceptionHandler {
         return response(HttpStatus.CONFLICT, message, request, List.of());
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ApiErrorDto> dataConflict(DataIntegrityViolationException error, HttpServletRequest request) {
+        return response(HttpStatus.CONFLICT, "Операция конфликтует с существующими данными.", request, List.of());
+    }
+
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiErrorDto> other(Exception error, HttpServletRequest request) {
         if (error instanceof ErrorResponse frameworkError) {
@@ -81,7 +118,8 @@ public class ApiExceptionHandler {
             headers.setContentType(MediaType.APPLICATION_JSON);
             return new ResponseEntity<>(response.getBody(), headers, status);
         }
-        LOG.error("HTTP request failed: {} {}", request.getMethod(), request.getRequestURI(), error);
+        // Exception messages/stack traces may contain SQL values or malformed credential JSON.
+        LOG.error("HTTP request failed type={} incident={}", error.getClass().getSimpleName(), java.util.UUID.randomUUID());
         return response(HttpStatus.INTERNAL_SERVER_ERROR, "Не удалось выполнить операцию.", request, List.of());
     }
 

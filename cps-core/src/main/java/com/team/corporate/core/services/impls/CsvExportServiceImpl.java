@@ -1,6 +1,5 @@
 package com.team.corporate.core.services.impls;
 
-import com.team.corporate.core.entities.UserRole;
 import com.team.corporate.core.repositories.*;
 import com.team.corporate.core.services.CsvExportService;
 import com.team.corporate.core.utils.CsvWriter;
@@ -55,7 +54,7 @@ public final class CsvExportServiceImpl implements CsvExportService {
         List<Table> tables = transactions.execute(() -> {
             var manager = users.getById(managerId)
                     .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
-            if (manager.getUserRole() != UserRole.MANAGER) {
+            if (!manager.getUserRole().canManageProcurement()) {
                 throw new IllegalArgumentException("Доступ только для менеджера.");
             }
             return readTables();

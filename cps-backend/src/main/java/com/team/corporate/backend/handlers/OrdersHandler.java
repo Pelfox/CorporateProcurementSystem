@@ -4,8 +4,8 @@ import com.team.corporate.backend.dto.AuditLogDto;
 import com.team.corporate.backend.dto.OrderDto;
 import com.team.corporate.backend.http.ApiException;
 import com.team.corporate.backend.http.ApiExecutor;
+import com.team.corporate.backend.security.BusinessAccess;
 import com.team.corporate.core.entities.Order;
-import com.team.corporate.core.entities.OrderItem;
 import com.team.corporate.core.services.AuditLogsService;
 import com.team.corporate.core.services.OrderItemsService;
 import com.team.corporate.core.services.OrdersService;
@@ -13,13 +13,26 @@ import jakarta.validation.Valid;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
-import static com.team.corporate.backend.http.QueryExtractor.*;
+import static com.team.corporate.backend.http.QueryExtractor.contains;
+import static com.team.corporate.backend.http.QueryExtractor.normalize;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -28,22 +41,25 @@ public class OrdersHandler {
     private final OrderItemsService items;
     private final AuditLogsService audit;
     private final ApiExecutor api;
+    private final BusinessAccess access;
 
     public OrdersHandler(
             @NotNull OrdersService orders,
             @NotNull OrderItemsService items,
             @NotNull AuditLogsService audit,
-            @NotNull ApiExecutor api
+            @NotNull ApiExecutor api,
+            @NotNull BusinessAccess access
     ) {
         this.orders = orders;
         this.items = items;
         this.audit = audit;
         this.api = api;
+        this.access = access;
     }
 
     @GetMapping
     public List<OrderDto> list(@Valid @ModelAttribute OrderDto.Query query) {
-        return list(query, query.userId());
+        return list(query, access.orderScope(query.userId()));
     }
 
     @GetMapping("/{id}")
@@ -67,7 +83,7 @@ public class OrdersHandler {
 
     @PostMapping
     public ResponseEntity<OrderDto> create(@Valid @RequestBody OrderDto.Request body) {
-        UUID id = api.execute(() -> orders.createOrder(body.userId(), body.lines(), body.notes()));
+        UUID id = api.execute(() -> orders.createOrder(access.actor(body.userId()), body.lines(), body.notes()));
         return ResponseEntity.created(URI.create("/api/orders/" + id)).body(details(id));
     }
 
@@ -75,7 +91,7 @@ public class OrdersHandler {
     public OrderDto update(@PathVariable UUID id, @Valid @RequestBody OrderDto.Request body) {
         api.run(() -> {
             requireOrder(id);
-            orders.saveOrder(body.userId(), id, body.lines(), body.notes());
+            orders.saveOrder(access.actor(body.userId()), id, body.lines(), body.notes());
         });
         return details(id);
     }
@@ -84,7 +100,7 @@ public class OrdersHandler {
     public OrderDto notes(@PathVariable UUID id, @Valid @RequestBody OrderDto.NotesRequest body) {
         api.run(() -> {
             requireOrder(id);
-            orders.updateNotes(body.userId(), id, body.notes());
+            orders.updateNotes(access.actor(body.userId()), id, body.notes());
         });
         return details(id);
     }
@@ -93,7 +109,7 @@ public class OrdersHandler {
     public OrderDto addItem(@PathVariable UUID id, @Valid @RequestBody OrderDto.AddItemRequest body) {
         api.run(() -> {
             requireOrder(id);
-            orders.addItem(body.userId(), id, body.line());
+            orders.addItem(access.actor(body.userId()), id, body.line());
         });
         return details(id);
     }
@@ -116,7 +132,7 @@ public class OrdersHandler {
     public OrderDto status(@PathVariable UUID id, @Valid @RequestBody OrderDto.StatusRequest body) {
         api.run(() -> {
             requireOrder(id);
-            orders.changeStatus(body.managerId(), id, body.status());
+            orders.changeStatus(access.actor(body.managerId()), id, body.status());
         });
         return details(id);
     }
@@ -135,7 +151,7 @@ public class OrdersHandler {
             requireOrder(orderId);
             items.getOrderItem(itemId).filter(item -> item.getOrder().getId().equals(orderId))
                     .orElseThrow(() -> ApiException.notFound("Позиция заказа"));
-            orders.updateQuantity(userId, orderId, itemId, quantity);
+            orders.updateQuantity(access.actor(userId), orderId, itemId, quantity);
         });
         return details(orderId);
     }
@@ -145,8 +161,7 @@ public class OrdersHandler {
     }
 
     private Order requireOrder(@NotNull UUID id) {
-        return orders.getOrder(id)
-                .orElseThrow(() -> ApiException.notFound("Заказ"));
+        return access.requireOrder(id);
     }
 
     private List<OrderDto> list(@NotNull OrderDto.Query query, @Nullable UUID userId) {
@@ -158,12 +173,8 @@ public class OrdersHandler {
             case TOTAL_DESC -> Comparator.comparing(OrderDto::total).reversed();
         };
         return api.execute(() -> {
-            var lines = new HashMap<UUID, List<OrderItem>>();
-            for (var item : items.getAll()) {
-                lines.computeIfAbsent(item.getOrder().getId(), ignored -> new ArrayList<>()).add(item);
-            }
             var source = userId == null ? orders.getAll() : orders.getAllByUser(userId);
-            return source.stream().map(order -> OrderDto.from(order, lines.getOrDefault(order.getId(), List.of())))
+            return source.stream().map(order -> OrderDto.from(order, items.getAllByOrder(order.getId())))
                     .filter(order -> contains(order.id().toString(), q) || contains(order.notes(), q))
                     .filter(order -> query.status() == null || order.status() == query.status())
                     .filter(order -> query.minTotal() == null || order.total().compareTo(query.minTotal()) >= 0)

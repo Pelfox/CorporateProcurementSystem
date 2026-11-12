@@ -6,13 +6,17 @@ import com.team.corporate.backend.handlers.UsersHandler;
 import com.team.corporate.backend.http.ApiExecutor;
 import com.team.corporate.core.services.CsvExportService;
 import com.team.corporate.core.services.UsersService;
+import com.team.corporate.backend.services.UserManagementService;
+import com.team.corporate.backend.security.SessionValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,16 +33,30 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = {UsersHandler.class, ExportsHandler.class})
-@ContextConfiguration(classes = BackendMain.class)
+@AutoConfigureMockMvc(addFilters = false)
+@ContextConfiguration(classes = BackendMain.class, initializers = JwtTestKeys.class)
 class HttpErrorHandlingTest {
     @Autowired private MockMvc mvc;
     @MockitoBean private UsersService users;
+    @MockitoBean private UserManagementService management;
+    @MockitoBean private SessionValidator sessionValidator;
     @MockitoBean private ApiExecutor api;
     @MockitoBean private CsvExportService exporter;
+    @MockitoBean private com.team.corporate.backend.security.BusinessAccess access;
 
     @BeforeEach
     void executeHandlerActions() {
+        when(access.actor(any())).thenAnswer(invocation -> invocation.getArgument(0));
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(api).execute(any());
+    }
+
+    @Test
+    void concurrentUniqueConstraintFailureReturnsConflictWithoutDatabaseDetails() throws Exception {
+        when(users.getAll()).thenThrow(new DataIntegrityViolationException("internal SQL detail"));
+        var response = mvc.perform(get("/api/users")).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Операция конфликтует с существующими данными."))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(response).doesNotContain("internal", "SQL", "detail");
     }
 
     @Test

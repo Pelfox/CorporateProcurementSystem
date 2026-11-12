@@ -4,7 +4,9 @@ import com.team.corporate.core.entities.*;
 import com.team.corporate.core.services.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class DataInitializer {
@@ -14,21 +16,36 @@ public class DataInitializer {
     private final OrdersService ordersService;
     private final WarehousesService warehousesService;
     private final InventoriesService inventoriesService;
+    private final Map<String, InitialCredentials> credentials;
 
     public DataInitializer(UsersService usersService, CategoriesService categoriesService,
                            ProductsService productsService, OrdersService ordersService,
                            WarehousesService warehousesService, InventoriesService inventoriesService) {
+        this(usersService, categoriesService, productsService, ordersService, warehousesService,
+                inventoriesService, Map.of());
+    }
+
+    public DataInitializer(UsersService usersService, CategoriesService categoriesService,
+                           ProductsService productsService, OrdersService ordersService,
+                           WarehousesService warehousesService, InventoriesService inventoriesService,
+                           Map<String, InitialCredentials> credentials) {
         this.usersService = usersService;
         this.categoriesService = categoriesService;
         this.productsService = productsService;
         this.ordersService = ordersService;
         this.warehousesService = warehousesService;
         this.inventoriesService = inventoriesService;
+        this.credentials = Map.copyOf(credentials);
     }
 
     public void run() {
         if (!usersService.getAll().isEmpty()) {
             System.out.println("База данных уже содержит данные.");
+            return;
+        }
+
+        if (!credentials.keySet().containsAll(List.of("ivan_sid", "nikita_och", "matvey_rat", "alexey_dem", "dmitry_sla"))) {
+            System.out.println("Тестовые данные не созданы: передайте индивидуальные подготовленные хэши и сроки паролей.");
             return;
         }
 
@@ -40,11 +57,11 @@ public class DataInitializer {
         Category furniture = categoriesService.createCategory("Мебель");
 
         // Пользователи
-        User user1 = usersService.createUser("ivan_sid", UserRole.USER);
-        User user2 = usersService.createUser("nikita_och", UserRole.USER);
-        User manager1 = usersService.createUser("matvey_rat", UserRole.MANAGER);
-        User user3 = usersService.createUser("alexey_dem", UserRole.USER);
-        User manager2 = usersService.createUser("dmitry_sla", UserRole.MANAGER);
+        User user1 = createUser("ivan_sid", UserRole.USER);
+        User user2 = createUser("nikita_och", UserRole.USER);
+        User manager1 = createUser("matvey_rat", UserRole.MANAGER);
+        User user3 = createUser("alexey_dem", UserRole.USER);
+        User manager2 = createUser("dmitry_sla", UserRole.MANAGER);
 
         // Товары
         Product p1 = productsService.createProduct("Ноутбук Dell Latitude", "LAPTOP-001", office.getId(), new BigDecimal("75000.00"));
@@ -90,5 +107,23 @@ public class DataInitializer {
         ordersService.changeStatus(manager2.getId(), order10Id, OrderStatus.CANCELLED);
 
         System.out.println("Тестовые данные добавлены!");
+    }
+
+    private User createUser(String username, UserRole role) {
+        InitialCredentials initial = credentials.get(username);
+        return usersService.createUser(username, initial.passwordHash(), initial.expiresAt(), role);
+    }
+
+    /** Prepared individually by a trusted dev/test caller; never contains raw passwords. */
+    public record InitialCredentials(String passwordHash, Instant expiresAt) {
+        public InitialCredentials {
+            passwordHash = EntityValidation.requireText(passwordHash, "Хэш пароля");
+            expiresAt = EntityValidation.requireNonNull(expiresAt, "Срок временного пароля");
+        }
+
+        @Override
+        public String toString() {
+            return "InitialCredentials[passwordHash=<redacted>, expiresAt=" + expiresAt + "]";
+        }
     }
 }
