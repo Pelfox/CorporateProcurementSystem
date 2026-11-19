@@ -1,6 +1,11 @@
 package com.team.corporate.backend.controllers;
 
 import com.team.corporate.core.services.CsvExportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +30,7 @@ import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping("/api/exports")
+@Tag(name = "Экспорт CSV", description = "Выгрузка данных в CSV. Только MANAGER после смены временного пароля.")
 @PreAuthorize("hasRole('MANAGER')")
 public class CsvExportController {
     private static final Logger LOGGER =
@@ -37,6 +43,10 @@ public class CsvExportController {
     }
 
     @GetMapping(value = "/all", produces = "application/zip")
+    @Operation(summary = "Скачать архив CSV", description = "Возвращает ZIP-файл export.zip с users.csv, categories.csv, products.csv, warehouses.csv, "
+            + "inventories.csv, orders.csv, order_items.csv и audit_logs.csv. Файл передаётся как вложение через Content-Disposition.")
+    @ApiResponse(responseCode = "200", description = "ZIP-архив с CSV-файлами", content = @Content(
+            mediaType = "application/zip", schema = @Schema(type = "string", format = "binary")))
     public ResponseEntity<byte @NotNull []> exportAllEntities(@AuthenticationPrincipal Jwt jwt) throws IOException {
         UUID managerId = UUID.fromString(jwt.getSubject());
 

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Авторизация")
+@Tag(name = "Авторизация", description = "Вход, обновление токенов, завершение сессии и смена пароля. Для login, refresh и logout access JWT не требуется.")
 public class AuthenticationController {
     private final AccountsService accounts;
     private final AuthenticationService authenticationService;
