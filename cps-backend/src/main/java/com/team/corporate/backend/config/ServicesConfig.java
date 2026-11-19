@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Clock;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -151,6 +152,19 @@ public class ServicesConfig {
         return new CsvExportServiceImpl(
                 users, categories, products, warehouses,
                 inventories, orders, items, auditLogs, transactions
+        );
+    }
+
+    @Bean
+    public CsvImportService csvImportService(
+            UsersRepository users,
+            CategoriesRepository categories,
+            ProductsRepository products,
+            Transactions transactions,
+            Clock clock
+    ) {
+        return new CsvImportServiceImpl(
+                users, categories, products, transactions, clock
         );
     }
 }

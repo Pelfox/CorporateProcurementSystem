@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.jakarta.persistence.api)
     implementation(libs.postgresql)
     implementation(libs.hikaricp)
+    implementation(libs.apache.commons.csv)
 
     compileOnly(libs.jetbrains.annotations)
     testImplementation(libs.junit.jupiter)

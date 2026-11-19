@@ -3,6 +3,8 @@ package com.team.corporate.core.entities;
 import com.team.corporate.core.utils.EntityValidation;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.annotations.SoftDeleteType;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +32,7 @@ public class User {
     private String fullName;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "user_role", nullable = false)
     private UserRole userRole;
 
