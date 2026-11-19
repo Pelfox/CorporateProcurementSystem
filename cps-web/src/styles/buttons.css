@@ -1,0 +1,67 @@
+.btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.15s;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Зелёная — добавление / создание / успех */
+.btn-add,
+.btn-create,
+.btn-success {
+    background: linear-gradient(to bottom right, #22c55e, #4eed88);
+}
+.btn-add:hover:not(:disabled),
+.btn-create:hover:not(:disabled),
+.btn-success:hover:not(:disabled) {
+    background: linear-gradient(to bottom right, #1a7f42, #1eab52);
+}
+
+/* Синяя — редактирование / основная */
+.btn-edit,
+.btn-primary {
+    background: linear-gradient(to bottom right, #4d51f2, #788cec);
+}
+.btn-edit:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(to bottom right, #443fb5, #5850e0);
+}
+
+/* Оранжевая — предупреждение / смена статуса */
+.btn-warning {
+    background: linear-gradient(to bottom right, #f59e0b, #f8cc3d);
+}
+.btn-warning:hover:not(:disabled) {
+    background: linear-gradient(to bottom right, #b45309, #ea8a0a);
+}
+
+/* Красная — удаление */
+.btn-delete,
+.btn-danger {
+    background: linear-gradient(to bottom right, #ec3030, #f55959);
+}
+.btn-delete:hover:not(:disabled),
+.btn-danger:hover:not(:disabled) {
+    background: linear-gradient(to bottom right, #b22828, #dd3c3c);
+}
+
+/* Серая — отмена */
+.btn-cancel {
+    background: linear-gradient(to bottom right, #aeacac, #bdbcbc);
+}
+.btn-cancel:hover:not(:disabled) {
+    background: linear-gradient(to bottom right, #8d8b8b, #9c9b9b);
+}

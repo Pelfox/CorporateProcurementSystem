@@ -1,0 +1,103 @@
+.search-actions-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: var(--primary);
+}
+
+.action-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    outline: none;
+    min-width: 160px;
+    cursor: pointer;
+}
+
+.filter-select:focus {
+    border-color: var(--primary);
+}
+
+.filter-date {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 7px 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    outline: none;
+    min-width: 150px;
+}
+
+.filter-date:focus {
+    border-color: var(--primary);
+}
+
+.filter-input {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    outline: none;
+    min-width: 120px;
+}
+
+.filter-input:focus {
+    border-color: var(--primary);
+}
+
+.date-separator {
+    color: var(--text-muted);
+    font-size: 14px;
+    padding: 0 4px;
+}
+
+/* Строка фильтров */
+.search-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Кнопки внутри строки фильтров — компактные, по высоте инпутов */
+.search-row .btn {
+    padding: 8px 16px;
+    height: 38px;
+    font-size: 13px;
+}
+
+.date-error-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 12px;
+}

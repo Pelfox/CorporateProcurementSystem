@@ -1,0 +1,32 @@
+.tabs {
+    display: inline-flex;
+    background: #eef2f7;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+    align-self: flex-start;
+}
+
+.tab {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+}
+
+.tab:hover {
+    color: var(--primary);
+}
+
+.tab.selected {
+    background: white;
+    color: var(--primary);
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}

@@ -1,0 +1,61 @@
+.role-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.role-user {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.role-manager {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.role-admin {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.status {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.status-approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Статусы заказов */
+.status-created {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-approved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-delivered {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
