@@ -129,11 +129,12 @@ public class ServicesConfig {
             OrdersRepository orders,
             OrderItemsRepository items,
             InventoriesRepository inventories,
-            Transactions transactions
+            Transactions transactions,
+            StatisticsRepository statistics
     ) {
         return new StatisticsServiceImpl(
                 users, products, categories, warehouses,
-                orders, items, inventories, transactions
+                orders, items, inventories, transactions, statistics
         );
     }
 
