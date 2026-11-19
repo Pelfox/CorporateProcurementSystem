@@ -2,7 +2,6 @@ package com.team.corporate.core.services;
 
 import com.team.corporate.core.dto.CategoryProductCountResponse;
 import com.team.corporate.core.dto.OrderStatusCountResponse;
-import com.team.corporate.core.dto.ProductStatisticsResponse;
 import com.team.corporate.core.dto.ProductStockCountResponse;
 import com.team.corporate.core.dto.ProductsStatisticsResponse;
 import org.jetbrains.annotations.NotNull;

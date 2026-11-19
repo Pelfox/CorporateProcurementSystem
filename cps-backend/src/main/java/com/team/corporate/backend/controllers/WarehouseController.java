@@ -19,7 +19,7 @@ import java.net.URI;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/warehouses")
+@RequestMapping("/api/warehouses")
 public class WarehouseController {
     private final WarehousesService warehouses;
     private final WarehousesSearchService search;

@@ -38,7 +38,7 @@ class AuditMigrationTest {
                 statement.setString(6, "APPROVED");
                 statement.executeUpdate();
             }
-            ScriptUtils.executeSqlScript(connection, new ClassPathResource("database/migrations/V15__create_audit_events.sql"));
+            ScriptUtils.executeSqlScript(connection, new ClassPathResource("database/migrations/V16__create_audit_events.sql"));
             try (var statement = connection.createStatement()) {
                 try (var rows = statement.executeQuery("SELECT * FROM audit_events")) {
                     assertTrue(rows.next());

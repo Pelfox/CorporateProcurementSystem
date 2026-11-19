@@ -19,7 +19,7 @@ import java.net.URI;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/inventories")
+@RequestMapping("/api/inventories")
 public class InventoriesController {
     private final InventoriesService inventories;
     private final InventoriesSearchService search;

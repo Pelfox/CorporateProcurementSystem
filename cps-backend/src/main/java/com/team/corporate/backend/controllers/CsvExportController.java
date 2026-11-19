@@ -24,7 +24,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @RestController
-@RequestMapping("/exports")
+@RequestMapping("/api/exports")
 @PreAuthorize("hasRole('MANAGER')")
 public class CsvExportController {
     private static final Logger LOGGER =

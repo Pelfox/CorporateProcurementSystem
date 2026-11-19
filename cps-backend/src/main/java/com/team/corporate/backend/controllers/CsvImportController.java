@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/imports")
+@RequestMapping("/api/imports")
 @PreAuthorize("hasRole('MANAGER')")
 public class CsvImportController {
     private final CsvImportService importService;
