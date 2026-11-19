@@ -74,8 +74,8 @@ export default function OrderEditorDialog({ order, currentUser, onClose, onSaved
             setAddError('Товар не найден');
             return;
         }
-        const qty = parseInt(quantity, 10);
-        if (!qty || qty < 1) {
+        const qty = Number(quantity);
+        if (!Number.isInteger(qty) || qty < 1) {
             setAddError('Количество — целое число от 1');
             return;
         }
@@ -115,7 +115,8 @@ export default function OrderEditorDialog({ order, currentUser, onClose, onSaved
 
     const total = lines.reduce((sum, l) => {
         const p = productById(l.productId);
-        return sum + (p ? p.price * l.quantity : 0);
+        const price = order?.items.find((item) => item.productId === l.productId)?.purchasePrice ?? p?.price ?? 0;
+        return sum + price * l.quantity;
     }, 0);
 
     async function handleSave() {
@@ -298,7 +299,7 @@ export default function OrderEditorDialog({ order, currentUser, onClose, onSaved
                                                         }}
                                                     >
                                                         {formatMoneyRub(
-                                                            p ? p.price * line.quantity : 0
+                                                            (order?.items.find((item) => item.productId === line.productId)?.purchasePrice ?? p?.price ?? 0) * line.quantity
                                                         )}
                                                     </td>
                                                     <td>

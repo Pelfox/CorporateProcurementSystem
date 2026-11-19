@@ -4,6 +4,7 @@ import com.team.corporate.backend.dto.CreateOrderItemRequest;
 import com.team.corporate.backend.dto.CreateOrderRequest;
 import com.team.corporate.backend.dto.OrderItemResponse;
 import com.team.corporate.backend.dto.OrderResponse;
+import com.team.corporate.backend.dto.OrderContentsRequest;
 import com.team.corporate.backend.dto.UpdateOrderItemRequest;
 import com.team.corporate.backend.dto.UpdateOrderRequest;
 import com.team.corporate.backend.search.OrderFilter;
@@ -12,6 +13,7 @@ import com.team.corporate.core.entities.OrderItem;
 import com.team.corporate.core.exceptions.OrderItemNotFoundException;
 import com.team.corporate.core.services.OrderItemsService;
 import com.team.corporate.core.services.OrdersService;
+import com.team.corporate.core.services.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -38,11 +41,48 @@ public class OrdersController {
     private final OrdersService orders;
     private final OrdersSearchService search;
     private final OrderItemsService items;
+    private final StockService stock;
 
-    public OrdersController(OrdersService orders, OrdersSearchService search, OrderItemsService items) {
+    public OrdersController(OrdersService orders, OrdersSearchService search, OrderItemsService items, StockService stock) {
         this.orders = orders;
         this.search = search;
         this.items = items;
+        this.stock = stock;
+    }
+
+    @GetMapping("/availability")
+    @Operation(summary = "Получить доступные остатки для заказа", description = "Возвращает карту UUID товара → доступное количество с учётом резервов. editingOrderId исключает резерв собственного редактируемого заказа.")
+    public Map<UUID, Long> getAvailability(
+            @RequestParam(name = "editingOrderId", required = false) UUID editingOrderId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        if (editingOrderId != null) {
+            var order = search.getById(editingOrderId);
+            if (!order.userId().equals(UUID.fromString(jwt.getSubject()))) {
+                throw new org.springframework.security.access.AccessDeniedException("Можно редактировать только свой заказ.");
+            }
+        }
+        return stock.getAvailableQuantities(editingOrderId);
+    }
+
+    @PostMapping("/checkout")
+    @Transactional
+    @Operation(summary = "Создать свой заказ с позициями", description = "Владелец определяется по JWT. Создаёт заказ CREATED и все позиции одной транзакцией; проверяет доступный остаток и сохраняет текущие цены товаров.")
+    @ApiResponse(responseCode = "201", description = "Заказ с позициями создан")
+    public ResponseEntity<OrderResponse> checkout(@Valid @RequestBody OrderContentsRequest request,
+                                                @AuthenticationPrincipal Jwt jwt) {
+        UUID id = orders.createOrder(UUID.fromString(jwt.getSubject()), request.lines(), request.notes());
+        return ResponseEntity.created(URI.create("/api/orders/" + id)).body(search.getById(id));
+    }
+
+    @PutMapping("/{id}/contents")
+    @Transactional
+    @Operation(summary = "Сохранить состав своего заказа", description = "Заменяет позиции и примечание одной транзакцией. Доступно владельцу заказа в статусе CREATED; проверяет доступные остатки, сохраняя цены существующих позиций.")
+    public OrderResponse saveContents(@PathVariable("id") UUID id,
+                                     @Valid @RequestBody OrderContentsRequest request,
+                                     @AuthenticationPrincipal Jwt jwt) {
+        orders.saveOrder(UUID.fromString(jwt.getSubject()), id, request.lines(), request.notes());
+        return search.getById(id);
     }
 
     @GetMapping("/{id}")

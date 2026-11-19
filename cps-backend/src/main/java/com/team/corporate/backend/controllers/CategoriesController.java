@@ -6,13 +6,9 @@ import com.team.corporate.backend.dto.CreateCategoryRequest;
 import com.team.corporate.backend.dto.UpdateCategoryRequest;
 import com.team.corporate.backend.search.CategoryFilter;
 import com.team.corporate.backend.services.CategoriesSearchService;
-import com.team.corporate.core.entities.Category;
 import com.team.corporate.core.exceptions.CategoryNotFoundException;
 import com.team.corporate.core.services.CategoriesService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,6 +16,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -37,11 +34,11 @@ public class CategoriesController {
     }
 
     @GetMapping
-    @Operation(summary = "Получить страницу категорий", description = "Фильтр name передаётся в JSON-теле и ищет подстроку без учёта регистра. "
+    @Operation(summary = "Получить страницу категорий", description = "Необязательный query-фильтр name ищет подстроку без учёта регистра. "
             + "page с 0, size от 1 до 100; по умолчанию 0 и 20. Сортировка: sort=name,asc или name,desc. "
             + "Ответ содержит content и page с size, number, totalElements и totalPages.")
     public PagedModel<CategoryResponse> getCategories(
-            @Valid @RequestBody CategoryFilter filter,
+            @ParameterObject @Valid @ModelAttribute CategoryFilter filter,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size,
             @ParameterObject Sort sort
@@ -66,7 +63,7 @@ public class CategoriesController {
         var category = categories.createCategory(request.name());
 
         return ResponseEntity
-                .created(URI.create("api/categories/" + category.getId()))
+                .created(URI.create("/api/categories/" + category.getId()))
                 .body(CategoryResponse.of(category));
 
     }
@@ -75,17 +72,17 @@ public class CategoriesController {
     @Operation(summary = "Изменить категорию", description = "Обязателен непустой name длиной до 255 символов. Отсутствующая или удалённая категория — 404.")
     public CategoryResponse updateCategory(
             @PathVariable("id") UUID id,
-            @RequestBody UpdateCategoryRequest request
+            @Valid @RequestBody UpdateCategoryRequest request
     ){
         var updatedCategory = categories.updateCategory(id, request.name());
         return CategoryResponse.of(updatedCategory);
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Удалить категорию (не реализовано)", description = "Текущая реализация возвращает 200 без изменения данных; категория не удаляется.")
-    @Parameter(name = "id", in = ParameterIn.PATH, required = true, description = "UUID категории",
-            schema = @Schema(type = "string", format = "uuid"))
-    public void deleteCategory(){
-
+    @Operation(summary = "Удалить категорию", description = "Выполняет мягкое удаление категории. Сначала перенесите или удалите товары этой категории; иначе 400.")
+    @ApiResponse(responseCode = "204", description = "Категория удалена или уже отсутствует")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCategory(@PathVariable("id") UUID id){
+        categories.deleteCategory(id);
     }
 }

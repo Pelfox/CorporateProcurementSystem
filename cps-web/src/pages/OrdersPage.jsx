@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { getAllOrders, deleteOrder } from '../api/orders';
 import { ORDER_STATUSES, statusLabel, statusCss } from '../utils/orderStatus';
 import { formatDateTime, formatMoneyRub, formatMoney } from '../utils/format';
@@ -125,6 +125,7 @@ export default function OrdersPage() {
     function handleOpenFullEdit() {
         setActionError('');
         if (!selected) return;
+        if (selected.userId !== user.id) { setActionError('Состав заказа может менять только его владелец'); return; }
         if (selected.status !== 'CREATED') {
             setActionError('Редактировать можно только созданный заказ');
             return;
@@ -179,7 +180,7 @@ export default function OrdersPage() {
         <div className="page-content page-content--fixed">
             <div className="page-header">
                 <button className="back-btn" onClick={() => navigate('/services')}>
-                    ←
+                    Назад
                 </button>
                 <h1 className="page-title">Заказы</h1>
             </div>

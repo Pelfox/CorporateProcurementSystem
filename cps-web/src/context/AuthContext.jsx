@@ -1,57 +1,37 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { clearTokens, getCurrentUser } from '../api/client';
-import {
-    login as loginApi,
-    logout as logoutApi,
-    loadCurrentUser,
-} from '../api/auth';
-
-const AuthContext = createContext(null);
-
+import { useEffect, useState } from 'react';
+import { clearTokens, getAccessToken, getRefreshToken, getCurrentUser, saveCurrentUser } from '../api/client';
+import { login as loginApi, logout as logoutApi, loadCurrentUser } from '../api/auth';
+import { AuthContext } from './useAuth';
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(getCurrentUser());
+    const [user, setUser] = useState(getCurrentUser);
     const [loading, setLoading] = useState(true);
-
-    // Жив ли токен
     useEffect(() => {
+        let active = true;
+        const expired = () => setUser(null);
+        const storageChanged = (event) => { if (event.key === 'accessToken' && !event.newValue) expired(); };
+        window.addEventListener('auth:expired', expired);
+        window.addEventListener('storage', storageChanged);
         async function init() {
-            if (localStorage.getItem('accessToken')) {
-                try {
-                    const fresh = await loadCurrentUser();
-                    setUser(fresh);
-                } catch (e) {
-                    // Токен протух и refresh не сработал — чистим
-                    clearTokens();
-                    setUser(null);
-                }
-            }
-            setLoading(false);
+            try {
+                const fresh = getAccessToken() || getRefreshToken() ? await loadCurrentUser() : null;
+                if (active) setUser(fresh);
+            } catch {
+                clearTokens();
+                if (active) setUser(null);
+            } finally { if (active) setLoading(false); }
         }
         init();
+        return () => { active = false; window.removeEventListener('auth:expired', expired); window.removeEventListener('storage', storageChanged); };
     }, []);
-
     async function login(username, password) {
-        const userData = await loginApi(username, password);
-        setUser(userData);
-        return userData;
+        const fresh = await loginApi(username, password);
+        setUser(fresh);
+        return fresh;
     }
-
     async function logout() {
-        await logoutApi();
-        setUser(null);
+        try { await logoutApi(); } catch { /* Local sign-out must also work offline. */ }
+        finally { setUser(null); }
     }
-
-    function updateUser(userData) {
-        setUser(userData);
-    }
-
-    return (
-        <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
-            {children}
-        </AuthContext.Provider>
-    );
-}
-
-export function useAuth() {
-    return useContext(AuthContext);
+    function updateUser(fresh) { saveCurrentUser(fresh); setUser(fresh); }
+    return <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>{children}</AuthContext.Provider>;
 }

@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { createProduct, updateProduct } from '../../api/products';
 import { getCategories } from '../../api/categories';
 
-// [A-Z0-9]{3,10}(-[A-Z0-9]{3,10})*
-const SKU_PATTERN = /^[A-Z0-9]{3,10}(-[A-Z0-9]{3,10})*$/;
 const PRICE_PATTERN = /^[+]?\d+(\.\d{1,2})?$/;
 
 export default function ProductDialog({ product, onClose, onSaved }) {
@@ -39,9 +37,6 @@ export default function ProductDialog({ product, onClose, onSaved }) {
         if (!name.trim()) return 'Название товара не может быть пустым';
         if (name.trim().length > 255) return 'Название слишком длинное (макс. 255)';
         if (!sku.trim()) return 'Артикул не может быть пустым';
-        if (!SKU_PATTERN.test(sku)) {
-            return 'Артикул: только заглавные латинские буквы, цифры и дефис (от 3 символов)';
-        }
         if (!categoryId) return 'Выберите категорию';
         if (!price) return 'Укажите цену';
         const normalizedPrice = price.replace(',', '.').trim();
@@ -116,11 +111,10 @@ export default function ProductDialog({ product, onClose, onSaved }) {
                         <input
                             className="form-input"
                             value={sku}
-                            onChange={(e) => setSku(e.target.value.toUpperCase())}
+                            onChange={(e) => setSku(e.target.value)}
                             placeholder="Например: NTB-001"
                             disabled={saving}
-                            maxLength={40}
-                            style={{ textTransform: 'uppercase' }}
+                            maxLength={255}
                         />
                     </div>
 

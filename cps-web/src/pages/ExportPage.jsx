@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { exportAllData } from '../api/export';
 import { downloadBlob } from '../utils/download';
 
@@ -16,7 +15,6 @@ const EXPORT_ITEMS = [
 ];
 
 export default function ExportPage() {
-    const { user } = useAuth();
     const navigate = useNavigate();
 
     const [exporting, setExporting] = useState(false);
@@ -30,9 +28,9 @@ export default function ExportPage() {
         setExporting(true);
 
         try {
-            const { blob, filename } = await exportAllData(user.id);
+            const { blob, filename } = await exportAllData();
             downloadBlob(blob, filename);
-            setSuccessMessage('Экспорт завершён. Файл сохранён в папку «Загрузки».');
+            setSuccessMessage('Архив подготовлен. Скачивание началось.');
             setTimeout(() => setSuccessMessage(''), 5000);
         } catch (e) {
             setError(e.message || 'Не удалось выполнить экспорт');
@@ -45,7 +43,7 @@ export default function ExportPage() {
         <div className="page-content page-content--fixed">
             <div className="page-header">
                 <button className="back-btn" onClick={() => navigate('/services')}>
-                    ←
+                    Назад
                 </button>
                 <h1 className="page-title">Экспорт данных</h1>
             </div>
@@ -104,7 +102,7 @@ export default function ExportPage() {
                 </div>
 
                 <div className="info-note">
-                    Файлы будут сохранены в выбранную вами папку в формате CSV.
+                    Браузер скачает ZIP-архив с восемью CSV-файлами.
                 </div>
             </div>
         </div>

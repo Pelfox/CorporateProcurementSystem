@@ -103,7 +103,7 @@ export default function CategoriesPage() {
         <div className="page-content page-content--fixed">
             <div className="page-header">
                 <button className="back-btn" onClick={() => navigate('/services')}>
-                    ←
+                    Назад
                 </button>
                 <h1 className="page-title">Категории</h1>
             </div>

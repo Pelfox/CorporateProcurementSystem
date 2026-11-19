@@ -1,48 +1,16 @@
-import { apiRequest } from './client';
-
-const USE_MOCKS = true;
-
-const MOCK_STATISTICS = {
-    totalUsers: 3,
-    totalProducts: 12,
-    totalCategories: 4,
-    totalWarehouses: 3,
-    totalOrders: 6,
-    activeOrders: 3, // CREATED + APPROVED
-    createdOrders: 2,
-    approvedOrders: 1,
-    deliveredOrders: 1,
-    cancelledOrders: 1,
-    totalStockQuantity: 542,
-    totalOrderValue: 412730.75,
-};
-
-const MOCK_WAREHOUSE_STOCKS = [
-    { warehouseName: 'Главный склад', quantity: 180 },
-    { warehouseName: 'Резервный склад', quantity: 320 },
-    { warehouseName: 'Склад филиала', quantity: 42 },
-];
-
+import { requestJson } from './client.js';
+import { getWarehouses } from './warehouses.js';
+import { getAllInventory } from './inventory.js';
 export async function getStatistics() {
-    if (USE_MOCKS) {
-        await new Promise((r) => setTimeout(r, 250));
-        return MOCK_STATISTICS;
-    }
-    const response = await apiRequest('/statistics');
-    if (!response.ok) {
-        throw new Error('Не удалось загрузить статистику');
-    }
-    return response.json();
+    const stats = await requestJson('/statistics/summary');
+    return { ...stats, activeOrders: stats.createdOrders + stats.approvedOrders };
 }
-
 export async function getWarehouseStocks() {
-    if (USE_MOCKS) {
-        await new Promise((r) => setTimeout(r, 200));
-        return MOCK_WAREHOUSE_STOCKS;
-    }
-    const response = await apiRequest('/statistics/warehouses');
-    if (!response.ok) {
-        throw new Error('Не удалось загрузить остатки по складам');
-    }
-    return response.json();
+    const [warehouses, inventory] = await Promise.all([getWarehouses(), getAllInventory()]);
+    return warehouses.map((warehouse) => ({ warehouseName: warehouse.name,
+        quantity: inventory.filter((item) => item.warehouseId === warehouse.id).reduce((sum, item) => sum + item.quantity, 0),
+    }));
 }
+export const getProductStatistics = () => requestJson('/statistics/products');
+export const getProductsByCategory = () => requestJson('/statistics/products/by-category');
+export const getProductsByStock = () => requestJson('/statistics/products/by-stock');

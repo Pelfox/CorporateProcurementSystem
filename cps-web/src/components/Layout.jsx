@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 
 export default function Layout({ children }) {
     const { user, logout } = useAuth();
@@ -10,6 +10,7 @@ export default function Layout({ children }) {
     function activeTab() {
         if (pathname === '/my-orders') return 'my-orders';
         if (pathname === '/statistics') return 'statistics';
+        if (pathname === '/profile') return 'profile';
         return 'services';
     }
     const tab = activeTab();
@@ -42,19 +43,19 @@ export default function Layout({ children }) {
                     >
                         Сервисы
                     </Link>
-                    <Link
+                    {['MANAGER', 'ADMIN'].includes(user?.role) && <Link
                         to="/statistics"
                         className={'nav-item' + (tab === 'statistics' ? ' active' : '')}
                     >
                         Статистика
-                    </Link>
+                    </Link>}
                 </nav>
 
                 <div className="user-info">
                     <div className="avatar-circle">
                         <span className="avatar-initial">{initial}</span>
                     </div>
-                    <span className="username-label">{user?.username}</span>
+                    <Link to="/profile" className="username-label" title="Профиль и смена пароля">{user?.fullName || user?.username}</Link>
                     <button className="logout-btn" onClick={handleLogout}>
                         Выйти
                     </button>

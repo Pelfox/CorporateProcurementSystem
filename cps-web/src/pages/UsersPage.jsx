@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { getUsers, setUserStatus } from '../api/users';
 import UserCreateDialog from '../components/dialogs/UserCreateDialog';
 import ResetPasswordDialog from '../components/dialogs/ResetPasswordDialog';
+import UserEditDialog from '../components/dialogs/UserEditDialog';
 
 const ROLE_LABELS = {
     USER: 'Пользователь',
@@ -31,6 +32,7 @@ export default function UsersPage() {
     const [selectedId, setSelectedId] = useState(null);
     const [showCreate, setShowCreate] = useState(false);
     const [showReset, setShowReset] = useState(false);
+    const [showEdit, setShowEdit] = useState(false);
     const [actionError, setActionError] = useState('');
 
     async function load() {
@@ -54,7 +56,7 @@ export default function UsersPage() {
         let list = users;
         if (tab !== 'ALL') list = list.filter((u) => u.role === tab);
         const q = search.trim().toLowerCase();
-        if (q) list = list.filter((u) => u.username.toLowerCase().includes(q));
+        if (q) list = list.filter((u) => `${u.username} ${u.fullName}`.toLowerCase().includes(q));
         return list;
     }, [users, tab, search]);
 
@@ -92,7 +94,7 @@ export default function UsersPage() {
         <div className="page-content page-content--fixed">
             <div className="page-header">
                 <button className="back-btn" onClick={() => navigate('/services')}>
-                    ←
+                    Назад
                 </button>
                 <h1 className="page-title">Пользователи</h1>
             </div>
@@ -121,6 +123,7 @@ export default function UsersPage() {
                         <button className="btn btn-add" onClick={() => setShowCreate(true)}>
                             Добавить
                         </button>
+                        <button className="btn btn-edit" disabled={!selected} onClick={() => setShowEdit(true)}>Редактировать</button>
                         <button
                             className="btn btn-warning"
                             disabled={!selected}
@@ -171,7 +174,7 @@ export default function UsersPage() {
                             <thead>
                             <tr>
                                 <th style={{ width: '60px' }}>№</th>
-                                <th>Имя пользователя</th>
+                                <th>Полное имя</th><th>Логин</th>
                                 <th style={{ width: '160px' }}>Роль</th>
                                 <th style={{ width: '140px' }}>Статус</th>
                                 <th style={{ width: '180px' }}>Дата создания</th>
@@ -185,7 +188,7 @@ export default function UsersPage() {
                                     onClick={() => setSelectedId(u.id)}
                                 >
                                     <td>{i + 1}</td>
-                                    <td>{u.username}</td>
+                                    <td>{u.fullName}</td><td>{u.username}</td>
                                     <td>
                                             <span className={'role-badge role-' + u.role.toLowerCase()}>
                                                 {ROLE_LABELS[u.role] || u.role}
@@ -205,6 +208,7 @@ export default function UsersPage() {
                 )}
             </div>
 
+            {showEdit && selected && <UserEditDialog user={selected} onClose={() => setShowEdit(false)} onSaved={() => { setShowEdit(false); load(); }} />}
             {showCreate && (
                 <UserCreateDialog
                     onClose={() => setShowCreate(false)}

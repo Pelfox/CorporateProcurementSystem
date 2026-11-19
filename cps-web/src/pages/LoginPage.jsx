@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -8,7 +8,8 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { login } = useAuth();
+    const { user, loading: authLoading, login } = useAuth();
+    const { state } = useLocation();
     const navigate = useNavigate();
 
     async function handleSubmit(event) {
@@ -17,8 +18,8 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await login(username, password);
-            navigate('/my-orders');
+            const fresh = await login(username, password);
+            navigate(fresh.mustChangePassword ? '/profile' : '/my-orders', { replace: true });
         } catch (e) {
             setError(e.message || 'Не удалось войти');
         } finally {
@@ -26,6 +27,7 @@ export default function LoginPage() {
         }
     }
 
+    if (!authLoading && user) return <Navigate to={user.mustChangePassword ? "/profile" : "/my-orders"} replace />;
     return (
         <div className="login-root">
             <div className="login-card">
@@ -36,7 +38,8 @@ export default function LoginPage() {
                 <p className="login-subtitle">Корпоративная система управления закупками</p>
 
                 <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-                    {error && <div className="login-error">{error}</div>}
+                    {state?.message && <div className="notice notice-success" role="status">{state.message}</div>}
+                    {error && <div className="login-error" role="alert">{error}</div>}
 
                     <div className="login-form-group">
                         <label className="login-form-label">

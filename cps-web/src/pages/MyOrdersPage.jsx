@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { getMyOrders } from '../api/orders';
 import { ORDER_STATUSES, statusLabel, statusCss } from '../utils/orderStatus';
 import { formatDateTime, formatMoneyRub } from '../utils/format';

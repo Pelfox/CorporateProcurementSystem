@@ -94,6 +94,17 @@ class InfrastructureIntegrationTest {
         assertNotNull(schemas.get("LoginRequest").get("properties").get("password"));
         assertNotNull(schemas.get("TokenResponse").get("properties").get("mustChangePassword"));
         assertNotNull(schemas.get("UserResponse").get("properties").get("fullName"));
+        for (String schemaName : List.of("ProductResponse", "CategoryProductCountResponse")) {
+            var categoryId = schemas.get(schemaName).get("properties").get("categoryId");
+            assertEquals("uuid", categoryId.get("format").asString());
+            if (document.get("openapi").asString().startsWith("3.0")) {
+                assertTrue(categoryId.get("nullable").asBoolean(), schemaName);
+            } else {
+                assertTrue(categoryId.get("type").isArray(), schemaName);
+                assertTrue(categoryId.get("type").toString().contains("\"null\""), schemaName);
+                assertTrue(categoryId.get("type").toString().contains("\"string\""), schemaName);
+            }
+        }
         assertFalse(result.getResponse().getContentAsString().contains("passwordHash"));
         assertFalse(paths.has("/actuator/health"));
         var yaml = mvc.perform(get("/v3/api-docs.yaml")).andReturn();

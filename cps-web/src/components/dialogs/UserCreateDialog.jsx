@@ -3,6 +3,7 @@ import { createUser } from '../../api/users';
 
 export default function UserCreateDialog({ onClose, onCreated }) {
     const [username, setUsername] = useState('');
+    const [fullName, setFullName] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('USER');
     const [error, setError] = useState('');
@@ -16,6 +17,7 @@ export default function UserCreateDialog({ onClose, onCreated }) {
             setError('Введите имя пользователя');
             return;
         }
+        if (!fullName.trim()) { setError('Введите полное имя'); return; }
         if (password.length < 12) {
             setError('Пароль должен быть не короче 12 символов');
             return;
@@ -27,7 +29,7 @@ export default function UserCreateDialog({ onClose, onCreated }) {
 
         setSaving(true);
         try {
-            await createUser(username.trim(), password, role);
+            await createUser(username.trim(), password, role, fullName.trim());
             onCreated();
         } catch (e) {
             setError(e.message || 'Не удалось создать пользователя');
@@ -62,8 +64,9 @@ export default function UserCreateDialog({ onClose, onCreated }) {
                         />
                     </div>
 
+                    <label className="form-group form-label">Полное имя *<input className="form-input" value={fullName} onChange={(event) => setFullName(event.target.value)} disabled={saving} maxLength={255} required /></label>
                     <div className="form-group">
-                        <label className="form-label">Пароль *</label>
+                        <label className="form-label">Временный пароль *</label>
                         <input
                             className="form-input"
                             type="password"

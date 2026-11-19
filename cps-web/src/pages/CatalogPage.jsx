@@ -4,6 +4,8 @@ import { getProducts, deleteProduct } from '../api/products';
 import { getCategories } from '../api/categories';
 import { formatMoneyRub } from '../utils/format';
 import ProductDialog from '../components/dialogs/ProductDialog';
+import ProductTagsDialog from '../components/dialogs/ProductTagsDialog';
+import { useAuth } from '../context/useAuth';
 import ConfirmDeleteDialog from '../components/dialogs/ConfirmDeleteDialog';
 
 const SORT_MODES = [
@@ -19,6 +21,9 @@ function shortId(id) {
 
 export default function CatalogPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const canEdit = ['MANAGER', 'ADMIN'].includes(user.role);
+    const [showTags, setShowTags] = useState(false);
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -133,7 +138,7 @@ export default function CatalogPage() {
         <div className="page-content page-content--fixed">
             <div className="page-header">
                 <button className="back-btn" onClick={() => navigate('/services')}>
-                    ←
+                    Назад
                 </button>
                 <h1 className="page-title">Каталог товаров</h1>
             </div>
@@ -185,20 +190,21 @@ export default function CatalogPage() {
                 </div>
 
                 <div className="action-row" style={{ marginTop: 16 }}>
-                    <button className="btn btn-add" onClick={() => setShowCreate(true)}>
+                    <button className="btn btn-cancel" disabled={!selected} onClick={() => setShowTags(true)}>Теги</button>
+                    <button className="btn btn-add" disabled={!canEdit} onClick={() => setShowCreate(true)}>
                         Добавить
                     </button>
                     <button
                         className="btn btn-edit"
                         onClick={() => setShowEdit(true)}
-                        disabled={!selected}
+                        disabled={!selected || !canEdit}
                     >
                         Редактировать
                     </button>
                     <button
                         className="btn btn-delete"
                         onClick={() => setShowDelete(true)}
-                        disabled={!selected}
+                        disabled={!selected || !canEdit}
                     >
                         Удалить
                     </button>
@@ -264,6 +270,7 @@ export default function CatalogPage() {
                 )}
             </div>
 
+            {showTags && selected && <ProductTagsDialog product={selected} canEdit={canEdit} onClose={() => setShowTags(false)} />}
             {showCreate && (
                 <ProductDialog product={null} onClose={() => setShowCreate(false)} onSaved={handleSaved} />
             )}

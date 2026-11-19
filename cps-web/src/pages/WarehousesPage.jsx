@@ -1,3 +1,4 @@
+import { useAuth } from '../context/useAuth';
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getWarehouses, deleteWarehouse } from '../api/warehouses';
@@ -9,6 +10,8 @@ import ConfirmDeleteDialog from '../components/dialogs/ConfirmDeleteDialog';
 
 export default function WarehousesPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const canEdit = ['MANAGER', 'ADMIN'].includes(user.role);
 
     const [warehouses, setWarehouses] = useState([]);
     const [products, setProducts] = useState([]);
@@ -55,6 +58,7 @@ export default function WarehousesPage() {
             const data = await getInventoryByWarehouse(warehouseId);
             setInventory(data);
         } catch (e) {
+            setActionError(e.message || 'Не удалось загрузить остатки');
             setInventory([]);
         }
     }
@@ -144,7 +148,7 @@ export default function WarehousesPage() {
         <div className="page-content page-content--fixed">
             <div className="page-header">
                 <button className="back-btn" onClick={() => navigate('/services')}>
-                    ←
+                    Назад
                 </button>
                 <h1 className="page-title">Склады и остатки</h1>
             </div>
@@ -162,35 +166,35 @@ export default function WarehousesPage() {
                 <div className="action-row" style={{ marginTop: 16 }}>
                     <button
                         className="btn btn-success"
-                        onClick={() => setShowCreateWarehouse(true)}
+                        onClick={() => canEdit && setShowCreateWarehouse(true)}
                     >
                         Создать склад
                     </button>
                     <button
                         className="btn btn-edit"
-                        onClick={() => setShowEditWarehouse(true)}
-                        disabled={!selectedWarehouse}
+                        onClick={() => canEdit && setShowEditWarehouse(true)}
+                        disabled={!selectedWarehouse || !canEdit}
                     >
                         Редактировать склад
                     </button>
                     <button
                         className="btn btn-primary"
-                        onClick={() => setShowAddInventory(true)}
-                        disabled={!selectedWarehouse}
+                        onClick={() => canEdit && setShowAddInventory(true)}
+                        disabled={!selectedWarehouse || !canEdit}
                     >
                         Добавить товар на склад
                     </button>
                     <button
                         className="btn btn-warning"
-                        onClick={() => setShowEditInventory(true)}
-                        disabled={!selectedInventory}
+                        onClick={() => canEdit && setShowEditInventory(true)}
+                        disabled={!selectedInventory || !canEdit}
                     >
                         Изменить остаток
                     </button>
                     <button
                         className="btn btn-danger"
-                        onClick={() => setShowDeleteWarehouse(true)}
-                        disabled={!selectedWarehouse}
+                        onClick={() => canEdit && setShowDeleteWarehouse(true)}
+                        disabled={!selectedWarehouse || !canEdit}
                     >
                         Удалить склад
                     </button>
@@ -295,7 +299,7 @@ export default function WarehousesPage() {
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedInventoryId(item.id);
-                                                            setShowDeleteInventory(true);
+                                                            canEdit && setShowDeleteInventory(true);
                                                         }}
                                                     >
                                                         ✕

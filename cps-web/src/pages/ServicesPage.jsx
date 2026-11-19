@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 
 export default function ServicesPage() {
     const { user } = useAuth();
@@ -43,6 +43,7 @@ export default function ServicesPage() {
             emoji: '📊',
             color: 'card-indigo',
             path: '/statistics',
+            visible: isManager,
         },
         {
             title: 'Экспорт данных',
@@ -50,7 +51,7 @@ export default function ServicesPage() {
             emoji: '💾',
             color: 'card-cyan',
             path: '/services/export',
-            visible: isManager,
+            visible: role === 'MANAGER',
         },
         {
             title: 'Пользователи',
@@ -60,6 +61,10 @@ export default function ServicesPage() {
             path: '/services/users',
             visible: isAdmin,
         },
+        { title: 'Теги товаров', subtitle: 'Метки и классификация товаров', emoji: '🔖', color: 'card-purple', path: '/services/tags' },
+        { title: 'Импорт товаров', subtitle: 'Проверка и загрузка CSV', emoji: '📥', color: 'card-teal', path: '/services/import', visible: role === 'MANAGER' },
+        { title: 'Журнал аудита', subtitle: 'Действия пользователей и история изменений', emoji: '📑', color: 'card-indigo', path: '/services/audit', visible: isAdmin },
+        { title: 'Удалённые записи', subtitle: 'Восстановление и окончательное удаление', emoji: '🗂️', color: 'card-orange', path: '/services/deleted', visible: isAdmin },
     ];
 
     return (
